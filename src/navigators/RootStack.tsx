@@ -18,6 +18,9 @@ import { EventDetails } from '../screens/EventDetails'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon1 from 'react-native-vector-icons/MaterialIcons'
 import Icon2 from 'react-native-vector-icons/SimpleLineIcons'
+import { InvitationsContacts } from '../screens/InvitationsContacts'
+import { ContactsList } from '../components/ContactsList'
+import { EditEvent } from '../screens/EditEvent'
 
 
 const RootStack = () => {
@@ -123,6 +126,33 @@ const RootStack = () => {
           headerLeft: () => false,
         }}
         component={EventDetails}
+      />
+      <Stack.Screen
+        name="InvitationsContacts"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={InvitationsContacts}
+      />
+      <Stack.Screen
+        name="ContactsList"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ContactsList}
+      />
+      <Stack.Screen
+        name="EditEvent"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={EditEvent}
       />
     </Stack.Navigator>
 

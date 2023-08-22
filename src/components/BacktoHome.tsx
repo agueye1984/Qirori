@@ -7,11 +7,10 @@ import { useNavigation } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
 
 type Props = {
-    route: string
     textRoute: string
   };
 
-export const BacktoHome = ({ route, textRoute }: Props) => {
+export const BacktoHome = ({ textRoute }: Props) => {
     const navigation = useNavigation()
     const defaultStyles = DefaultComponentsThemes()
     const { ColorPallet } = useTheme()
@@ -34,7 +33,7 @@ export const BacktoHome = ({ route, textRoute }: Props) => {
 
     let content = (
         <ScrollView style={{padding: 10}}>
-      <TouchableOpacity style={[styles.touchableStyle]} onPress={() => navigation.navigate(route as never)}>
+      <TouchableOpacity style={[styles.touchableStyle]} onPress={() => navigation.goBack()}>
         <View style={styles.row}>
           <View style={{ flexDirection: 'row', marginTop:5 }}>
             <Image source={require('../assets/back@20x20.png')} />

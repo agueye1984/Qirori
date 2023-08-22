@@ -39,10 +39,10 @@ const RegisterScreen = ({ navigation }: Props) => {
 
   const _onSignUpPressed = () => {
     const nameError = nameValidator(name.value, t);
-    const emailError = emailValidator(email.value,t);
-    let passwordError = passwordValidator(password.value,t);
-    let retapePasswordError = retapePasswordValidator(retapePassword.value,t);
-    const phoneError = phoneValidator(phone.value,t);
+    const emailError = emailValidator(email.value, t);
+    let passwordError = passwordValidator(password.value, t);
+    let retapePasswordError = retapePasswordValidator(retapePassword.value, t);
+    const phoneError = phoneValidator(phone.value, t);
     if (password.value != '' && retapePassword.value != '' && password.value != retapePassword.value) {
       retapePasswordError = t('RegisterScreen.PasswordNotConfirm');
     }
@@ -55,21 +55,26 @@ const RegisterScreen = ({ navigation }: Props) => {
       setRetapePassword({ ...retapePassword, error: retapePasswordError });
       setPhone({ ...phone, error: phoneError });
     } else {
-      let user: User = {
-        id: uuidv4(),
-        name: name.value,
-        email: email.value,
-        password: password.value,
-        telephone: phone.value,
-      }
+      const findIndex = state.user.findIndex((req) => req.email === email.value);
+      if (findIndex) {
+        let user: User = {
+          id: uuidv4(),
+          name: name.value,
+          email: email.value,
+          password: password.value,
+          telephone: phone.value,
+        }
 
-      dispatch({
-        type: DispatchAction.ADD_USER,
-        payload: user,
-      })
-      navigation.navigate('LoginScreen');
+        dispatch({
+          type: DispatchAction.ADD_USER,
+          payload: user,
+        })
+        navigation.navigate('LoginScreen');
+      } else {
+        retapePasswordError = t('RegisterScreen.AccountExists');
+      }
     }
-    
+
   };
 
 

@@ -12,12 +12,11 @@ import { useTranslation } from 'react-i18next'
 
 type Props = {
     item: Event
-    action: () => void
 }
 
 type eventDetailsProp = StackNavigationProp<ManageEventsParamList, 'EventDetails'>
 
-export const EventItem = ({ item, action }: Props) => {
+export const EventItem = ({ item }: Props) => {
     const { t } = useTranslation()
     const defaultStyles = DefaultComponentsThemes()
     const { ColorPallet } = useTheme()
@@ -81,6 +80,7 @@ export const EventItem = ({ item, action }: Props) => {
     })
 
     let content = (
+        <View style={[{ marginVertical: 15,}]} >
         <TouchableOpacity onPress={() => handleEventSelection(item)}>
             <View style={[styles.itemContainer]}>
                 <View style={styles.row}>
@@ -103,6 +103,7 @@ export const EventItem = ({ item, action }: Props) => {
                 </View>
             </View>
         </TouchableOpacity>
+        </View>
     )
 
     return content

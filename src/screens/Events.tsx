@@ -12,6 +12,9 @@ import { EventItem } from '../components/EventItem'
 import { Event } from '../contexts/types'
 import Paragraph from '../components/Paragraph'
 import { EmptyList } from '../components/EmptyList'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { LocalStorageKeys } from '../constants'
+
 
 
 export const Events = () => {
@@ -19,15 +22,11 @@ export const Events = () => {
   const [state] = useStore()
   const navigation = useNavigation()
 
-  function handleSelection(item: Event) {
-    navigation.navigate('QRCode' as never)
-  }
-
-  console.log(state.events.length)
+  console.log(state)
 
   return (
     <BackgroundContents>
-      <BacktoHome route='Home' textRoute={t('HomeScreen.title')} />
+      <BacktoHome textRoute={t('HomeScreen.title')} />
       <Header>{t('Events.title')}</Header>
       <View style={{ justifyContent: 'center', alignContent: 'center' }}>
         {state.events.length === 0 && (
@@ -39,7 +38,7 @@ export const Events = () => {
         )}
         <ScrollView style={{ padding: 10 }}>
           {state.events.map((item: Event, index: number) => {
-            return <EventItem key={index.toString()} item={item} action={() => handleSelection(item)} />
+            return <EventItem key={index.toString()} item={item} />
           })}
         </ScrollView>
       </View>

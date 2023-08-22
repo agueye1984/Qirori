@@ -3,6 +3,8 @@ import {useTranslation} from 'react-i18next'
 import {StyleSheet, Text, View} from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { CustomInputText } from './CustomInputText'
+import TextInput from './TextInput'
+import { useTheme } from '../contexts/theme'
 
 
 type Props = {
@@ -18,25 +20,42 @@ export const DescriptionSection = ({
 }: Props) => {
   const {t} = useTranslation()
   const defaultStyles = DefaultComponentsThemes()
+  const {ColorPallet} = useTheme()
 
   const styles = StyleSheet.create({
     detailsTitle: {
       ...defaultStyles.text,
       ...defaultStyles.requestDetailsTitle,
     },
+    characterText: {
+      textAlign: 'right',
+      color: ColorPallet.primaryText,
+      fontSize: 14,
+      justifyContent: 'flex-start',
+    },
   })
 
   return (
     <View>
-      <Text style={styles.detailsTitle}>{t('AddEvent.Description')}</Text>
-      <CustomInputText
+    <View>
+      <TextInput
+        label={t('AddEvent.Description')}
+        returnKeyType="next"
         value={eventDescription}
-        setValue={setEventDescription}
-        placeholder={t('AddEvent.Description')}
-        containerStyle={{minHeight: 100}}
-        maxLength={maxLength}
+        onChangeText={text => setEventDescription(text)}
+        autoCapitalize="none"
         multiline={true}
+        maxLength={maxLength}
+        numberOfLines={4}
       />
+    </View>
+    <View>
+      {maxLength && (
+        <Text style={styles.characterText}>
+          {eventDescription.length}/{maxLength} {t('AddEvent.CharacterCount')}
+        </Text>
+      )}
+    </View>
     </View>
   )
 }

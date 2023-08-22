@@ -75,9 +75,13 @@ export const DateHeureSection = ({
         </View>
         <View style={{ marginHorizontal: 25 }}>
 
-          <CustomInputTextDate
+          <TextInput
+            returnKeyType="next"
             value={dateFormatDebut}
-            setOpenDate={handleOpenDateDebutChange}
+            onChangeText={handleOpenDateDebutChange}
+            autoCapitalize="none"
+            onFocus={handleOpenDateDebutChange}
+          onPressIn={handleOpenDateDebutChange}
           />
 
           <DatePicker
@@ -99,10 +103,15 @@ export const DateHeureSection = ({
             }}
           />
         </View>
-        <View style={{ marginLeft: 25 }}>
-          <CustomInputTextDate
+        <View style={{ marginLeft: 20 }}>
+          
+          <TextInput
+            returnKeyType="next"
             value={heureFormatDebut}
-            setOpenDate={handleOpenHeureDebutChange}
+            onChangeText={handleOpenHeureDebutChange}
+            autoCapitalize="none"
+            onFocus={handleOpenHeureDebutChange}
+          onPressIn={handleOpenHeureDebutChange}
           />
           <DatePicker
             modal
@@ -129,9 +138,14 @@ export const DateHeureSection = ({
           <Text style={styles.detailsTitle}>{t('AddEvent.DateFin')}</Text>
         </View>
         <View style={{ marginHorizontal: 35 }}>
-          <CustomInputTextDate
+          
+          <TextInput
+            returnKeyType="next"
             value={dateFormatFin}
-            setOpenDate={handleOpenDateFinChange}
+            onChangeText={handleOpenDateFinChange}
+            autoCapitalize="none"
+            onFocus={handleOpenDateFinChange}
+          onPressIn={handleOpenDateFinChange}
           />
           <DatePicker
             modal
@@ -153,9 +167,14 @@ export const DateHeureSection = ({
           />
         </View>
         <View style={{ marginHorizontal: 15 }}>
-          <CustomInputTextDate
+          
+          <TextInput
+            returnKeyType="next"
             value={heureFormatFin}
-            setOpenDate={handleOpenHeureFinChange}
+            onChangeText={handleOpenHeureFinChange}
+            autoCapitalize="none"
+            onFocus={handleOpenHeureFinChange}
+          onPressIn={handleOpenHeureFinChange}
           />
           <DatePicker
             modal

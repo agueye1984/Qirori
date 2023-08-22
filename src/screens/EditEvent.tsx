@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { t } from 'i18next'
 import React, { useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -20,21 +20,29 @@ import { DateHeureSection } from '../components/DateHeureSection'
 import { EmplacementSection } from '../components/EmplacementSection'
 import { StackNavigationProp } from '@react-navigation/stack'
 
-export const AddEvent = () => {
-  const [, dispatch] = useStore()
+type editEventProps = StackNavigationProp<ManageEventsParamList, 'EventDetails'>
+
+export const EditEvent = () => {
+  const route = useRoute<RouteProp<ManageEventsParamList, 'EditEvent'>>()
+  const [state, dispatch] = useStore()
   const defaultStyles = DefaultComponentsThemes()
   const { ColorPallet } = useTheme()
-  const navigation = useNavigation()
-  const [eventName, setEventName] = useState<string>('')
+  const navigation = useNavigation<editEventProps>()
+  const item = state.events.find((event) => event.id === route.params.itemId) as Event
+  const [eventName, setEventName] = useState<string>(item.name)
   const [nameDirty, setNameDirty] = useState(false)
-  const [eventDescription, setEventDescription] = useState<string>('')
+  const [eventDescription, setEventDescription] = useState<string>(item.description)
   const [descriptionDirty, setDescriptionDirty] = useState(false)
-  const [eventLocalisation, setEventLocalisation] = useState<string>('')
+  const [eventLocalisation, setEventLocalisation] = useState<string>(item.localisation)
   const [localisationDirty, setLocalisationDirty] = useState(false)
-  const [dateDebut, setDateDebut] = useState<Date>(new Date())
-  const [heureDebut, setHeureDebut] = useState<Date>(new Date())
-  const [dateFin, setDateFin] = useState<Date>(new Date())
-  const [heureFin, setHeureFin] = useState<Date>(new Date())
+  const dateDebFormat = item.dateDebut.substring(0, 4) + '-' + item.dateDebut.substring(4, 6) + '-' + item.dateDebut.substring(6, 8)
+  const heurDebFormat = dateDebFormat + ' ' + item.heureDebut.substring(0, 2) + ':' + item.heureDebut.substring(2, 4)
+  const dateFinFormat = item.dateFin.substring(0, 4) + '-' + item.dateFin.substring(4, 6) + '-' + item.dateFin.substring(6, 8)
+  const heurFinFormat = dateFinFormat + ' ' + item.heureFin.substring(0, 2) + ':' + item.heureFin.substring(2, 4)
+  const [dateDebut, setDateDebut] = useState<Date>(new Date(dateDebFormat))
+  const [heureDebut, setHeureDebut] = useState<Date>(new Date(heurDebFormat))
+  const [dateFin, setDateFin] = useState<Date>(new Date(dateFinFormat))
+  const [heureFin, setHeureFin] = useState<Date>(new Date(heurFinFormat))
 
 
 
@@ -135,7 +143,7 @@ export const AddEvent = () => {
       }).split(':').join('');
       const userId = await AsyncStorage.getItem(LocalStorageKeys.UserId);
       let event: Event = {
-        id: uuidv4(),
+        id: item.id,
         name: eventName,
         description: eventDescription,
         dateDebut: dateformatDebut,
@@ -145,9 +153,8 @@ export const AddEvent = () => {
         localisation: eventLocalisation,
         userId: userId
       }
-
       dispatch({
-        type: DispatchAction.ADD_EVENT,
+        type: DispatchAction.UPDATE_EVENT,
         payload: event,
       })
       navigation.navigate('Events' as never)
@@ -160,7 +167,7 @@ export const AddEvent = () => {
   return (
     <BackgroundContents>
       <BacktoHome textRoute={t('Events.title')} />
-      <Header>{t('AddEvent.title')}</Header>
+      <Header>{t('AddEvent.titleModify')}</Header>
 
       <ScrollView>
         <View style={styles.section}>
@@ -207,13 +214,12 @@ export const AddEvent = () => {
               <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Cancel')}</Text>
             </TouchableOpacity>
           </View>
-          {nameDirty && descriptionDirty && localisationDirty &&
-            <View style={defaultStyles.rightSectRowContainer}>
-              <TouchableOpacity onPress={handleSaveEvents}>
-                <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Create')}</Text>
-              </TouchableOpacity>
-            </View>
-          }
+          <View style={defaultStyles.rightSectRowContainer}>
+            <TouchableOpacity onPress={handleSaveEvents}>
+              <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Modify')}</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
       </View>
 

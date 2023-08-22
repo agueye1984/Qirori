@@ -25,12 +25,16 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import * as AddCalendarEvent from 'react-native-add-calendar-event';
 import { AddEvent } from './AddEvent'
 import MapView, { Marker } from 'react-native-maps'
+import { StackNavigationProp } from '@react-navigation/stack'
+
+type invitationsContactsProps = StackNavigationProp<ManageEventsParamList, 'InvitationsContacts'>;
 
 export const EventDetails = () => {
   const route = useRoute<RouteProp<ManageEventsParamList, 'EventDetails'>>()
   const item = route.params.item
   const defaultStyles = DefaultComponentsThemes()
   const { ColorPallet } = useTheme()
+  const navigation = useNavigation<invitationsContactsProps>()
 
   const anneeDebut = parseInt(item.dateDebut.substring(0, 4));
   const moisDebut = parseInt(item.dateDebut.substring(4, 6)) - 1;
@@ -79,6 +83,14 @@ export const EventDetails = () => {
         console.warn(error);
       });
   };
+
+  const handleInvitationsContacts = (item: Event) => {
+    navigation.navigate('InvitationsContacts', { item: item, })
+  };
+  const handleEditEvent = (itemId: string) => {
+    navigation.navigate('EditEvent', { itemId: itemId, })
+  };
+  
 
 
   const styles = StyleSheet.create({
@@ -211,7 +223,7 @@ export const EventDetails = () => {
 
   return (
     <BackgroundContents>
-      <BacktoHome route='Events' textRoute={t('Events.title')} />
+      <BacktoHome textRoute={t('Events.title')} />
       <Header>{item.name}</Header>
 
       <ScrollView>
@@ -243,24 +255,24 @@ export const EventDetails = () => {
             <View style={styles.row}>
 
               <View style={{ flexDirection: 'column', flex: 4, marginVertical: 5 }}>
+              <TouchableOpacity onPress={() => handleInvitationsContacts(item)}>
                 <View style={{ marginHorizontal: 25 }}>
                   <Icon name={'user-plus'} size={25} color={ColorPallet.primary} />
                 </View>
                 <View style={{ marginHorizontal: 15 }}>
-                  <TouchableOpacity onPress={() => addToCalendar(item.name, dateDebut.toISOString(), dateFin.toISOString())}>
                     <Text style={{ color: ColorPallet.primary }}> {t('Events.Invite')}</Text>
-                  </TouchableOpacity>
                 </View>
+                </TouchableOpacity>
               </View>
               <View style={{ flexDirection: 'column', flex: 5, marginVertical: 5 }}>
+              <TouchableOpacity onPress={() => handleEditEvent(item.id)}>
                 <View style={{ marginHorizontal: 15, alignItems: 'flex-end' }}>
                   <Icon name={'pencil'} size={25} color={ColorPallet.primary} />
                 </View>
                 <View style={{ marginHorizontal: 15, alignItems: 'flex-end' }}>
-                  <TouchableOpacity onPress={() => addToCalendar(item.name, dateDebut.toISOString(), dateFin.toISOString())}>
                     <Text style={{ color: ColorPallet.primary }}> {t('Events.Modify')}</Text>
-                  </TouchableOpacity>
                 </View>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
