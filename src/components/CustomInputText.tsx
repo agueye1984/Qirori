@@ -66,7 +66,7 @@ export const CustomInputText = ({
       </View>
       {maxLength && (
         <Text style={styles.characterText}>
-          {value.length}/{maxLength} {t('Screens.EditRequest.CharacterCount')}
+          {value.length}/{maxLength} {t('AddEvent.CharacterCount')}
         </Text>
       )}
     </View>

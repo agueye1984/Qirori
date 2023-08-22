@@ -6,6 +6,7 @@ export enum LocalStorageKeys {
   User = 'users',
   Events = 'events',
   UserId= 'user_id',
+  Invitations = 'invitations',
 }
 
 const lengthOfhiddenAttributes = 10

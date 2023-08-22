@@ -3,6 +3,7 @@ import {useTranslation} from 'react-i18next'
 import {StyleSheet, Text, View, ViewStyle} from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { CustomInputText } from './CustomInputText'
+import TextInput from './TextInput'
 
 
 type Props = {
@@ -23,12 +24,12 @@ export const NameSection = ({eventName, setEventName, containerStyles}: Props) =
 
   return (
     <View>
-      <Text style={styles.detailsTitle}>{t('AddEvent.Name')}</Text>
-      <CustomInputText
+      <TextInput
+        label={t('AddEvent.Name')}
+        returnKeyType="next"
         value={eventName}
-        setValue={setEventName}
-        placeholder={t('AddEvent.Name')}
-        containerStyle={containerStyles}
+        onChangeText={text => setEventName(text)}
+        autoCapitalize="none"
       />
     </View>
   )

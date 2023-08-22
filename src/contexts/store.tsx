@@ -4,7 +4,7 @@ import React, {createContext, Dispatch, useContext, useEffect, useReducer} from 
 import { defaultLanguage, LocalStorageKeys} from '../constants'
 
 import _defaultReducer, {DispatchAction, ReducerAction} from './reducers/store'
-import {State, User, Event} from './types'
+import {State, User, Event, Invitation} from './types'
 
 type Reducer = <S extends State>(state: S, action: ReducerAction<any>) => S
 
@@ -16,6 +16,7 @@ interface StoreProviderProps {
 
 export const UserList: User[] = [];
 export const EventList: Event[] = [];
+export const InvitationList: Invitation[] = [];
 
 export const defaultState: State = {
   onboarding: {
@@ -24,6 +25,7 @@ export const defaultState: State = {
   language: defaultLanguage,
   user: UserList,
   events: EventList,
+  invitations: InvitationList,
 }
 
 export const StoreContext = createContext<[State, Dispatch<ReducerAction<any>>]>([
@@ -63,6 +65,34 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({children, initialSt
       }
     }
     getLanguage()
+  }, [])
+
+  useEffect(() => {
+    const getUsers = async () => {
+      const usersJSON = await AsyncStorage.getItem(LocalStorageKeys.User)
+      if (usersJSON) {
+        const users: User[] = JSON.parse(usersJSON)
+        dispatch({
+          type: DispatchAction.SET_USERS,
+          payload: users,
+        })
+      }
+    }
+    getUsers()
+  }, [])
+
+  useEffect(() => {
+    const getEvents = async () => {
+      const eventsJSON = await AsyncStorage.getItem(LocalStorageKeys.Events)
+      if (eventsJSON) {
+        const events: Event[] = JSON.parse(eventsJSON)
+        dispatch({
+          type: DispatchAction.SET_EVENTS,
+          payload: events,
+        })
+      }
+    }
+    getEvents()
   }, [])
 
   return <StoreContext.Provider value={[state, dispatch]}>{children}</StoreContext.Provider>

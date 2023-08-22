@@ -25,6 +25,8 @@ const LoginScreen = ({ navigation }: Props) => {
   const { t } = useTranslation();
   const [state] = useStore();
 
+  console.log(state)
+
   const _onLoginPressed = async () => {
     const emailError = emailValidator(email.value,t);
     const passwordError = passwordValidator(password.value,t);
@@ -35,11 +37,8 @@ const LoginScreen = ({ navigation }: Props) => {
       return;
     } else {
       const findUser = state.user.find((item) => {return (item.email ==email.value && item.password==password.value)});
-      console.log(findUser);
       if(findUser != null){
-        console.log(findUser.id);
         await AsyncStorage.setItem(LocalStorageKeys.UserId, findUser.id)
-        console.log(await AsyncStorage.getItem(LocalStorageKeys.UserId));
         navigation.navigate('HomeScreen');
       } else {
         const loginError = t('LoginScreen.LoginError');
