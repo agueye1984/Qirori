@@ -37,6 +37,7 @@ const translation = {
     PasswordError: "Ooops! We need a valid password.The password must have at least 8 characters, an upper case, a lower case, a special character, a number.",
     RetapePasswordError: "Ooops! We need a valid confirm password.The password must have at least 8 characters, an upper case, a lower case, a special character, a number.",
     PasswordNotConfirm: "Oops, the two passwords do not match.",
+    AccountExists: "This email have already an account",
   },
   Screens: {
     Home: 'Home',
@@ -82,6 +83,20 @@ const translation = {
     Search: 'Search',
     Create: 'Create',
     Cancel: 'Cancel',
+    CharacterCount: 'characters',
+    titleModify: 'Modify an event',
+    Modify:'Modify',
+  },
+  InvitationsContacts: {
+    title: 'Invite your contacts',
+    Share: 'Share',
+    Everyone: 'Everyone with the link',
+    Limit: '+1 Limit',
+    Nos: 'No +1s',
+    Invite: 'Invite a new user',
+    FromContacts: 'From Contacts',
+    PhoneNumber: 'Telephone number',
+    Invitee: 'Invite',
   },
   Invitations: {
     title: 'Invitations',

@@ -1,5 +1,3 @@
-import { ImageSourcePropType } from "react-native"
-
 export interface Onboarding {
   didAgreeToTerms: boolean
 }
@@ -9,6 +7,7 @@ export interface State {
   user: User[]
   language: String
   events: Event[]
+  invitations: Invitation[]
 }
 
 export interface User{
@@ -46,7 +45,12 @@ export type ManageEventsParamList = {
   }
   EditEvent: {
     itemId: string
-    attribute: 'Title' | 'Description' | 'Attributes'
+  }
+  InvitationsContacts: {
+    item: Event
+  }
+  Invitations: {
+    item: Event
   }
 }
 
@@ -55,9 +59,8 @@ export interface Invitation{
   eventId: string
   reponse: string
   userId: string | null
-  nbrPresent: string
-  heureDebut: string
-  dateFin: string
-  heureFin: string
-  localisation: string
+  nbrAdultes: number
+  numeroTelephone: string
+  nbrEnfants?: number
+  AgeEnfants?: number
 }

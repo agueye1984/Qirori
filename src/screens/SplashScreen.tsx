@@ -15,9 +15,10 @@ const SplashScreen = () => {
       resizeMode: 'contain',
     },
   })
-
+  console.log(state)
   useEffect(() => {
     setTimeout(() => {
+      console.log(state.onboarding.didAgreeToTerms)
     if (state.onboarding.didAgreeToTerms) {
       navigation.navigate('LoginScreen' as never)
      } else {

@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, ViewStyle } from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { CustomInputText } from './CustomInputText'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
+import TextInput from './TextInput'
 
 
 type Props = {
@@ -24,12 +25,12 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
 
   return (
     <View>
-      <Text style={styles.detailsTitle}>{t('AddEvent.Emplacement')}</Text>
-      <CustomInputText
+     <TextInput
+        label={t('AddEvent.Emplacement')}
+        returnKeyType="next"
         value={eventLocalisation}
-        setValue={setEventLocalisation}
-        placeholder={t('AddEvent.Search')}
-        containerStyle={containerStyles}
+        onChangeText={text => setEventLocalisation(text)}
+        autoCapitalize="none"
       />
       {/*<GooglePlacesAutocomplete
                   placeholder={t('AddEvent.Search')}
