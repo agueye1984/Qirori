@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon1 from 'react-native-vector-icons/MaterialIcons'
 import Icon2 from 'react-native-vector-icons/SimpleLineIcons'
 import Icon3 from 'react-native-vector-icons/FontAwesome5'
+import { theme } from '../core/theme'
 
 type Props = {
     item: Accueil
@@ -55,35 +56,35 @@ export const AccueilItem = ({ item, action }: Props) => {
                         {icon[0] == 'Icon' && 
                         <Icon
                             name={icon[1]}
-                            color={ColorPallet.primary}
+                            color={theme.colors.primary}
                             size={35}
                          />
                         }
                         {icon[0] == 'Icon1' && 
                         <Icon1
                             name={icon[1]}
-                            color={ColorPallet.primary}
+                            color={theme.colors.primary}
                             size={35}
                          />
                         }
                         {icon[0] == 'Icon2' && 
                         <Icon2
                             name={icon[1]}
-                            color={ColorPallet.primary}
+                            color={theme.colors.primary}
                             size={35}
                          />
                         }
                         {icon[0] == 'Icon3' && 
                         <Icon3
                             name={icon[1]}
-                            color={ColorPallet.primary}
+                            color={theme.colors.primary}
                             size={35}
                          />
                         }
 
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={[defaultStyles.text, { paddingLeft: 10, fontWeight: 'bold', fontSize: 20, color: ColorPallet.primary }]}>{item.title}</Text>
+                        <Text style={[defaultStyles.text, { paddingLeft: 10, fontWeight: 'bold', fontSize: 20, color: theme.colors.primary }]}>{item.title}</Text>
                     </View>
                 </View>
             </TouchableOpacity>

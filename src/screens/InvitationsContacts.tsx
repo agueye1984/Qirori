@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
 import { useTheme } from '../contexts/theme';
-import BackgroundContents from '../components/BackgroundContents';
 import { useTranslation } from 'react-i18next';
 import Header from '../components/Header';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { Invitation, ManageEventsParamList } from '../contexts/types';
+import { AgeEnfant, Invitation, ManageEventsParamList, User } from '../contexts/types';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { BacktoHome } from '../components/BacktoHome';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -15,8 +14,11 @@ import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { LocalStorageKeys } from '../constants';
 import { useStore } from '../contexts/store';
+import { DispatchAction } from '../contexts/reducers/store';
+import { theme } from '../core/theme';
+import Button from '../components/Button';
 
-type invitationsContactsProps = StackNavigationProp<ManageEventsParamList, 'InvitationsContacts'>;
+type eventDetailsProp = StackNavigationProp<ManageEventsParamList, 'EventDetails'>
 
 
 export const InvitationsContacts = () => {
@@ -26,9 +28,18 @@ export const InvitationsContacts = () => {
   const { t } = useTranslation();
   const route = useRoute<RouteProp<ManageEventsParamList, 'InvitationsContacts'>>();
   const item = route.params.item;
-  const navigation = useNavigation<invitationsContactsProps>()
+  const navigation = useNavigation<eventDetailsProp>()
   const [toggle, setToggle] = useState(false)
   const [numTelephone, setNumTelephone] = useState<string>('')
+  const [userId, setUserId] = useState('')
+
+  AsyncStorage.getItem(LocalStorageKeys.UserId)
+    .then((result) => {
+      if (result != null) {
+        setUserId(result);
+      }
+    })
+    .catch(error => console.log(error))
 
 
   const getToggleOnOff = (toggle: boolean) => {
@@ -41,17 +52,25 @@ export const InvitationsContacts = () => {
 
   const handleSaveInvitations = async () => {
     const findIndex = state.invitations.findIndex((req) => req.numeroTelephone === numTelephone);
-    const userId = await AsyncStorage.getItem(LocalStorageKeys.UserId);
-        let invitation: Invitation = {
-          id: uuidv4(),
-          eventId: item.id,
-          reponse: '',
-          nbrAdultes: 0,
-          numeroTelephone:numTelephone,
-          nbrEnfants: 0,
-          AgeEnfants: 0,
-          userId: userId
-        }
+    const ageEnfant: AgeEnfant[] = [];
+    if (findIndex) {
+      let invitation: Invitation = {
+        id: uuidv4(),
+        eventId: item.id,
+        reponse: '',
+        nbrAdultes: 0,
+        numeroTelephone: numTelephone,
+        nbrEnfants: 0,
+        AgeEnfants: ageEnfant,
+        userId: userId,
+        closeDonation: false
+      }
+      dispatch({
+        type: DispatchAction.ADD_INVITE,
+        payload: invitation,
+      })
+      navigation.navigate('EventDetails', { item: item, })
+    }
 
   }
 
@@ -86,11 +105,12 @@ export const InvitationsContacts = () => {
     containerStyleName: {
       borderColor: ColorPallet.lightGray,
       borderWidth: 1,
+      backgroundColor:'white'
     },
   })
 
   return (
-    <BackgroundContents>
+    <SafeAreaView>
       <BacktoHome textRoute={item.name} />
       <Header>{t('InvitationsContacts.title')}</Header>
       <View>
@@ -106,7 +126,7 @@ export const InvitationsContacts = () => {
                   <TouchableOpacity onPress={() => getToggleOnOff(false)}>
                     <Icon
                       name={'toggle-on'}
-                      color={ColorPallet.primary}
+                      color={theme.colors.primary}
                       size={20}
                     />
                   </TouchableOpacity>
@@ -161,16 +181,16 @@ export const InvitationsContacts = () => {
                   containerStyle={styles.containerStyleName}
                 />
               </View>
-              <View style={{ marginVertical: 25, marginLeft: 100 }}>
-                <TouchableOpacity onPress={() => handleSaveInvitations()}>
-                  <Text >{t('InvitationsContacts.Invitee')}</Text>
-                </TouchableOpacity>
+              <View style={{ marginLeft: 50 }}>
+                <Button mode="contained" onPress={handleSaveInvitations}>
+                  {t('InvitationsContacts.Invitee')}
+                </Button>
               </View>
             </View>
           </View>
         </View>
       </View>
-    </BackgroundContents>
+    </SafeAreaView>
 
 
   )

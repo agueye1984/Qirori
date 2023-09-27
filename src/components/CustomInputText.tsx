@@ -3,6 +3,7 @@ import {useTranslation} from 'react-i18next'
 import {StyleSheet, Text, TextInput, View, ViewStyle} from 'react-native'
 
 import {useTheme} from '../contexts/theme'
+import { theme } from '../core/theme'
 
 type Props = {
   value: string
@@ -40,11 +41,11 @@ export const CustomInputText = ({
       textAlignVertical: 'top',
       fontSize: 16,
       height: '100%',
-      color: ColorPallet.primaryText,
+      color: theme.colors.primaryText,
     },
     characterText: {
       textAlign: 'right',
-      color: ColorPallet.primaryText,
+      color: theme.colors.primaryText,
       fontSize: 14,
       justifyContent: 'flex-start',
     },

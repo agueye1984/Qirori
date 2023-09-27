@@ -21,6 +21,7 @@ import { useStore } from '../contexts/store';
 import { DispatchAction } from '../contexts/reducers/store';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -79,7 +80,7 @@ const RegisterScreen = ({ navigation }: Props) => {
 
 
   return (
-    <Background>
+    <SafeAreaView style={styles.container}>
       <Logo />
       <Header>{t('RegisterScreen.title')}</Header>
       <Paragraph>{t('RegisterScreen.paragraph')}</Paragraph>
@@ -146,7 +147,7 @@ const RegisterScreen = ({ navigation }: Props) => {
           <Text style={styles.link}>{t('RegisterScreen.Login')}</Text>
         </TouchableOpacity>
       </View>
-    </Background>
+    </SafeAreaView>
   );
 };
 
@@ -164,6 +165,15 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: 'bold',
     color: theme.colors.primary,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    width: '100%',
+    maxWidth: 340,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

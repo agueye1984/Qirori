@@ -9,6 +9,7 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { useTranslation } from 'react-i18next'
+import { theme } from '../core/theme'
 
 type Props = {
     item: Event
@@ -17,7 +18,7 @@ type Props = {
 type eventDetailsProp = StackNavigationProp<ManageEventsParamList, 'EventDetails'>
 
 export const EventItem = ({ item }: Props) => {
-    const { t } = useTranslation()
+    const { i18n, t } = useTranslation();
     const defaultStyles = DefaultComponentsThemes()
     const { ColorPallet } = useTheme()
     const { navigate } = useNavigation<eventDetailsProp>()
@@ -26,8 +27,16 @@ export const EventItem = ({ item }: Props) => {
     const jourDebut = parseInt(item.dateDebut.substring(6, 8));
     const heureDebut = parseInt(item.heureDebut.substring(0, 2));
     const minutesDebut = parseInt(item.heureDebut.substring(2, 4));
+    const selectedLanguageCode = i18n.language;
+    let languageDate = ''
+    if(selectedLanguageCode==='fr'){
+        languageDate = 'fr-fr';
+    }
+    if(selectedLanguageCode==='en'){
+        languageDate = 'en-GB';
+    }
     const dateDebut = new Date(anneeDebut, moisDebut, jourDebut, heureDebut, minutesDebut, 0);
-    const heureFormatDebut = dateDebut.toLocaleTimeString('en-GB', {
+    const heureFormatDebut = dateDebut.toLocaleTimeString(languageDate, {
         hour: 'numeric',
         minute: 'numeric',
         hourCycle: 'h24'
@@ -38,7 +47,7 @@ export const EventItem = ({ item }: Props) => {
     const heureFin = parseInt(item.heureFin.substring(0, 2));
     const minutesFin = parseInt(item.heureFin.substring(2, 4));
     const dateFin = new Date(anneeFin, moisFin, jourFin, heureFin, minutesFin, 0);
-    const heureFormatFin = dateFin.toLocaleTimeString('en-GB', {
+    const heureFormatFin = dateFin.toLocaleTimeString(languageDate, {
         hour: 'numeric',
         minute: 'numeric',
         hourCycle: 'h24'
@@ -92,12 +101,12 @@ export const EventItem = ({ item }: Props) => {
                                     <Text style={[defaultStyles.text, { fontWeight: 'bold', fontSize: 20, }]}>{item.name}</Text>
                                 </View>
                                 <View style={{ width: 250 }}>
-                                    <Text>{t('Events.from')} {heureFormatDebut} {t('Events.to')} {heureFormatFin}</Text>
+                                    <Text>{t('Global.from')} {heureFormatDebut} {t('Global.to')} {heureFormatFin}</Text>
                                 </View>
                             </View>
                         </View>
                         <View style={[defaultStyles.rightSectRowContainer, { marginHorizontal: 15, marginVertical: 15, alignItems: 'center' }]}>
-                            <Icon name="angle-right" size={20} color={ColorPallet.primaryText} />
+                            <Icon name="angle-right" size={20} color={theme.colors.primaryText} />
                         </View>
                     </View>
                 </View>

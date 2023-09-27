@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TouchableOpacity, StyleSheet, Text, View, BackHandler } from 'react-native';
 import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -13,53 +13,79 @@ import Paragraph from '../components/Paragraph';
 import { useStore } from '../contexts/store';
 import { LocalStorageKeys } from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
   navigation: Navigation;
 };
 
 const LoginScreen = ({ navigation }: Props) => {
-  const [email, setEmail] = useState({ value: '', error: '' });
-  const [password, setPassword] = useState({ value: '', error: '' });
-  const [login, setLogin] = useState({ value: '', error: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [loginError, setLoginError] = useState('');
   const { t } = useTranslation();
   const [state] = useStore();
+  const [userId, setUserId] = useState('')
 
-  console.log(state)
+ console.log(email);
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        return true
+      }
+      BackHandler.addEventListener('hardwareBackPress', onBackPress)
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress)
+    }, [])
+  );
+
+ /* useEffect(() => {
+    AsyncStorage.getItem(LocalStorageKeys.UserId)
+        .then((result) => {
+            if (result === null) {
+              setEmail('');
+              setPassword('');
+            }
+        })
+        .catch(error => console.log(error))
+}, [email,password])*/
 
   const _onLoginPressed = async () => {
-    const emailError = emailValidator(email.value,t);
-    const passwordError = passwordValidator(password.value,t);
+    const emailError = emailValidator(email,t);
+    const passwordError = passwordValidator(password,t);
 
     if (emailError || passwordError) {
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
+      setEmailError(emailError);
+      setPasswordError(passwordError);
       return;
     } else {
-      const findUser = state.user.find((item) => {return (item.email ==email.value && item.password==password.value)});
+      const findUser = state.user.find((item) => {return (item.email ==email && item.password==password)});
       if(findUser != null){
         await AsyncStorage.setItem(LocalStorageKeys.UserId, findUser.id)
         navigation.navigate('HomeScreen');
       } else {
-        const loginError = t('LoginScreen.LoginError');
-        setLogin({ ...login, error: loginError });
+        setLoginError(t('LoginScreen.LoginError'));
       }
     }
   };
 
+
+
   return (
-    <Background>
+    <SafeAreaView style={styles.container}>
       <Logo />
       <Header>{t('LoginScreen.title')}</Header>
       <Paragraph>{t('LoginScreen.paragraph')}</Paragraph>
-      <Text style={styles.errorText}>{login.error}</Text>
+      <Text style={styles.errorText}>{loginError}</Text>
       <TextInput
         label={t('LoginScreen.Email')}
         returnKeyType="next"
-        value={email.value}
-        onChangeText={text => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
+        value={email}
+        onChangeText={text => setEmail(text)}
+        error={!!emailError}
+        errorText={emailError}
         autoCapitalize="none"
         autoComplete="email"
         textContentType="emailAddress"
@@ -69,10 +95,10 @@ const LoginScreen = ({ navigation }: Props) => {
       <TextInput
         label={t('LoginScreen.Password')}
         returnKeyType="done"
-        value={password.value}
-        onChangeText={text => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
+        value={password}
+        onChangeText={text => setPassword(text)}
+        error={!!passwordError}
+        errorText={passwordError}
         secureTextEntry
       />
 
@@ -94,7 +120,7 @@ const LoginScreen = ({ navigation }: Props) => {
           <Text style={styles.link}>{t('LoginScreen.SignUp')}</Text>
         </TouchableOpacity>
       </View>
-    </Background>
+    </SafeAreaView>
   );
 };
 
@@ -119,6 +145,15 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    width: '100%',
+    maxWidth: 340,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

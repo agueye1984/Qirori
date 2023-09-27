@@ -11,9 +11,9 @@ import {
     TouchableWithoutFeedback,
     Text,
     StyleSheet,
-    ViewStyle
+    ViewStyle,
+    SafeAreaView
 } from "react-native";
-import BackgroundContents from "./BackgroundContents";
 import { useStore } from "../contexts/store";
 import DefaultComponentsThemes from "../defaultComponentsThemes";
 import { useTheme } from "../contexts/theme";
@@ -106,8 +106,7 @@ export const SearchBar = ({ searchPlaceholder, onChangeText }: Props) => {
     const inputStyleCollection = [styles.inputStyle];
 
     return (
-        <BackgroundContents>
-            <Header>{t('AddEvent.title')}</Header>
+        <SafeAreaView>
             <TouchableWithoutFeedback>
                 <Animated.View style={styles.container}>
                     <View style={styles.leftIconStyle}>
@@ -144,6 +143,6 @@ export const SearchBar = ({ searchPlaceholder, onChangeText }: Props) => {
                     </View>
                 </Animated.View>
             </TouchableWithoutFeedback>
-        </BackgroundContents>
+        </SafeAreaView>
     )
 }

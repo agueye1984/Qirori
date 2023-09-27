@@ -5,6 +5,7 @@ import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { CustomInputText } from './CustomInputText'
 import TextInput from './TextInput'
 import { useTheme } from '../contexts/theme'
+import { theme } from '../core/theme'
 
 
 type Props = {
@@ -29,7 +30,7 @@ export const DescriptionSection = ({
     },
     characterText: {
       textAlign: 'right',
-      color: ColorPallet.primaryText,
+      color: theme.colors.primaryText,
       fontSize: 14,
       justifyContent: 'flex-start',
     },

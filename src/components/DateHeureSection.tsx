@@ -5,6 +5,7 @@ import DefaultComponentsThemes from '../defaultComponentsThemes'
 import TextInput from '../components/TextInput'
 import DatePicker from 'react-native-date-picker'
 import { CustomInputTextDate } from './CustomInputTextDate'
+import { i18n } from '../localization'
 
 type Props = {
   dateDeb: Date
@@ -37,11 +38,12 @@ export const DateHeureSection = ({
   const [openHeureDebut, setOpenHeureDebut] = useState(false)
   const [openDateFin, setOpenDateFin] = useState(false)
   const [openHeureFin, setOpenHeureFin] = useState(false)
+  const selectedLanguageCode = i18n.language;
 
-  let dateFormatDebut = dateDebut.toLocaleDateString('en', { year: "numeric", day: "2-digit", month: "short", });
-  let heureFormatDebut = heureDebut.toLocaleTimeString('en', { hour: "numeric", minute: "numeric", });
-  let dateFormatFin = dateFin.toLocaleDateString('en', { year: "numeric", day: "2-digit", month: "short", });
-  let heureFormatFin = heureFin.toLocaleTimeString('en', { hour: "numeric", minute: "numeric", });
+  let dateFormatDebut = dateDebut.toLocaleDateString(selectedLanguageCode, { year: "numeric", day: "2-digit", month: "short", });
+  let heureFormatDebut = heureDebut.toLocaleTimeString(selectedLanguageCode, { hour: "numeric", minute: "numeric", });
+  let dateFormatFin = dateFin.toLocaleDateString(selectedLanguageCode, { year: "numeric", day: "2-digit", month: "short", });
+  let heureFormatFin = heureFin.toLocaleTimeString(selectedLanguageCode, { hour: "numeric", minute: "numeric", });
 
   const handleOpenDateDebutChange = () => {
     setOpenDateDebut(true);

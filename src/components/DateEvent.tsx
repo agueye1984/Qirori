@@ -5,6 +5,7 @@ import { useTheme } from '../contexts/theme'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { useNavigation } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
+import { i18n } from '../localization'
 
 type Props = {
   dateDebut: string
@@ -18,8 +19,9 @@ export const DateEvent = ({ dateDebut, flexSize}: Props) => {
   const mois = parseInt(dateDebut.substring(4,6))-1;
   const jour = parseInt(dateDebut.substring(6,8));
   const date = new Date(annee, mois, jour, 0, 0, 0);
+  const selectedLanguageCode = i18n.language;
 
-  const moisformat = date.toLocaleDateString('en', { month: "short", })
+  const moisformat = date.toLocaleDateString(selectedLanguageCode, { month: "short", })
 
     const styles = StyleSheet.create({
         touchableStyle: {

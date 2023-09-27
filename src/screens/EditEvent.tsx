@@ -1,12 +1,11 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
-import { t } from 'i18next'
 import React, { useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { DispatchAction } from '../contexts/reducers/store'
 import { useStore } from '../contexts/store'
 import { useTheme } from '../contexts/theme'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
-import BackgroundContents from '../components/BackgroundContents'
+SafeAreaView
 import { BacktoHome } from '../components/BacktoHome'
 import Header from '../components/Header'
 import { v4 as uuidv4 } from 'uuid';
@@ -19,10 +18,15 @@ import { DescriptionSection } from '../components/DescriptionSection'
 import { DateHeureSection } from '../components/DateHeureSection'
 import { EmplacementSection } from '../components/EmplacementSection'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { theme } from '../core/theme'
+import Button from '../components/Button'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 
 type editEventProps = StackNavigationProp<ManageEventsParamList, 'EventDetails'>
 
 export const EditEvent = () => {
+  const { i18n, t } = useTranslation();
   const route = useRoute<RouteProp<ManageEventsParamList, 'EditEvent'>>()
   const [state, dispatch] = useStore()
   const defaultStyles = DefaultComponentsThemes()
@@ -43,6 +47,14 @@ export const EditEvent = () => {
   const [heureDebut, setHeureDebut] = useState<Date>(new Date(heurDebFormat))
   const [dateFin, setDateFin] = useState<Date>(new Date(dateFinFormat))
   const [heureFin, setHeureFin] = useState<Date>(new Date(heurFinFormat))
+  const selectedLanguageCode = i18n.language;
+    let languageDate = ''
+    if(selectedLanguageCode==='fr'){
+        languageDate = 'fr-fr';
+    }
+    if(selectedLanguageCode==='en'){
+        languageDate = 'en-GB';
+    }
 
 
 
@@ -106,7 +118,7 @@ export const EditEvent = () => {
       textAlignVertical: 'top',
       fontSize: 16,
       height: '100%',
-      color: ColorPallet.primaryText,
+      color: theme.colors.primaryText,
     },
     container: {
       minHeight: 50,
@@ -121,22 +133,22 @@ export const EditEvent = () => {
 
   const handleSaveEvents = async () => {
     try {
-      const dateformatDebut = dateDebut.toLocaleDateString('en-GB', {
+      const dateformatDebut = dateDebut.toLocaleDateString(languageDate, {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
       }).split('/').reverse().join('');
-      const heureFormatDebut = heureDebut.toLocaleTimeString('en-GB', {
+      const heureFormatDebut = heureDebut.toLocaleTimeString(languageDate, {
         hour: 'numeric',
         minute: 'numeric',
         hourCycle: 'h24'
       }).split(':').join('');
-      const dateformatFin = dateFin.toLocaleDateString('en-GB', {
+      const dateformatFin = dateFin.toLocaleDateString(languageDate, {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
       }).split('/').reverse().join('');
-      const heureFormatFin = heureFin.toLocaleTimeString('en-GB', {
+      const heureFormatFin = heureFin.toLocaleTimeString(languageDate, {
         hour: 'numeric',
         minute: 'numeric',
         hourCycle: 'h24'
@@ -165,7 +177,7 @@ export const EditEvent = () => {
   }
 
   return (
-    <BackgroundContents>
+    <SafeAreaView>
       <BacktoHome textRoute={t('Events.title')} />
       <Header>{t('AddEvent.titleModify')}</Header>
 
@@ -206,25 +218,22 @@ export const EditEvent = () => {
           />
         </View>
         {eventLocalisation.length === 0 && localisationDirty && <Text style={styles.error}>{t('AddEvent.localisationErrorEmpty')}</Text>}
-      </ScrollView>
-      <View style={styles.itemContainer}>
-        <View style={styles.row}>
-          <View style={defaultStyles.leftSectRowContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('Events' as never)}>
-              <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Cancel')}</Text>
-            </TouchableOpacity>
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <View style={{ marginRight: 80, alignItems: 'flex-start' }}>
+              <Button mode="contained" onPress={() => navigation.navigate('Events' as never)}>
+                {t('Global.Cancel')}
+              </Button>
+            </View>
+            <View style={[{ marginLeft: 80, alignItems: 'flex-end' }]}>
+              <Button mode="contained" onPress={handleSaveEvents}>
+                {t('Global.Modify')}
+              </Button>
+            </View>
           </View>
-          <View style={defaultStyles.rightSectRowContainer}>
-            <TouchableOpacity onPress={handleSaveEvents}>
-              <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Modify')}</Text>
-            </TouchableOpacity>
-          </View>
-
         </View>
-      </View>
-
-
-    </BackgroundContents>
+      </ScrollView>
+    </SafeAreaView>
 
 
   )

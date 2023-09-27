@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { emailValidator } from '../core/utils';
 import Background from '../components/Background';
 import BackButton from '../components/BackButton';
@@ -31,7 +31,7 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <Background>
+    <SafeAreaView style={styles.container}>
       <BackButton goBack={() => navigation.navigate('LoginScreen')} />
 
       <Logo />
@@ -61,7 +61,7 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
       >
         <Text style={styles.label}>← Back to login</Text>
       </TouchableOpacity>
-    </Background>
+    </SafeAreaView>
   );
 };
 
@@ -76,6 +76,15 @@ const styles = StyleSheet.create({
   label: {
     color: theme.colors.secondary,
     width: '100%',
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    width: '100%',
+    maxWidth: 340,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

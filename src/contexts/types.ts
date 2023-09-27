@@ -8,9 +8,14 @@ export interface State {
   language: String
   events: Event[]
   invitations: Invitation[]
+  contributions: Contribution[]
+  products: Product[]
+  services: Service[]
+  carts: Panier[]
+  contactUs: Mail[]
 }
 
-export interface User{
+export interface User {
   id: string
   email: string
   telephone: string
@@ -18,14 +23,14 @@ export interface User{
   name: string
 }
 
-export interface Accueil{
+export interface Accueil {
   id: string
   title: string
   route: string
   images: string
 }
 
-export interface Event{
+export interface Event {
   id: string
   name: string
   description: string
@@ -52,9 +57,22 @@ export type ManageEventsParamList = {
   Invitations: {
     item: Event
   }
+  InvitationDetails: {
+    item: Invitation
+  }
+  ContributionsDetails: {
+    item: Invitation
+  }
+  ProductDetails: {
+    item: Product
+  },
+  PaypalPayement: {
+    amount: string
+    currency: string
+  }
 }
 
-export interface Invitation{
+export interface Invitation {
   id: string
   eventId: string
   reponse: string
@@ -62,5 +80,73 @@ export interface Invitation{
   nbrAdultes: number
   numeroTelephone: string
   nbrEnfants?: number
-  AgeEnfants?: number
+  AgeEnfants?: AgeEnfant[]
+  closeDonation: boolean
+}
+
+export interface AgeEnfant {
+  age: number
+}
+
+export interface Contribution {
+  id: string
+  eventId: string
+  nature?: string
+  userId: string | null
+  contribution: string
+  Produits?: Product[]
+  montant: number
+}
+
+export interface Product {
+  id: string
+  name: string
+  description: string
+  userId: string | null 
+  devise: string
+  quantite: number
+  prixUnitaire: number
+  images: string
+}
+
+export interface Service {
+  id: string
+  name: string
+  description: string
+  userId: string | null 
+  images: string
+}
+
+export interface Panier {
+  id:string,
+  qty: number,
+  product: string,
+  totalPrice: number,
+  paid: boolean,
+  userId: string | null
+}
+
+export interface Mail {
+  id: string,
+  subject: string,
+  message: string,
+  userId: string | null
+}
+
+export interface Commande {
+  id: string,
+  paniers: Panier[],
+  adresse: Adresse,
+  paymentId: string,
+  orderId: string,
+  userId: string | null
+}
+
+export interface Adresse {
+  id: string,
+  adresse: string,
+  city: string,
+  province: string,
+  postalCode: string,
+  userId: string | null
 }

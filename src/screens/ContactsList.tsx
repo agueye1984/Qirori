@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { useTheme } from '../contexts/theme'
-import BackgroundContents from '../components/BackgroundContents'
 import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import { useNavigation } from '@react-navigation/native'
@@ -12,9 +11,9 @@ import { EventItem } from '../components/EventItem'
 import { Event } from '../contexts/types'
 import Paragraph from '../components/Paragraph'
 import { EmptyList } from '../components/EmptyList'
-import { SearchBar } from './SearchBar'
+import { SearchBar } from '../components/SearchBar'
 import Contacts from "react-native-contacts";
-import Contact from './Contact'
+import Contact from '../components/Contact'
 
 
 export const ContactsList = () => {
@@ -84,7 +83,7 @@ export const ContactsList = () => {
 
 
   return (
-    <BackgroundContents>
+    <SafeAreaView>
       <BacktoHome textRoute={t('InvitationsContacts.title')} />
       <Header>{t('InvitationsContacts.title')}</Header>
       <SearchBar searchPlaceholder='Search' onChangeText={text => search(text)} />
@@ -108,6 +107,6 @@ export const ContactsList = () => {
       }
     
     
-    </BackgroundContents>
+    </SafeAreaView>
   )
 }

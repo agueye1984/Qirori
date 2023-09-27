@@ -2,7 +2,6 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, Text, View, SafeAreaView, BackHandler } from 'react-native'
-
 import CheckBoxRow from '../components/CheckBoxRow'
 import { LargeButton } from '../components/LargeButton'
 import { NotificationBox } from '../components/NotificationBox'
@@ -12,7 +11,8 @@ import { DispatchAction } from '../contexts/reducers/store'
 import { useStore } from '../contexts/store'
 import { useTheme } from '../contexts/theme'
 import defaultComponentsThemes from '../defaultComponentsThemes'
-import BackgroundContents from '../components/BackgroundContents'
+SafeAreaView
+import { theme } from '../core/theme'
 
 const TermsScreen: React.FC = () => {
   const [, dispatch] = useStore()
@@ -24,7 +24,7 @@ const TermsScreen: React.FC = () => {
   const defaultStyle = defaultComponentsThemes()
   const style = StyleSheet.create({
     container: {
-      backgroundColor: ColorPallet.primaryBackground,
+      backgroundColor: theme.colors.primaryBackground,
     },
     bodyText: {
       ...defaultStyle.text,
@@ -84,7 +84,6 @@ const TermsScreen: React.FC = () => {
  
 
   return (
-    <BackgroundContents>
       <SafeAreaView>
         <ScrollView style={{ paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
           <Header>{t('TermsV2.title')}</Header>
@@ -140,7 +139,6 @@ const TermsScreen: React.FC = () => {
           </View>
         </ScrollView>
       </SafeAreaView>
-    </BackgroundContents>
   )
 }
 

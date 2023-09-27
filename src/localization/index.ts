@@ -42,13 +42,15 @@ const currentLanguage = i18n.language
 
 const initLanguages = async (resources: TranslationResources) => {
   const availableLanguages = Object.keys(resources)
-  const bestLanguageMatch = RNLocalize.findBestLanguageTag(availableLanguages)
+  //const bestLanguageMatch = RNLocalize.findBestLanguageTag(availableLanguages)
   let translationToUse = defaultLanguage
 
-  if (bestLanguageMatch && availableLanguages.includes(bestLanguageMatch.languageTag)) {
-    translationToUse = bestLanguageMatch.languageTag
+  if (currentLanguage && availableLanguages.includes(currentLanguage)) {
+    translationToUse = currentLanguage
   }
-
+  console.log(translationToUse)
+  console.log(currentLanguage)
+  console.log(availableLanguages)
   i18n.use(initReactI18next).init({
     compatibilityJSON: 'v3',
     lng: translationToUse,
