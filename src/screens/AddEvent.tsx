@@ -102,7 +102,6 @@ export const AddEvent = () => {
       flexWrap: 'wrap',
     },
     input: {
-      flex: 1,
       textAlignVertical: 'top',
       fontSize: 16,
       height: '100%',
@@ -170,7 +169,7 @@ export const AddEvent = () => {
       <BacktoHome textRoute={t('Events.title')} />
       <Header>{t('AddEvent.title')}</Header>
 
-      <ScrollView>
+      <View>
         <View style={styles.section}>
           <NameSection
             eventName={eventName}
@@ -207,7 +206,7 @@ export const AddEvent = () => {
           />
         </View>
         {eventLocalisation.length === 0 && localisationDirty && <Text style={styles.error}>{t('Global.LocalisationErrorEmpty')}</Text>}
-        <View style={styles.section}>
+        <View style={[styles.section, {marginVertical:25}]}>
           <View style={styles.row}>
             <View style={{ marginRight: 90, alignItems: 'flex-start' }}>
               <Button mode="contained" onPress={() => navigation.navigate('Events' as never)}>
@@ -221,7 +220,7 @@ export const AddEvent = () => {
             </View>
           </View>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

@@ -83,8 +83,8 @@ export const AccueilItem = ({ item, action }: Props) => {
                         }
 
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={[defaultStyles.text, { paddingLeft: 10, fontWeight: 'bold', fontSize: 20, color: theme.colors.primary }]}>{item.title}</Text>
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems:'center', marginHorizontal:5 }}>
+                        <Text style={[defaultStyles.text, {fontWeight: 'bold', fontSize: 20, color: theme.colors.primary }]}>{item.title}</Text>
                     </View>
                 </View>
             </TouchableOpacity>

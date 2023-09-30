@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Linking, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { LargeButton } from '../components/LargeButton'
@@ -8,7 +8,6 @@ import { DispatchAction } from '../contexts/reducers/store'
 import { useStore } from '../contexts/store'
 import { useTheme } from '../contexts/theme'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
-SafeAreaView
 import { BacktoHome } from '../components/BacktoHome'
 import Header from '../components/Header'
 import TextInput from '../components/TextInput'
@@ -27,8 +26,11 @@ import MapView, { Marker } from 'react-native-maps'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { theme } from '../core/theme'
 import { NumericFormat } from 'react-number-format'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
+import moment from 'moment';
+import { showMessage } from 'react-native-flash-message';
+
+
 
 type invitationsContactsProps = StackNavigationProp<ManageEventsParamList, 'InvitationsContacts'>;
 
@@ -115,14 +117,14 @@ export const EventDetails = () => {
       startDate: startDate.replace('Z', 'ZZ'),
       endDate: endDate.replace('Z', 'ZZ'),
     };
+    console.log(eventConfig)
     AddCalendarEvent.presentEventCreatingDialog(eventConfig)
-      .then(eventId => {
-        //handle success (receives event id) or dismissing the modal (receives false)
-        if (eventId) {
-          console.warn(eventId);
-        } else {
-          console.warn('dismissed');
-        }
+      .then((eventInfo) => {
+        // handle success - receives an object with `calendarItemIdentifier` and `eventIdentifier` keys, both of type string.
+        // These are two different identifiers on iOS.
+        // On Android, where they are both equal and represent the event id, also strings.
+        // when { action: 'CANCELED' } is returned, the dialog was dismissed
+        console.warn(JSON.stringify(eventInfo));
       })
       .catch((error: string) => {
         // handle error such as when user rejected permissions
@@ -273,8 +275,8 @@ export const EventDetails = () => {
   ];
 
   const quebecRegion = {
-    latitude: 35.6762,
-    longitude: 139.6503,
+    latitude: 46.81228,
+    longitude: -71.21454,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   };
@@ -406,11 +408,12 @@ export const EventDetails = () => {
             <MapView
               customMapStyle={mapStyle}
               style={{ width: '100%', height: '100%', ...StyleSheet.absoluteFillObject, }}
-              initialRegion={{ latitude: 37.78825, longitude: -122.4324, latitudeDelta: 0.0922, longitudeDelta: 0.0421, }}
+              initialRegion={quebecRegion}
+              showsUserLocation={true}
             >
               <Marker
                 draggable
-                coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
+                coordinate={{ latitude: 46.81228, longitude: -71.21454}}
                 description={'This is a description of the marker'}
                 title={'Test Marker'}
                 onDragEnd={
