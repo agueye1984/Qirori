@@ -49,7 +49,9 @@
 		<string>Feather.ttf</string>
 		<string>FontAwesome.ttf</string>
 		<string>Fontisto.ttf</string>
-		<string>FontAwesome5.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
 		<string>SimpleLineIcons.ttf</string>
 	</array>
 	<key>NSAppTransportSecurity</key>

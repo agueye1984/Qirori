@@ -30,7 +30,6 @@ const LoginScreen = ({ navigation }: Props) => {
   const [state] = useStore();
   const [userId, setUserId] = useState('')
 
- console.log(email);
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -82,7 +81,6 @@ const LoginScreen = ({ navigation }: Props) => {
       <TextInput
         label={t('LoginScreen.Email')}
         returnKeyType="next"
-        value={email}
         onChangeText={text => setEmail(text)}
         error={!!emailError}
         errorText={emailError}
@@ -95,7 +93,6 @@ const LoginScreen = ({ navigation }: Props) => {
       <TextInput
         label={t('LoginScreen.Password')}
         returnKeyType="done"
-        value={password}
         onChangeText={text => setPassword(text)}
         error={!!passwordError}
         errorText={passwordError}

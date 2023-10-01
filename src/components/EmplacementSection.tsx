@@ -28,6 +28,7 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
     },
   })
 
+  console.log(placesRef)
 
   return (
     <View>
