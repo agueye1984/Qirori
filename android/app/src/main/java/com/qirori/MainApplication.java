@@ -9,7 +9,6 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
-//import com.vonovak.AddCalendarEventPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -27,6 +26,7 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           //packages.add(new AddCalendarEventPackage());
+          //packages.add(new RNCConfigPackage());
           return packages;
         }
 

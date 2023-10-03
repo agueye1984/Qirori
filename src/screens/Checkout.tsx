@@ -123,7 +123,7 @@ export const Checkout = () => {
         console.log("response", response);
         setAccesToken(response.access_token);
 
-        fetch('https://api.sandbox.paypal.com/v1/payments/payment',
+        fetch('https://api.sandbox.paypal.com/v2/checkout/orders',
           {
             method: 'POST',
             headers: {

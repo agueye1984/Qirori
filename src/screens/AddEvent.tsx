@@ -19,6 +19,7 @@ import { EmplacementSection } from '../components/EmplacementSection';
 import { theme } from '../core/theme';
 import Button from '../components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
+//import { ScrollView } from 'react-native-virtualized-view';
 
 export const AddEvent = () => {
   const { i18n, t } = useTranslation();
@@ -169,7 +170,7 @@ export const AddEvent = () => {
       <BacktoHome textRoute={t('Events.title')} />
       <Header>{t('AddEvent.title')}</Header>
 
-      <View>
+      <ScrollView scrollEnabled>
         <View style={styles.section}>
           <NameSection
             eventName={eventName}
@@ -206,7 +207,7 @@ export const AddEvent = () => {
           />
         </View>
         {eventLocalisation.length === 0 && localisationDirty && <Text style={styles.error}>{t('Global.LocalisationErrorEmpty')}</Text>}
-        <View style={[styles.section, {marginVertical:25}]}>
+        <View style={[styles.section]}>
           <View style={styles.row}>
             <View style={{ marginRight: 90, alignItems: 'flex-start' }}>
               <Button mode="contained" onPress={() => navigation.navigate('Events' as never)}>
@@ -220,7 +221,7 @@ export const AddEvent = () => {
             </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
