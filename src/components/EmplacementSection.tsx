@@ -2,17 +2,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
-import { CustomInputText } from './CustomInputText'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import TextInput from './TextInput'
 import { useNavigation } from '@react-navigation/native'
 import { i18n } from '../localization'
-import Geolocation from '@react-native-community/geolocation';
 import { PredictionType } from '../contexts/types';
 import axios from 'axios'
-import { useDebounce } from '../hooks/useDebounce'
-import SearchBarWithAutocomplete from './SearchBarWithAutocomplete'
-import { SelectList } from 'react-native-dropdown-select-list';
 
 import Config from "react-native-config";
 
@@ -27,11 +21,6 @@ type Props = {
 
 export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, containerStyles }: Props) => {
   const { t } = useTranslation()
-  const defaultStyles = DefaultComponentsThemes()
-  const navigation = useNavigation();
-  const selectedLanguageCode = i18n.language;
-  const placesRef = useRef().current;
-  const [search, setSearch] = useState({ term: '', fetchPredictions: false })
   const [showPredictions, setShowPredictions] = useState(false)
   const [predictions, setPredictions] = useState<PredictionType[]>([]);
 
@@ -41,7 +30,7 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
   const handleChange = async (text: string) => {
     setEventLocalisation(text);
     if (text.trim() === '') return
-    const apiUrl = `${GOOGLE_PLACES_API_BASE_URL}/autocomplete/json?key=${GOOGLE_API_KEY}&input=${text}&components=country:ca`;
+    const apiUrl = `${Config.GOOGLE_PACES_API_BASE_URL}/autocomplete/json?key=${Config.GOOGLE_API_KEY}&input=${text}&components=country:ca`;
     try {
       const result = await axios.request({
         method: 'post',
@@ -58,7 +47,7 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
   }
   
   const onPredictionTapped = async (placeId: string, description: string) => {
-    const apiUrl = `${GOOGLE_PLACES_API_BASE_URL}/details/json?key=${GOOGLE_API_KEY}&place_id=${placeId}&components=country:ca`
+    const apiUrl = `${Config.GOOGLE_PACES_API_BASE_URL}/details/json?key=${Config.GOOGLE_API_KEY}&place_id=${placeId}&components=country:ca`
     console.log(placeId)
     try {
       const result = await axios.request({
@@ -67,16 +56,13 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
       })
       if (result) {
         const { data: { result: { geometry: { location } } } } = result
-        const { lat, lng } = location
         setShowPredictions(false)
-        setSearch({ term: description, fetchPredictions: false })
         setEventLocalisation(description);
       }
     } catch (e) {
       console.log(e)
     }
   }
-
 
 
   const styles = StyleSheet.create({
@@ -107,7 +93,6 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
 
   const _renderPredictions = (predictions: PredictionType[]) => {
     const {
-      predictionsContainer,
       predictionRow
     } = styles
     return (
@@ -130,7 +115,6 @@ export const EmplacementSection = ({ eventLocalisation, setEventLocalisation, co
         }}
         keyExtractor={(item) => item.place_id}
         keyboardShouldPersistTaps='handled'
-       // nestedScrollEnabled 
        nestedScrollEnabled={true}
        scrollEnabled={false}
       />

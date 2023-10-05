@@ -13,6 +13,7 @@ enum UpdateSettingAction {
 
 enum UserAction {
   ADD_USER = 'user',
+  UPDATE_USER = 'update_user',
   SET_USERS= 'set_users',
 }
 
@@ -114,6 +115,18 @@ export const reducer = <S extends State>(state: S, action: ReducerAction<Dispatc
     case UserAction.ADD_USER: {
       const user = action.payload as User
       const newUser = [user, ...state.user]
+      const newState = {
+        ...state,
+        user: newUser,
+      }
+      AsyncStorage.setItem(LocalStorageKeys.User, JSON.stringify(newState.user))
+      return newState
+    }
+    case UserAction.UPDATE_USER: {
+      const user = action.payload as User
+      const userIndex  = state.user.findIndex((req) => req.id === user.id)
+      const newUser = [...state.user]
+      newUser[userIndex] = user
       const newState = {
         ...state,
         user: newUser,

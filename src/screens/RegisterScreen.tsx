@@ -30,40 +30,81 @@ type Props = {
 };
 
 const RegisterScreen = ({ navigation }: Props) => {
-  const [name, setName] = useState({ value: '', error: '' });
-  const [email, setEmail] = useState({ value: '', error: '' });
-  const [password, setPassword] = useState({ value: '', error: '' });
-  const [retapePassword, setRetapePassword] = useState({ value: '', error: '' });
-  const [phone, setPhone] = useState({ value: '', error: '' });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [retapePassword, setRetapePassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [retapePasswordError, setRetapePasswordError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const { t } = useTranslation();
   const [state, dispatch] = useStore();
 
+  const handleName = (text: string)=>{
+    setName(text);
+    if(text===''){
+      setNameError('');
+    }
+  }
+
+  const handleEmail = (text: string)=>{
+    setEmail(text);
+    if(text===''){
+      setEmailError('');
+    }
+  }
+
+  const handlePassword = (text: string)=>{
+    setPassword(text);
+    if(text===''){
+      setPasswordError('');
+    }
+  }
+
+  const handleRetapePassword = (text: string)=>{
+    setRetapePassword(text);
+    if(text===''){
+      setRetapePasswordError('');
+    }
+  }
+
+  const handlePhone = (text: string)=>{
+    setPhone(text);
+    if(text===''){
+      setPhoneError('');
+    }
+  }
+
+
   const _onSignUpPressed = () => {
-    const nameError = nameValidator(name.value, t);
-    const emailError = emailValidator(email.value, t);
-    let passwordError = passwordValidator(password.value, t);
-    let retapePasswordError = retapePasswordValidator(retapePassword.value, t);
-    const phoneError = phoneValidator(phone.value, t);
-    if (password.value != '' && retapePassword.value != '' && password.value != retapePassword.value) {
+    const nameError = nameValidator(name, t);
+    const emailError = emailValidator(email, t);
+    let passwordError = passwordValidator(password, t);
+    let retapePasswordError = retapePasswordValidator(retapePassword, t);
+    const phoneError = phoneValidator(phone, t);
+    if (password != '' && retapePassword != '' && password != retapePassword) {
       retapePasswordError = t('RegisterScreen.PasswordNotConfirm');
     }
 
 
     if (emailError || passwordError || nameError || retapePasswordError || phoneError) {
-      setName({ ...name, error: nameError });
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
-      setRetapePassword({ ...retapePassword, error: retapePasswordError });
-      setPhone({ ...phone, error: phoneError });
+      setNameError(nameError);
+      setEmailError(emailError);
+      setPasswordError(passwordError);
+      setRetapePasswordError(retapePasswordError);
+      setPhoneError(phoneError);
     } else {
-      const findIndex = state.user.findIndex((req) => req.email === email.value);
+      const findIndex = state.user.findIndex((req) => req.email === email);
       if (findIndex) {
         let user: User = {
           id: uuidv4(),
-          name: name.value,
-          email: email.value,
-          password: password.value,
-          telephone: phone.value,
+          name: name,
+          email: email,
+          password: password,
+          telephone: phone,
         }
 
         dispatch({
@@ -87,19 +128,19 @@ const RegisterScreen = ({ navigation }: Props) => {
       <TextInput
         label={t('RegisterScreen.Name')}
         returnKeyType="next"
-        value={name.value}
-        onChangeText={text => setName({ value: text, error: '' })}
-        error={!!name.error}
-        errorText={name.error}
+        value={name}
+        onChangeText={text => handleName(text)}
+        error={!!nameError}
+        errorText={nameError}
       />
 
       <TextInput
         label={t('RegisterScreen.Email')}
         returnKeyType="next"
-        value={email.value}
-        onChangeText={text => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
+        value={email}
+        onChangeText={text => handleEmail(text)}
+        error={!!emailError}
+        errorText={emailError}
         autoCapitalize="none"
         autoComplete="email"
         textContentType="emailAddress"
@@ -109,10 +150,10 @@ const RegisterScreen = ({ navigation }: Props) => {
       <TextInput
         label={t('RegisterScreen.Phone')}
         returnKeyType="next"
-        value={phone.value}
-        onChangeText={text => setPhone({ value: text, error: '' })}
-        error={!!phone.error}
-        errorText={phone.error}
+        value={phone}
+        onChangeText={text => handlePhone(text)}
+        error={!!phoneError}
+        errorText={phoneError}
         autoCapitalize="none"
         autoComplete="tel"
         textContentType="telephoneNumber"
@@ -120,20 +161,20 @@ const RegisterScreen = ({ navigation }: Props) => {
       />
       <TextInput
         label={t('RegisterScreen.Password')}
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={text => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
+        returnKeyType="next"
+        value={password}
+        onChangeText={text => handlePassword(text)}
+        error={!!passwordError}
+        errorText={passwordError}
         secureTextEntry
       />
       <TextInput
         label={t('RegisterScreen.RetapePassword')}
         returnKeyType="done"
-        value={retapePassword.value}
-        onChangeText={text => setRetapePassword({ value: text, error: '' })}
-        error={!!retapePassword.error}
-        errorText={retapePassword.error}
+        value={retapePassword}
+        onChangeText={text => handleRetapePassword(text)}
+        error={!!retapePasswordError}
+        errorText={retapePasswordError}
         secureTextEntry
       />
 

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, BackHandler } from 'react-native';
-import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
@@ -28,7 +27,6 @@ const LoginScreen = ({ navigation }: Props) => {
   const [loginError, setLoginError] = useState('');
   const { t } = useTranslation();
   const [state] = useStore();
-  const [userId, setUserId] = useState('')
 
   useFocusEffect(
     React.useCallback(() => {
@@ -40,16 +38,20 @@ const LoginScreen = ({ navigation }: Props) => {
     }, [])
   );
 
- /* useEffect(() => {
-    AsyncStorage.getItem(LocalStorageKeys.UserId)
-        .then((result) => {
-            if (result === null) {
-              setEmail('');
-              setPassword('');
-            }
-        })
-        .catch(error => console.log(error))
-}, [email,password])*/
+  const handleEmail = (text: string)=>{
+    setEmail(text);
+    if(text===''){
+      setEmailError('');
+    }
+  }
+
+  const handlePassword = (text: string)=>{
+    setPassword(text);
+    if(text===''){
+      setPasswordError('');
+    }
+  }
+
 
   const _onLoginPressed = async () => {
     const emailError = emailValidator(email,t);
@@ -63,6 +65,11 @@ const LoginScreen = ({ navigation }: Props) => {
       const findUser = state.user.find((item) => {return (item.email ==email && item.password==password)});
       if(findUser != null){
         await AsyncStorage.setItem(LocalStorageKeys.UserId, findUser.id)
+        setEmail('');
+        setPassword('');
+        setEmailError('');
+        setPasswordError('');
+        setLoginError('');
         navigation.navigate('HomeScreen');
       } else {
         setLoginError(t('LoginScreen.LoginError'));
@@ -79,9 +86,10 @@ const LoginScreen = ({ navigation }: Props) => {
       <Paragraph>{t('LoginScreen.paragraph')}</Paragraph>
       <Text style={styles.errorText}>{loginError}</Text>
       <TextInput
+        value={email}
         label={t('LoginScreen.Email')}
         returnKeyType="next"
-        onChangeText={text => setEmail(text)}
+        onChangeText={text => handleEmail(text)}
         error={!!emailError}
         errorText={emailError}
         autoCapitalize="none"
@@ -91,9 +99,10 @@ const LoginScreen = ({ navigation }: Props) => {
       />
 
       <TextInput
+      value={password}
         label={t('LoginScreen.Password')}
         returnKeyType="done"
-        onChangeText={text => setPassword(text)}
+        onChangeText={text => handlePassword(text)}
         error={!!passwordError}
         errorText={passwordError}
         secureTextEntry

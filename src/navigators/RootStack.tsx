@@ -38,6 +38,7 @@ import { LanguageSetting } from '../screens/LanguageSetting'
 import { ContactUs } from '../screens/ContactUs'
 import { ContributionsList } from '../screens/ContributionsList'
 import { InvitationsList } from '../screens/InvitationsList'
+import ResetPassword from '../screens/ResetPassword'
 
 
 const RootStack = () => {
@@ -314,6 +315,15 @@ const RootStack = () => {
           headerLeft: () => false,
         }}
         component={InvitationsList}
+      />  
+      <Stack.Screen
+        name="ResetPassword"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ResetPassword}
       />  
       
     </Stack.Navigator>

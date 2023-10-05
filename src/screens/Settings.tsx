@@ -1,5 +1,5 @@
 import React from 'react'
-import {Image, StyleSheet, Text, View,SafeAreaView} from 'react-native'
+import { Image, StyleSheet, Text, View, SafeAreaView, ScrollView } from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { useTheme } from '../contexts/theme'
 
@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native'
 
 export const Settings = () => {
   const defaultStyles = DefaultComponentsThemes()
-  const {ColorPallet} = useTheme()
+  const { ColorPallet } = useTheme()
   const { t } = useTranslation()
   const settings = SettingsList(t)
   const { navigate } = useNavigation()
@@ -36,16 +36,17 @@ export const Settings = () => {
   }
   return (
     <SafeAreaView>
-      <BacktoHome textRoute={t('HomeScreen.title')} />
-      <Header>{t('Settings.title')}</Header>
-      <View style={{ justifyContent: 'center', alignContent: 'center', flex: 1 }}>
+      <ScrollView style={{ padding: 10 }}>
+        <BacktoHome textRoute={t('HomeScreen.title')} />
+        <Header>{t('Settings.title')}</Header>
+        <View style={{ justifyContent: 'center', alignContent: 'center', flex: 1 }}>
           <View style={{ padding: 10 }}>
             {settings.map((item: Accueil) => {
               return <SettingsItem key={item.id} item={item} action={() => handleSelection(item)} />
             })}
           </View>
         </View>
-        
+      </ScrollView>
     </SafeAreaView>
   )
 }

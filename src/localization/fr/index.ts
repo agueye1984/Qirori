@@ -30,6 +30,7 @@ const translation = {
     PrixUnitaireErrorEmpty: "Prix Unitaire ne peut pas être vide.",
     LocalisationErrorEmpty: "Emplacement ne peut pas être vide.",
     QuantiteErrorEmpty: "Quantité ne peut pas être vide.",
+    EmailNotExist: 'Aucun utilisateur trouvé pour cet email',
   },
   LoginScreen: {
     title: 'Connectez-vous',

@@ -29,6 +29,10 @@ const translation = {
     PrixUnitaireErrorEmpty: "Unit Price cannot be empty.",
     LocalisationErrorEmpty: "Localisation cannot be empty.",
     QuantiteErrorEmpty: "Quantity cannot be empty.",
+    EmailNotExist: 'No users found for this email',
+    RestorePassword: 'Restore Password',
+    VerifyEmail: 'Verify Email',
+    BackTologin: 'Back to Login',
   },
   LoginScreen: {
     title: 'Login',

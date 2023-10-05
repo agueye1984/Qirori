@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { emailValidator } from '../core/utils';
-import Background from '../components/Background';
 import BackButton from '../components/BackButton';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -10,41 +9,60 @@ import { theme } from '../core/theme';
 import Button from '../components/Button';
 import { Navigation } from '../types';
 import { useTranslation } from 'react-i18next';
+import { useStore } from '../contexts/store';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { ManageEventsParamList } from '../contexts/types';
+import { useNavigation } from '@react-navigation/native';
 
-type Props = {
-  navigation: Navigation;
-};
+type resetPasswordProp = StackNavigationProp<ManageEventsParamList, 'ResetPassword'>
 
-const ForgotPasswordScreen = ({ navigation }: Props) => {
-  const [email, setEmail] = useState({ value: '', error: '' });
+const ForgotPasswordScreen = () => {
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const { t } = useTranslation();
+  const [state] = useStore();
+  const navigation = useNavigation<resetPasswordProp>();
 
   const _onSendPressed = () => {
-    const emailError = emailValidator(email.value,t);
+    let emailError = emailValidator(email,t);
 
     if (emailError) {
-      setEmail({ ...email, error: emailError });
+      setEmailError(emailError);
       return;
+    } else {
+      const findUser = state.user.find((item) => {return (item.email ==email)});
+      console.log(findUser)
+      if (findUser===undefined){
+        setEmailError(t('Global.EmailNotExist')+' '+email);
+      } else {
+        navigation.navigate('ResetPassword', { userId: findUser.id, })
+      }
+      
     }
-
-    navigation.navigate('LoginScreen');
   };
+
+  const handleEmail = (text: string)=>{
+    setEmail(text);
+    if(text===''){
+      setEmailError('');
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <BackButton goBack={() => navigation.navigate('LoginScreen')} />
+      <BackButton goBack={() => navigation.goBack()} />
 
       <Logo />
 
-      <Header>Restore Password</Header>
+      <Header>{t('Global.RestorePassword')}</Header>
 
       <TextInput
         label="E-mail address"
         returnKeyType="done"
-        value={email.value}
-        onChangeText={text => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
+        value={email}
+        onChangeText={text => handleEmail(text)}
+        error={!!emailError}
+        errorText={emailError}
         autoCapitalize="none"
         autoComplete="email"
         textContentType="emailAddress"
@@ -52,14 +70,14 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
       />
 
       <Button mode="contained" onPress={_onSendPressed} style={styles.button}>
-        Send Reset Instructions
+      {t('Global.VerifyEmail')}
       </Button>
 
       <TouchableOpacity
         style={styles.back}
-        onPress={() => navigation.navigate('LoginScreen')}
+        onPress={() => navigation.navigate('LoginScreen' as never)}
       >
-        <Text style={styles.label}>← Back to login</Text>
+        <Text style={styles.label}>← {t('Global.BackTologin')}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

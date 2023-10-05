@@ -66,9 +66,8 @@ export type ManageEventsParamList = {
   ProductDetails: {
     item: Product
   },
-  PaypalPayement: {
-    amount: string
-    currency: string
+  ResetPassword: {
+    userId: string
   }
 }
 
@@ -115,6 +114,7 @@ export interface Service {
   description: string
   userId: string | null 
   images: string
+  offres: string[]
 }
 
 export interface Panier {
