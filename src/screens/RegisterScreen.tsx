@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Background from '../components/Background';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
@@ -19,7 +18,6 @@ import Paragraph from '../components/Paragraph';
 import { User } from '../contexts/types';
 import { useStore } from '../contexts/store';
 import { DispatchAction } from '../contexts/reducers/store';
-import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -118,7 +116,6 @@ const RegisterScreen = ({ navigation }: Props) => {
     }
 
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
