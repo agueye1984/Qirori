@@ -157,6 +157,8 @@ const translation = {
   },
   AddService:{
     title: 'Add a service',
+    AddOffre: 'Add an offer',
+    Offre: 'Offer',
   },
   Achats: {
     title: 'Buy Product/Request Service',

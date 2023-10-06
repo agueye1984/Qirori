@@ -25,8 +25,11 @@ import { DeviseProduct } from '../components/DeviseProduct'
 import { ImageProduct } from '../components/ImageProduct'
 import { theme } from '../core/theme'
 import { useTranslation } from 'react-i18next'
+import { CustomInputText } from '../components/CustomInputText'
+import Button from '../components/Button'
 
 export const AddService = () => {
+    let initOffre: string[] = [];
     const { t } = useTranslation();
     const [, dispatch] = useStore()
     const defaultStyles = DefaultComponentsThemes()
@@ -38,6 +41,8 @@ export const AddService = () => {
     const [descriptionDirty, setDescriptionDirty] = useState(false)
     const [serviceImage, setServiceImage] = useState<string>('assets/No_image_available.svg')
     const [imageDirty, setImageDirty] = useState(false)
+    const [offres, setOffres] = useState(initOffre);
+    const [offre, setOffre] = useState('');
 
     const handleNameChange = (value: string) => {
         setNameDirty(true)
@@ -96,6 +101,11 @@ export const AddService = () => {
         },
     })
 
+    const addOffre = (offres: string[]) => {
+        offres.push(offre);
+        setOffres(offres);
+    }
+
     const handleSaveProducts = async () => {
         try {
             const userId = await AsyncStorage.getItem(LocalStorageKeys.UserId);
@@ -104,7 +114,8 @@ export const AddService = () => {
                 name: serviceName,
                 description: serviceDescription,
                 images: serviceImage,
-                userId: userId
+                userId: userId,
+                offres: offres
             }
             console.log(service)
             dispatch({
@@ -141,6 +152,25 @@ export const AddService = () => {
                     {serviceDescription.length === 0 && descriptionDirty && <Text style={styles.error}>{t('Global.DescriptionErrorEmpty')}</Text>}
                 </View>
                 <View style={styles.section}>
+                    <Text>{t('AddService.Offre')}</Text>
+                    <View style={styles.row}>
+                        <View style={{ alignItems: 'flex-start', flex:1 }}>
+                            <CustomInputText
+                                value={offre}
+                                setValue={(text) => setOffre(text)}
+                                containerStyle={styles.containerStyleName}
+                                placeholder={t('AddService.AddOffre')}
+                            />
+                        </View>
+                        <View style={[{ alignItems: 'flex-end' }]}>
+                            <Button mode="contained" onPress={() => addOffre(offres)}>
+                                {t('Global.Add')}
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.section}>
                     <ImageProduct
                         productImage={serviceImage}
                         setProductImage={handleImageChange}
@@ -149,22 +179,21 @@ export const AddService = () => {
                 </View>
                 {serviceImage.length === 0 && imageDirty && <Text style={styles.error}>{t('Global.ImageErrorEmpty')}</Text>}
             </ScrollView>
-            <View style={styles.itemContainer}>
+            <View style={styles.section}>
                 <View style={styles.row}>
-                    <View style={defaultStyles.leftSectRowContainer}>
-                        <TouchableOpacity onPress={() => navigation.navigate('Ventes' as never)}>
-                            <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: theme.colors.primary }]}>{t('Global.Cancel')}</Text>
-                        </TouchableOpacity>
+                    <View style={{ marginRight: 90, alignItems: 'flex-start' }}>
+                        <Button mode="contained" onPress={() => navigation.navigate('Ventes' as never)}>
+                            {t('Global.Cancel')}
+                        </Button>
                     </View>
-                    {nameDirty && descriptionDirty && 
-                        <View style={defaultStyles.rightSectRowContainer}>
-                            <TouchableOpacity onPress={handleSaveProducts}>
-                                <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: theme.colors.primary }]}>{t('Global.Create')}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    }
+                    <View style={[{ marginLeft: 90, alignItems: 'flex-end' }]}>
+                        <Button mode="contained" onPress={handleSaveProducts}>
+                            {t('Global.Create')}
+                        </Button>
+                    </View>
                 </View>
             </View>
+
         </SafeAreaView>
     )
 }
