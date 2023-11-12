@@ -20,6 +20,7 @@ jobs:
       - id: isReleaseBuild
         if: env.PLAY_STORE_JKS_BASE64 != null && env.PLAY_STORE_JKS_ALIAS != null && env.PLAY_STORE_JKS_PASSWD != null
         run: echo "::set-output name=defined::true"
+        
         env:
           PLAY_STORE_JKS_BASE64: ${{ secrets.PLAY_STORE_JKS_BASE64 }}
           PLAY_STORE_JKS_ALIAS: ${{ secrets.PLAY_STORE_JKS_ALIAS }}
