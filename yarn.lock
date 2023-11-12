@@ -7934,6 +7934,11 @@
   dependencies:
     "dotenv" "^16.3.1"
 
+"react-native-dropdown-select-list@^2.0.5":
+  "integrity" "sha512-TepbcagQVUMB6nLuIlVU2ghRpQHAECOeZWe8K04ymW6NqbKbxuczZSDFfdCiABiiQ2dFD+8Dz65y4K7/uUEqGg=="
+  "resolved" "https://registry.npmjs.org/react-native-dropdown-select-list/-/react-native-dropdown-select-list-2.0.5.tgz"
+  "version" "2.0.5"
+
 "react-native-format-currency@^0.0.3":
   "integrity" "sha512-MLCTyQ+B9DWz85KQZzqsjY+peKYScnemRobTcNb+A6bstmNR8LLK8dx3PAYlwc5ZQ0PMm13XXAqT2sPwp9UKAA=="
   "resolved" "https://registry.npmjs.org/react-native-format-currency/-/react-native-format-currency-0.0.3.tgz"

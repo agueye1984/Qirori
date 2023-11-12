@@ -5,7 +5,6 @@ import { SelectList } from 'react-native-dropdown-select-list'
 import { useTheme } from '../contexts/theme'
 import { theme } from '../core/theme'
 import { CategoryList } from './CategoryList'
-import TextInput from './TextInput'
 
 
 type Props = {
