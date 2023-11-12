@@ -68,6 +68,14 @@ target 'Qirori' do
     rnImagePicker.build_configurations.each do |config|
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = true
     end
+
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = ""
+        config.build_settings['CODE_SIGNING_REQUIRED'] = "NO"
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      end
+    end
    
     react_native_post_install(
       installer,
