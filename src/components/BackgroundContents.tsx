@@ -37,4 +37,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BackgroundContents;
+export default BackgroundContents
+  ;

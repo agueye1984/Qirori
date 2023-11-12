@@ -5,6 +5,8 @@ import { useTheme } from '../contexts/theme'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import { useNavigation } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
+import { theme } from '../core/theme'
+import Icon from 'react-native-vector-icons/MaterialIcons'
 
 type Props = {
     textRoute: string
@@ -36,10 +38,15 @@ export const BacktoHome = ({ textRoute }: Props) => {
       <TouchableOpacity style={[styles.touchableStyle]} onPress={() => navigation.goBack()}>
         <View style={styles.row}>
           <View style={{ flexDirection: 'row', marginTop:5 }}>
-            <Image source={require('../assets/back@20x20.png')} />
+            {/* <Image source={require('../assets/back@20x20.png')} /> */}
+            <Icon
+                            name='arrow-back-ios'
+                            color={theme.colors.primary}
+                            size={20}
+                         />
             </View>
           <View style={{ flexDirection: 'row', marginTop:5}}>
-            <Text style={[defaultStyles.text, { fontWeight: 'bold', fontSize: 15, color: ColorPallet.primary }]}>{textRoute}</Text>
+            <Text style={[defaultStyles.text, { fontWeight: 'bold', fontSize: 15, color: theme.colors.primary }]}>{textRoute}</Text>
           </View>
         </View>
       </TouchableOpacity>

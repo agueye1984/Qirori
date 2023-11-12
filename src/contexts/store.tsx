@@ -4,7 +4,7 @@ import React, {createContext, Dispatch, useContext, useEffect, useReducer} from 
 import { defaultLanguage, LocalStorageKeys} from '../constants'
 
 import _defaultReducer, {DispatchAction, ReducerAction} from './reducers/store'
-import {State, User, Event, Invitation} from './types'
+import {State, User, Event, Invitation, Contribution, Product, Service, Panier, Mail} from './types'
 
 type Reducer = <S extends State>(state: S, action: ReducerAction<any>) => S
 
@@ -17,6 +17,12 @@ interface StoreProviderProps {
 export const UserList: User[] = [];
 export const EventList: Event[] = [];
 export const InvitationList: Invitation[] = [];
+export const ContributionList: Contribution[]= [];
+export const ProductList: Product[]= [];
+export const ServiceList: Service[]= [];
+export const CartList: Panier[]= [];
+export const ContactUsList: Mail[]=[];
+
 
 export const defaultState: State = {
   onboarding: {
@@ -26,6 +32,11 @@ export const defaultState: State = {
   user: UserList,
   events: EventList,
   invitations: InvitationList,
+  contributions: ContributionList,
+  products: ProductList,
+  services: ServiceList,
+  carts: CartList,
+  contactUs: ContactUsList,
 }
 
 export const StoreContext = createContext<[State, Dispatch<ReducerAction<any>>]>([
@@ -93,6 +104,76 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({children, initialSt
       }
     }
     getEvents()
+  }, [])
+
+  useEffect(() => {
+    const getInvitations = async () => {
+      const invitesJSON = await AsyncStorage.getItem(LocalStorageKeys.Invitations)
+      if (invitesJSON) {
+        const invitations: Invitation[] = JSON.parse(invitesJSON)
+        dispatch({
+          type: DispatchAction.SET_INVITATIONS,
+          payload: invitations,
+        })
+      }
+    }
+    getInvitations()
+  }, [])
+
+  useEffect(() => {
+    const getContributions = async () => {
+      const donationJSON = await AsyncStorage.getItem(LocalStorageKeys.Contributions)
+      if (donationJSON) {
+        const contributions: Contribution[] = JSON.parse(donationJSON)
+        dispatch({
+          type: DispatchAction.SET_DONATIONS,
+          payload: contributions,
+        })
+      }
+    }
+    getContributions()
+  }, [])
+
+  useEffect(() => {
+    const getProducts = async () => {
+      const productJSON = await AsyncStorage.getItem(LocalStorageKeys.Products)
+      if (productJSON) {
+        const products: Product[] = JSON.parse(productJSON)
+        dispatch({
+          type: DispatchAction.SET_PRODUCTS,
+          payload: products,
+        })
+      }
+    }
+    getProducts()
+  }, [])
+
+  useEffect(() => {
+    const getServices = async () => {
+      const serviceJSON = await AsyncStorage.getItem(LocalStorageKeys.Services)
+      if (serviceJSON) {
+        const services: Service[] = JSON.parse(serviceJSON)
+        dispatch({
+          type: DispatchAction.SET_SERVICES,
+          payload: services,
+        })
+      }
+    }
+    getServices()
+  }, [])
+
+  useEffect(() => {
+    const getCarts = async () => {
+      const cartJSON = await AsyncStorage.getItem(LocalStorageKeys.Carts)
+      if (cartJSON) {
+        const carts: Panier[] = JSON.parse(cartJSON)
+        dispatch({
+          type: DispatchAction.SET_CARTS,
+          payload: carts,
+        })
+      }
+    }
+    getCarts()
   }, [])
 
   return <StoreContext.Provider value={[state, dispatch]}>{children}</StoreContext.Provider>

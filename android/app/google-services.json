@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "190882182392",
+    "project_id": "qirori-6a834",
+    "storage_bucket": "qirori-6a834.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190882182392:android:ea21e3078ac70e8f1cf70d",
+        "android_client_info": {
+          "package_name": "com.qirori"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8MyDdCDQApwjMoW-VGH1vt7rfVmm8C78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
