@@ -31,7 +31,7 @@ jobs:
       isReleaseBuild: ${{ steps.isReleaseBuild.outputs.defined }}
     steps:
       - id: isReleaseBuild
-        if: env.CERTIFICATE != null && env.KEYCHIAN_PASSWD != null && env.PROVISIONING_PROFILE != null
+        if: env.BUILD_CERTIFICATE_BASE64 != null && env.KEYCHIAN_PASSWD != null && env.BUILD_PROVISION_PROFILE_BASE64 != null
         run: echo "::set-output name=defined::true"
         env:
           CERTIFICATE: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
