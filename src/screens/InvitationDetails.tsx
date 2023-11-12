@@ -2,43 +2,19 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
-
-import {LargeButton} from '../components/LargeButton';
-import {DispatchAction} from '../contexts/reducers/store';
 import {useStore} from '../contexts/store';
 import {useTheme} from '../contexts/theme';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
-SafeAreaView;
 import {BacktoHome} from '../components/BacktoHome';
 import Header from '../components/Header';
-import TextInput from '../components/TextInput';
-import DatePicker from 'react-native-date-picker';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {v4 as uuidv4} from 'uuid';
 import {
   AgeEnfant,
   Event,
   Invitation,
   ManageEventsParamList,
 } from '../contexts/types';
-import {
-  dateDebutValidator,
-  dateFinValidator,
-  descriptionValidator,
-  heureDebutValidator,
-  heureFinValidator,
-  localisationValidator,
-  nameValidator,
-} from '../core/utils';
-import {LocalStorageKeys} from '../constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {DateEvent} from '../components/DateEvent';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import * as AddCalendarEvent from 'react-native-add-calendar-event';
-import {AddEvent} from './AddEvent';
-import MapView, {Marker} from 'react-native-maps';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {SelectList} from 'react-native-dropdown-select-list';
 import {CustomInputText} from '../components/CustomInputText';
 import {theme} from '../core/theme';
 import Button from '../components/Button';
