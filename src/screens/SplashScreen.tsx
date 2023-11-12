@@ -1,6 +1,6 @@
 
 import React, {useEffect} from 'react'
-import {Image, StyleSheet} from 'react-native'
+import {Image, SafeAreaView, StyleSheet} from 'react-native'
 import Background from '../components/Background';
 import {useNavigation} from '@react-navigation/native'
 import { useStore } from '../contexts/store';
@@ -14,23 +14,30 @@ const SplashScreen = () => {
       width: '51.5%',
       resizeMode: 'contain',
     },
+    container: {
+      flex: 1,
+      padding: 20,
+      width: '100%',
+      maxWidth: 340,
+      alignSelf: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
   })
-  console.log(state)
   useEffect(() => {
     setTimeout(() => {
-      console.log(state.onboarding.didAgreeToTerms)
     if (state.onboarding.didAgreeToTerms) {
       navigation.navigate('LoginScreen' as never)
      } else {
       navigation.navigate('TermsScreen' as never)
     }
   }, 5000);
-  }, []);
+  }, [state.onboarding.didAgreeToTerms]);
 
   return (
-    <Background>
+    <SafeAreaView style={styles.container}>
       <Image source={require('../assets/logo.png')} style={styles.img} />
-    </Background>
+    </SafeAreaView>
   )
 };
 

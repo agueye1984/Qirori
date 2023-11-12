@@ -1,9 +1,8 @@
 import React from 'react'
 import {View, StyleSheet, TouchableOpacity, Text} from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-
-import {useTheme} from '../contexts/theme'
 import defaultComponentsThemes from '../defaultComponentsThemes'
+import { theme } from '../core/theme'
 
 interface Props {
   title: string
@@ -14,7 +13,6 @@ interface Props {
 }
 
 const CheckBoxRow: React.FC<Props> = ({title, accessibilityLabel, testID, checked, onPress}) => {
-  const {ColorPallet} = useTheme()
   const defaultStyle = defaultComponentsThemes()
 
   const style = StyleSheet.create({
@@ -40,9 +38,9 @@ const CheckBoxRow: React.FC<Props> = ({title, accessibilityLabel, testID, checke
         testID={testID}
         onPress={onPress}>
         {checked ? (
-          <Icon name={'check-box'} size={30} color={ColorPallet.primary} />
+          <Icon name={'check-box'} size={30} color={theme.colors.primary} />
         ) : (
-          <Icon name={'check-box-outline-blank'} size={30} color={ColorPallet.primary} />
+          <Icon name={'check-box-outline-blank'} size={30} color={theme.colors.primary} />
         )}
       </TouchableOpacity>
       <Text style={[style.text]}>{title}</Text>

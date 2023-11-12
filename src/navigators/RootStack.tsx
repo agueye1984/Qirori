@@ -19,8 +19,35 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon1 from 'react-native-vector-icons/MaterialIcons'
 import Icon2 from 'react-native-vector-icons/SimpleLineIcons'
 import { InvitationsContacts } from '../screens/InvitationsContacts'
-import { ContactsList } from '../components/ContactsList'
+import { ContactsList } from '../screens/ContactsList'
 import { EditEvent } from '../screens/EditEvent'
+import { InvitationDetails } from '../screens/InvitationDetails'
+import { ContributionsDetails } from '../screens/ContributionsDetails'
+import { AddProduct } from '../screens/AddProduct'
+import { Products } from '../screens/Products'
+import { AddService } from '../screens/AddService'
+import { Services } from '../screens/Services'
+import { BuyProduct } from '../screens/BuyProduct'
+import { ProductDetails } from '../screens/ProductDetails'
+import { Cart } from '../screens/Cart'
+import { Search } from '../screens/Search'
+import { theme } from '../core/theme'
+import { Checkout } from '../screens/Checkout'
+import { Setting } from '../screens/Setting'
+import { LanguageSetting } from '../screens/LanguageSetting'
+import { ContactUs } from '../screens/ContactUs'
+import { ContributionsList } from '../screens/ContributionsList'
+import { InvitationsList } from '../screens/InvitationsList'
+import ResetPassword from '../screens/ResetPassword'
+import { RequestService } from '../screens/RequestService'
+import { ProductOrderings } from '../screens/ProductOrderings'
+import { ProductDelivering } from '../screens/ProductDelivering'
+import { ServicesOffertsList } from '../screens/ServicesOffertsList'
+import { User } from '../contexts/types'
+
+type Props = {
+  user: any
+}
 
 
 const RootStack = () => {
@@ -33,7 +60,7 @@ const RootStack = () => {
       initialRouteName="SplashScreen"
       screenOptions={{
         headerStyle: {
-          backgroundColor: ColorPallet.primary,
+          backgroundColor: theme.colors.primary,
         },
         headerTitleAlign: 'center',
       }}>
@@ -137,15 +164,6 @@ const RootStack = () => {
         component={InvitationsContacts}
       />
       <Stack.Screen
-        name="ContactsList"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-          headerLeft: () => false,
-        }}
-        component={ContactsList}
-      />
-      <Stack.Screen
         name="EditEvent"
         options={{
           headerShown: false,
@@ -154,6 +172,205 @@ const RootStack = () => {
         }}
         component={EditEvent}
       />
+      <Stack.Screen
+        name="InvitationDetails"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={InvitationDetails}
+      />
+      <Stack.Screen
+        name="ContributionsDetails"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ContributionsDetails}
+      />
+      <Stack.Screen
+        name="AddProduct"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={AddProduct}
+      />
+      <Stack.Screen
+        name="Products"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={Products}
+      />
+      <Stack.Screen
+        name="AddService"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={AddService}
+      />
+      <Stack.Screen
+        name="Services"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={Services}
+      />
+      <Stack.Screen
+        name="BuyProduct"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={BuyProduct}
+      />
+      <Stack.Screen
+        name="ProductDetails"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ProductDetails}
+      />
+      <Stack.Screen
+        name="Cart"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={Cart}
+      />
+      <Stack.Screen
+        name="Search"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={Search}
+      />    
+      <Stack.Screen
+        name="Checkout"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={Checkout}
+      />      
+      <Stack.Screen
+        name="ContactsList"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ContactsList}
+      />      
+      <Stack.Screen
+        name="Setting"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={Setting}
+      />   
+      <Stack.Screen
+        name="LanguageSetting"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={LanguageSetting}
+      />      
+      <Stack.Screen
+        name="ContactUs"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ContactUs}
+      />  
+      <Stack.Screen
+        name="ContributionsList"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ContributionsList}
+      />  
+      <Stack.Screen
+        name="InvitationsList"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={InvitationsList}
+      />  
+      <Stack.Screen
+        name="ResetPassword"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ResetPassword}
+      />  
+      <Stack.Screen
+        name="RequestService"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={RequestService}
+      />  
+      <Stack.Screen
+        name="ProductOrderings"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ProductOrderings}
+      />  
+      <Stack.Screen
+        name="ProductDelivering"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ProductDelivering}
+      />  
+        <Stack.Screen
+        name="ServicesOffertsList"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ServicesOffertsList}
+      />  
+      
     </Stack.Navigator>
 
   )
@@ -188,7 +405,7 @@ const BottomNav = () => {
               <Icon
                 style={styles.tabBarIcone}
                 name={'home'}
-                color={focused ? ColorPallet.primary : ColorPallet.lightGray}
+                color={focused ? theme.colors.primary : ColorPallet.lightGray}
                 size={20}
               />
             </View>
@@ -206,14 +423,14 @@ const BottomNav = () => {
               <Icon1
                 style={styles.tabBarIcone}
                 name={'event'}
-                color={focused ? ColorPallet.primary : ColorPallet.lightGray}
+                color={focused ? theme.colors.primary : ColorPallet.lightGray}
                 size={20}
               />
             </View>
           ),
         }}
       />
-      <Tab.Screen
+     {/*  <Tab.Screen
         name={'Invitations'}
         component={Invitations}
         options={{
@@ -224,25 +441,25 @@ const BottomNav = () => {
               <Icon2
                 style={styles.tabBarIcone}
                 name={'envelope-letter'}
-                color={focused ? ColorPallet.primary : ColorPallet.lightGray}
+                color={focused ? theme.colors.primary : ColorPallet.lightGray}
                 size={20}
               />
             </View>
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
-        name={'Contributions'}
-        component={Contributions}
+        name={'Achats'}
+        component={Achats}
         options={{
-          title: t('Screens.Contributions') || '',
+          title: t('Screens.Achats') || '',
           tabBarIcon: ({focused}) => (
             <View style={{width: '100%', height: '100%'}}>
               {focused && <View style={styles.tabBarActive} />}
               <Icon
                 style={styles.tabBarIcone}
-                name={'money'}
-                color={focused ? ColorPallet.primary : ColorPallet.lightGray}
+                name={'shopping-cart'}
+                color={focused ? theme.colors.primary : ColorPallet.lightGray}
                 size={20}
               />
             </View>
@@ -260,7 +477,7 @@ const BottomNav = () => {
               <Icon
                 style={styles.tabBarIcone}
                 name={'ellipsis-h'}
-                color={focused ? ColorPallet.primary : ColorPallet.lightGray}
+                color={focused ? theme.colors.primary : ColorPallet.lightGray}
                 size={20}
               />
             </View>

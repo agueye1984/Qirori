@@ -1,80 +1,121 @@
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
-import { t } from 'i18next'
-import React, { useState } from 'react'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { DispatchAction } from '../contexts/reducers/store'
-import { useStore } from '../contexts/store'
-import { useTheme } from '../contexts/theme'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import BackgroundContents from '../components/BackgroundContents'
-import { BacktoHome } from '../components/BacktoHome'
-import Header from '../components/Header'
-import { v4 as uuidv4 } from 'uuid';
-import { Event, ManageEventsParamList } from '../contexts/types';
-import { dateDebutValidator, dateFinValidator, descriptionValidator, heureDebutValidator, heureFinValidator, localisationValidator, nameValidator } from '../core/utils'
-import { LocalStorageKeys } from '../constants'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { NameSection } from '../components/NameSection'
-import { DescriptionSection } from '../components/DescriptionSection'
-import { DateHeureSection } from '../components/DateHeureSection'
-import { EmplacementSection } from '../components/EmplacementSection'
-import { StackNavigationProp } from '@react-navigation/stack'
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, StyleSheet, View} from 'react-native';
+import {DispatchAction} from '../contexts/reducers/store';
+import {useStore} from '../contexts/store';
+import {useTheme} from '../contexts/theme';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+import {BacktoHome} from '../components/BacktoHome';
+import Header from '../components/Header';
+import {Event, Location, ManageEventsParamList, User} from '../contexts/types';
+import {
+  descriptionValidator,
+  localisationValidator,
+  nameSectionValidator,
+} from '../core/utils';
+import {LocalStorageKeys} from '../constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {NameSection} from '../components/NameSection';
+import {DescriptionSection} from '../components/DescriptionSection';
+import {DateHeureSection} from '../components/DateHeureSection';
+import {EmplacementSection} from '../components/EmplacementSection';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {theme} from '../core/theme';
+import Button from '../components/Button';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
-type editEventProps = StackNavigationProp<ManageEventsParamList, 'EventDetails'>
+type editEventProps = StackNavigationProp<
+  ManageEventsParamList,
+  'EventDetails'
+>;
 
 export const EditEvent = () => {
-  const route = useRoute<RouteProp<ManageEventsParamList, 'EditEvent'>>()
-  const [state, dispatch] = useStore()
-  const defaultStyles = DefaultComponentsThemes()
-  const { ColorPallet } = useTheme()
-  const navigation = useNavigation<editEventProps>()
-  const item = state.events.find((event) => event.id === route.params.itemId) as Event
-  const [eventName, setEventName] = useState<string>(item.name)
-  const [nameDirty, setNameDirty] = useState(false)
-  const [eventDescription, setEventDescription] = useState<string>(item.description)
-  const [descriptionDirty, setDescriptionDirty] = useState(false)
-  const [eventLocalisation, setEventLocalisation] = useState<string>(item.localisation)
-  const [localisationDirty, setLocalisationDirty] = useState(false)
-  const dateDebFormat = item.dateDebut.substring(0, 4) + '-' + item.dateDebut.substring(4, 6) + '-' + item.dateDebut.substring(6, 8)
-  const heurDebFormat = dateDebFormat + ' ' + item.heureDebut.substring(0, 2) + ':' + item.heureDebut.substring(2, 4)
-  const dateFinFormat = item.dateFin.substring(0, 4) + '-' + item.dateFin.substring(4, 6) + '-' + item.dateFin.substring(6, 8)
-  const heurFinFormat = dateFinFormat + ' ' + item.heureFin.substring(0, 2) + ':' + item.heureFin.substring(2, 4)
-  const [dateDebut, setDateDebut] = useState<Date>(new Date(dateDebFormat))
-  const [heureDebut, setHeureDebut] = useState<Date>(new Date(heurDebFormat))
-  const [dateFin, setDateFin] = useState<Date>(new Date(dateFinFormat))
-  const [heureFin, setHeureFin] = useState<Date>(new Date(heurFinFormat))
-
-
+  const {i18n, t} = useTranslation();
+  const route = useRoute<RouteProp<ManageEventsParamList, 'EditEvent'>>();
+  const [state, dispatch] = useStore();
+  const defaultStyles = DefaultComponentsThemes();
+  const {ColorPallet} = useTheme();
+  const navigation = useNavigation<editEventProps>();
+  const item = route.params.item;
+  console.log(item)
+  const [eventName, setEventName] = useState<string>(item.name);
+  const [eventDescription, setEventDescription] = useState<string>(
+    item.description,
+  );
+  const [eventLocalisation, setEventLocalisation] = useState<Location>(
+    item.localisation,
+  );
+  const dateDebFormat =
+    item.dateDebut.substring(0, 4) +
+    '-' +
+    item.dateDebut.substring(4, 6) +
+    '-' +
+    item.dateDebut.substring(6, 8);
+  const heurDebFormat =
+    dateDebFormat +
+    ' ' +
+    item.heureDebut.substring(0, 2) +
+    ':' +
+    item.heureDebut.substring(2, 4);
+  const dateFinFormat =
+    item.dateFin.substring(0, 4) +
+    '-' +
+    item.dateFin.substring(4, 6) +
+    '-' +
+    item.dateFin.substring(6, 8);
+  const heurFinFormat =
+    dateFinFormat +
+    ' ' +
+    item.heureFin.substring(0, 2) +
+    ':' +
+    item.heureFin.substring(2, 4);
+    console.log(dateDebFormat)
+  const [dateDebut, setDateDebut] = useState<Date>(new Date(dateDebFormat));
+  const [heureDebut, setHeureDebut] = useState<Date>(new Date(heurDebFormat));
+  const [dateFin, setDateFin] = useState<Date>(new Date(dateFinFormat));
+  const [heureFin, setHeureFin] = useState<Date>(new Date(heurFinFormat));
+  const [nameError, setNameError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+  const [localisationError, setLocalisationError] = useState('');
+  console.log(dateDebut)
+  const selectedLanguageCode = i18n.language;
+  let languageDate = '';
+  if (selectedLanguageCode === 'fr') {
+    languageDate = 'fr-fr';
+  }
+  if (selectedLanguageCode === 'en') {
+    languageDate = 'en-GB';
+  }
 
   const handleNameChange = (value: string) => {
-    setNameDirty(true)
-    setEventName(value)
-  }
+    setEventName(value);
+  };
   const handleDescriptionChange = (value: string) => {
-    setDescriptionDirty(true)
-    setEventDescription(value)
-  }
+    setEventDescription(value);
+  };
 
-  const handleLocalisationChange = (value: string) => {
-    setLocalisationDirty(true)
-    setEventLocalisation(value)
-  }
+  const handleLocalisationChange = (value: Location) => {
+    setEventLocalisation(value);
+  };
 
   const handleDateDebutChange = (value: Date) => {
-    setDateDebut(value)
-  }
+    setDateDebut(value);
+  };
 
   const handleHeureDebutChange = (value: Date) => {
-    setHeureDebut(value)
-  }
+    setHeureDebut(value);
+  };
 
   const handleDateFinChange = (value: Date) => {
-    setDateFin(value)
-  }
+    setDateFin(value);
+  };
 
   const handleHeureFinChange = (value: Date) => {
-    setHeureFin(value)
-  }
+    setHeureFin(value);
+  };
 
   const styles = StyleSheet.create({
     section: {
@@ -89,10 +130,6 @@ export const EditEvent = () => {
       color: ColorPallet.error,
       fontWeight: 'bold',
     },
-    containerStyleName: {
-      borderColor: eventName.trim().length === 0 && nameDirty ? ColorPallet.error : ColorPallet.lightGray,
-      borderWidth: eventName.trim().length === 0 && nameDirty ? 2 : 1,
-    },
     itemContainer: {
       borderTopWidth: 0.2,
       borderTopStyle: 'solid',
@@ -106,7 +143,7 @@ export const EditEvent = () => {
       textAlignVertical: 'top',
       fontSize: 16,
       height: '100%',
-      color: ColorPallet.primaryText,
+      color: theme.colors.primaryText,
     },
     container: {
       minHeight: 50,
@@ -117,31 +154,75 @@ export const EditEvent = () => {
       borderColor: ColorPallet.lightGray,
       borderRadius: 4,
     },
-  })
+  });
 
   const handleSaveEvents = async () => {
     try {
-      const dateformatDebut = dateDebut.toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).split('/').reverse().join('');
-      const heureFormatDebut = heureDebut.toLocaleTimeString('en-GB', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hourCycle: 'h24'
-      }).split(':').join('');
-      const dateformatFin = dateFin.toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).split('/').reverse().join('');
-      const heureFormatFin = heureFin.toLocaleTimeString('en-GB', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hourCycle: 'h24'
-      }).split(':').join('');
-      const userId = await AsyncStorage.getItem(LocalStorageKeys.UserId);
+      const nameEmpty = nameSectionValidator(eventName, t);
+      const descriptionEmpty = descriptionValidator(eventDescription, t);
+      const locateEmpty = localisationValidator(eventLocalisation, t);
+
+      if (nameEmpty || descriptionEmpty || locateEmpty) {
+        setNameError(nameEmpty);
+        setDescriptionError(descriptionEmpty);
+        setLocalisationError(locateEmpty);
+      } else {
+        const dateformatDebut = dateDebut
+          .toLocaleDateString(languageDate, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: "UTC"
+          })
+          .split('/')
+          .reverse()
+          .join('');
+        const heureFormatDebut = heureDebut
+          .toLocaleTimeString(languageDate, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hourCycle: 'h24',
+            timeZone: "UTC"
+          })
+          .split(':')
+          .join('');
+        const dateformatFin = dateFin
+          .toLocaleDateString(languageDate, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            timeZone: "UTC"
+          })
+          .split('/')
+          .reverse()
+          .join('');
+        const heureFormatFin = heureFin
+          .toLocaleTimeString(languageDate, {
+            hour: 'numeric',
+            minute: 'numeric',
+            hourCycle: 'h24',
+            timeZone: "UTC"
+          })
+          .split(':')
+          .join('');
+        firestore()
+          .collection('events')
+          .doc(item.id)
+          .update({
+            name: eventName,
+            description: eventDescription,
+            dateDebut: dateformatDebut,
+            heureDebut: heureFormatDebut,
+            dateFin: dateformatFin,
+            heureFin: heureFormatFin,
+            localisation: eventLocalisation,
+          })
+          .then(() => {
+            console.log(eventName);
+            console.log('Event updated!');
+            navigation.navigate('Events' as never);
+          });
+        /*const userId = await AsyncStorage.getItem(LocalStorageKeys.UserId);
       let event: Event = {
         id: item.id,
         name: eventName,
@@ -157,34 +238,31 @@ export const EditEvent = () => {
         type: DispatchAction.UPDATE_EVENT,
         payload: event,
       })
-      navigation.navigate('Events' as never)
-    } catch (e: unknown) {
-
-    }
-
-  }
+      navigation.navigate('Events' as never)*/
+      }
+    } catch (e: unknown) {}
+  };
 
   return (
-    <BackgroundContents>
+    <SafeAreaView style={{flex: 1}}>
       <BacktoHome textRoute={t('Events.title')} />
       <Header>{t('AddEvent.titleModify')}</Header>
 
-      <ScrollView>
+      <ScrollView scrollEnabled>
         <View style={styles.section}>
           <NameSection
             eventName={eventName}
             setEventName={handleNameChange}
-            containerStyles={styles.containerStyleName}
+            error={nameError}
           />
-          {eventName.length === 0 && nameDirty && <Text style={styles.error}>{t('RegisterScreen.NameErrorEmpty')}</Text>}
         </View>
         <View style={styles.section}>
           <DescriptionSection
             maxLength={200}
             eventDescription={eventDescription}
             setEventDescription={handleDescriptionChange}
+            error={descriptionError}
           />
-          {eventDescription.length === 0 && descriptionDirty && <Text style={styles.error}>{t('AddEvent.DescriptionErrorEmpty')}</Text>}
         </View>
         <View style={styles.section}>
           <DateHeureSection
@@ -202,30 +280,26 @@ export const EditEvent = () => {
           <EmplacementSection
             eventLocalisation={eventLocalisation}
             setEventLocalisation={handleLocalisationChange}
-            containerStyles={styles.containerStyleName}
+            error={localisationError}
           />
         </View>
-        {eventLocalisation.length === 0 && localisationDirty && <Text style={styles.error}>{t('AddEvent.localisationErrorEmpty')}</Text>}
       </ScrollView>
-      <View style={styles.itemContainer}>
+      <View style={styles.section}>
         <View style={styles.row}>
-          <View style={defaultStyles.leftSectRowContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate('Events' as never)}>
-              <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Cancel')}</Text>
-            </TouchableOpacity>
+          <View style={{marginRight: 80, alignItems: 'flex-start'}}>
+            <Button
+              mode="contained"
+              onPress={() => navigation.navigate('Events' as never)}>
+              {t('Global.Cancel')}
+            </Button>
           </View>
-          <View style={defaultStyles.rightSectRowContainer}>
-            <TouchableOpacity onPress={handleSaveEvents}>
-              <Text style={[defaultStyles.text, { marginVertical: 10, marginHorizontal: 10, fontSize: 20, color: ColorPallet.primary }]}>{t('AddEvent.Modify')}</Text>
-            </TouchableOpacity>
+          <View style={[{marginLeft: 80, alignItems: 'flex-end'}]}>
+            <Button mode="contained" onPress={handleSaveEvents}>
+              {t('Global.Modify')}
+            </Button>
           </View>
-
         </View>
       </View>
-
-
-    </BackgroundContents>
-
-
-  )
-}
+    </SafeAreaView>
+  );
+};

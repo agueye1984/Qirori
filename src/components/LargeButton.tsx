@@ -3,6 +3,7 @@ import {StyleSheet, Text} from 'react-native'
 import {TouchableOpacity} from 'react-native-gesture-handler'
 
 import {useTheme} from '../contexts/theme'
+import { theme } from '../core/theme'
 
 interface Props {
   isPrimary?: boolean
@@ -15,9 +16,9 @@ interface Props {
 export const LargeButton = ({title, action, color, isPrimary = false, disabled = false}: Props) => {
   const {ColorPallet} = useTheme()
 
-  let backgroundColor = ColorPallet.primary
-  let borderColor = ColorPallet.primary
-  let textColor = ColorPallet.white
+  let backgroundColor = theme.colors.primary
+  let borderColor = theme.colors.primary
+  let textColor = theme.colors.surface
 
   if (isPrimary) {
     if (color) {
@@ -26,12 +27,12 @@ export const LargeButton = ({title, action, color, isPrimary = false, disabled =
     }
   } else {
     if (color) {
-      backgroundColor = ColorPallet.white
+      backgroundColor = theme.colors.surface
       borderColor = color
       textColor = color
     } else {
-      backgroundColor = ColorPallet.primaryBackground
-      textColor = ColorPallet.primary
+      backgroundColor = theme.colors.primaryBackground
+      textColor = theme.colors.primary
     }
   }
 

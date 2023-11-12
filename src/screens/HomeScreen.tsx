@@ -1,5 +1,5 @@
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import BackgroundContents from '../components/BackgroundContents';
+import { Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+SafeAreaView;
 import { useTranslation } from 'react-i18next';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
 import Header from '../components/Header';
@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AccueilItem } from '../components/AccueilItem';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useTheme } from '../contexts/theme';
+import { theme } from '../core/theme';
 
 
 
@@ -38,7 +39,7 @@ const HomeScreen = () => {
     },
   })
   return (
-    <BackgroundContents>
+    <SafeAreaView>
       <ScrollView style={{ padding: 10 }}>
         <View style={styles.row}>
           <View style={defaultStyles.leftSectRowContainer}>
@@ -49,7 +50,7 @@ const HomeScreen = () => {
               <TouchableOpacity onPress={() => navigate('AddEvent' as never)}>
                 <Icon
                   name={'calendar-plus-o'}
-                  color={ColorPallet.primary}
+                  color={theme.colors.primary}
                   size={30}
                 />
               </TouchableOpacity>
@@ -65,7 +66,7 @@ const HomeScreen = () => {
           </View>
         </View>
       </ScrollView>
-    </BackgroundContents>
+    </SafeAreaView>
   )
 };
 

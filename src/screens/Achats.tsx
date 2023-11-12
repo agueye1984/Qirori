@@ -1,40 +1,41 @@
-import React from 'react'
-import {Image, StyleSheet, Text, View} from 'react-native'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import { useTheme } from '../contexts/theme'
-import BackgroundContents from '../components/BackgroundContents'
-import { useTranslation } from 'react-i18next'
-import Header from '../components/Header'
-
+import React from 'react';
+import {SafeAreaView, ScrollView, View} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import Header from '../components/Header';
+import {BacktoHome} from '../components/BacktoHome';
+import {useNavigation} from '@react-navigation/native';
+import {Accueil} from '../contexts/types';
+import {AchatsItem} from '../components/AchatsItem';
+import {AchatsList} from '../components/AchatsList';
 
 export const Achats = () => {
-  const defaultStyles = DefaultComponentsThemes()
-  const {ColorPallet} = useTheme()
-  const { t } = useTranslation()
+  const {t} = useTranslation();
+  const achat = AchatsList(t);
+  const {navigate} = useNavigation();
 
-  const styles = StyleSheet.create({
-    img: {
-      width: '30%',
-      resizeMode: 'contain',
-      paddingRight: 50,
-    },
-    row: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-    },
-  })
-
+  function handleSelection(item: Accueil) {
+    navigate(item.route as never);
+  }
   return (
-    <BackgroundContents>
-      <View style={styles.row}>
-        <View style={defaultStyles.leftSectRowContainer}>
-          <Image source={require('../assets/back@20x20.png')} />
+    <SafeAreaView style={{flex: 1}}>
+      <ScrollView style={{padding: 10}}>
+        <BacktoHome textRoute={t('HomeScreen.title')} />
+        <Header>{t('Achats.title')}</Header>
+        <View
+          style={{justifyContent: 'center', alignContent: 'center', flex: 1}}>
+          <View style={{padding: 10}}>
+            {achat.map((item: Accueil) => {
+              return (
+                <AchatsItem
+                  key={item.id}
+                  item={item}
+                  action={() => handleSelection(item)}
+                />
+              );
+            })}
+          </View>
         </View>
-        <View style={{alignContent: 'space-between', height: 30 }} >
-          <Text>{t('HomeScreen.title')}</Text>
-        </View>
-      </View>
-      <Header>{t('Achats.title')}</Header>
-    </BackgroundContents>
-  )
-}
+      </ScrollView>
+    </SafeAreaView>
+  );
+};

@@ -1,26 +1,17 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
-import {StyleSheet, Text, View, ViewStyle} from 'react-native'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import { CustomInputText } from './CustomInputText'
+import {View} from 'react-native'
 import TextInput from './TextInput'
 
 
 type Props = {
   eventName: string
   setEventName: (value: string) => void
-  containerStyles?: ViewStyle
+  error: string
 }
 
-export const NameSection = ({eventName, setEventName, containerStyles}: Props) => {
+export const NameSection = ({eventName, setEventName, error}: Props) => {
   const {t} = useTranslation()
-  const defaultStyles = DefaultComponentsThemes()
-  const styles = StyleSheet.create({
-    detailsTitle: {
-      ...defaultStyles.text,
-      ...defaultStyles.requestDetailsTitle,
-    },
-  })
 
   return (
     <View>
@@ -30,6 +21,8 @@ export const NameSection = ({eventName, setEventName, containerStyles}: Props) =
         value={eventName}
         onChangeText={text => setEventName(text)}
         autoCapitalize="none"
+        error={!!error}
+        errorText={error}
       />
     </View>
   )

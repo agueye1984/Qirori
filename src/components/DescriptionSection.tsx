@@ -1,35 +1,29 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {StyleSheet, Text, View} from 'react-native'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import { CustomInputText } from './CustomInputText'
 import TextInput from './TextInput'
-import { useTheme } from '../contexts/theme'
+import { theme } from '../core/theme'
 
 
 type Props = {
   eventDescription: string
   setEventDescription: (value: string) => void
   maxLength?: number
+  error: string
 }
 
 export const DescriptionSection = ({
   eventDescription,
   setEventDescription,
   maxLength,
+  error,
 }: Props) => {
   const {t} = useTranslation()
-  const defaultStyles = DefaultComponentsThemes()
-  const {ColorPallet} = useTheme()
 
   const styles = StyleSheet.create({
-    detailsTitle: {
-      ...defaultStyles.text,
-      ...defaultStyles.requestDetailsTitle,
-    },
     characterText: {
       textAlign: 'right',
-      color: ColorPallet.primaryText,
+      color: theme.colors.primaryText,
       fontSize: 14,
       justifyContent: 'flex-start',
     },
@@ -47,6 +41,8 @@ export const DescriptionSection = ({
         multiline={true}
         maxLength={maxLength}
         numberOfLines={4}
+        error={!!error}
+        errorText={error}
       />
     </View>
     <View>
