@@ -56,7 +56,6 @@ target 'Qirori' do
   pod 'FirebaseCore', :modular_headers => true
   pod 'FirebaseCoreExtension', :modular_headers => true
   pod 'GTMSessionFetcher', :modular_headers => true
-  pod 'RNFS', :path => '../node_modules/react-native-fs'
 
   target 'QiroriTests' do
     inherit! :complete
