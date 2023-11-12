@@ -128,15 +128,6 @@ jobs:
           agvtool next-version -all && \
           agvtool new-marketing-version ${MARKETING_VERSION}
 
-        # Actual environment variables are not being picked up
-        # by the build so they're put into an .env file.
-      - name: Create environment settings
-        if: env.MEDIATOR_URL != null
-        working-directory: ./
-        env:
-          MEDIATOR_URL: ${{ secrets.MEDIATOR_URL }}
-        run: |
-          echo "MEDIATOR_URL=${MEDIATOR_URL}" >.env
       # https://docs.github.com/en/actions/deployment/deploying-xcode-applications/installing-an-apple-certificate-on-macos-runners-for-xcode-development
       - name: Create Provisioning Profile
         if: github.ref_name == 'main' && needs.check-ios-secrets.outputs.isReleaseBuild == 'true'
