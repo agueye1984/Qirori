@@ -65,7 +65,7 @@ const main = async () => {
       keyFile,
       scopes,
     })
-    console.log(`adama1 ${client}`)
+    console.log(`adama1 ${client._clientId}`)
     console.log('Preparing Android publisher.')
     const play = await google.androidpublisher({
       version: 'v3',
