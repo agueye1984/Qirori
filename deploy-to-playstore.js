@@ -57,13 +57,15 @@ const main = async () => {
 
   console.log(`Google Publish v${pjson.version}`)
 
+  console.log(`adama ${keyFile}`)
+
   try {
     console.log('Creating Google API client.')
     const client = await google.auth.getClient({
       keyFile,
       scopes,
     })
-
+    console.log(`adama1 ${client}`)
     console.log('Preparing Android publisher.')
     const play = await google.androidpublisher({
       version: 'v3',
