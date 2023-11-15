@@ -236,7 +236,6 @@ jobs:
       - name: Pull & update submodules recursively
         run: |
           git config --global --add safe.directory '*'
-          git submodule update --init --recursive
 
       - name: Configure node
         uses: actions/setup-node@v1
@@ -303,7 +302,6 @@ jobs:
           VERSION_NAME: ${{ env.appBuildVersion }}
         run: |
           echo "${GOOGLE_API_CREDENTIALS_BASE64}" | base64 -d >${GOOGLE_API_CREDENTIALS} && \
-          npm i
           chmod +x deploy-to-playstore.js
           node ./deploy-to-playstore.js
 
