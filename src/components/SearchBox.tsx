@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {View, Pressable, TextInput} from 'react-native';
 import {scale} from 'react-native-size-matters';
 import Feather from 'react-native-vector-icons/Feather';
-import { theme } from '../core/theme';
+import {theme} from '../core/theme';
 
 type Props = {
-    autoFocus?: boolean
-    onFoucs?: () => void
-    hideCamra?: boolean
-    onRightIconPress?: () => void
-    rightIcon?: string
-  }
+  autoFocus?: boolean;
+  onFoucs?: () => void;
+  hideCamra?: boolean;
+  onRightIconPress?: () => void;
+  rightIcon?: string;
+};
 
-export const SearchBox = ({autoFocus,onFoucs, hideCamra, onRightIconPress,rightIcon}: Props) =>{
-  const [search, setSearch] = useState('')
+export const SearchBox = ({
+  autoFocus,
+  onFoucs,
+  hideCamra,
+  onRightIconPress,
+  rightIcon,
+}: Props) => {
+  const [search, setSearch] = useState('');
   return (
-    <View style={{justifyContent: 'space-between', flexDirection: 'row', alignItems:'center',}}>
+    <View
+      style={{
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}>
       <View
         style={{
-          flex:1,
+          flex: 1,
           paddingHorizontal: scale(20),
           borderRadius: scale(20),
           alignItems: 'center',
@@ -28,11 +39,11 @@ export const SearchBox = ({autoFocus,onFoucs, hideCamra, onRightIconPress,rightI
           height: scale(40),
         }}>
         <Feather name="search" size={scale(20)} color={theme.colors.black} />
-        <TextInput 
-        autoFocus={autoFocus}
+        <TextInput
+          autoFocus={autoFocus}
           onFocus={onFoucs}
           style={{flex: 1, paddingLeft: scale(10)}}
-          placeholder='Search'
+          placeholder="Search"
           value={search}
           onChangeText={text => setSearch(text)}
         />
@@ -47,11 +58,15 @@ export const SearchBox = ({autoFocus,onFoucs, hideCamra, onRightIconPress,rightI
             backgroundColor: theme.colors.primary,
             justifyContent: 'center',
             alignItems: 'center',
-            marginLeft:scale(20)
+            marginLeft: scale(20),
           }}>
-          <Feather name={rightIcon ? rightIcon :"camera"} size={scale(18)} color={theme.colors.white} />
+          <Feather
+            name={rightIcon ? rightIcon : 'camera'}
+            size={scale(18)}
+            color={theme.colors.white}
+          />
         </Pressable>
       )}
     </View>
   );
-}
+};

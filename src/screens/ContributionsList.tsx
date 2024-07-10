@@ -1,86 +1,42 @@
-import React, { useEffect, useState } from 'react'
-import { Image, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import React, {useEffect, useState} from 'react'
+import {SafeAreaView, ScrollView, Text, View} from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
-import { useTranslation } from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 import Header from '../components/Header'
-import { useStore } from '../contexts/store'
-import { LocalStorageKeys } from '../constants'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Contribution, Invitation, User } from '../contexts/types'
-import { BacktoHome } from '../components/BacktoHome'
-import { Table, Row } from 'react-native-table-component';
-
+import {Event} from '../contexts/types'
+import {BacktoHome} from '../components/BacktoHome'
+import auth from '@react-native-firebase/auth'
+import {theme} from '../core/theme'
+import ContributionItemList from '../components/ContributionItemList'
+import {getFilteredRecords} from '../services/FirestoreServices'
 
 export const ContributionsList = () => {
-  const defaultStyles = DefaultComponentsThemes();
-  const { t } = useTranslation();
-  const [state] = useStore();
-  const [userId, setUserId] = useState('')
-  const tableHead= ["Event", "Donator", "Type Donation", "Amount"];
-  const widthArr = [100, 100, 100, 100];
-  const [contributions, setContributions] = useState<Contribution[]>([]);
+  const currentUser = auth().currentUser
+  const defaultStyles = DefaultComponentsThemes()
+  const {t} = useTranslation()
+  const [event, setEvent] = useState<Event[]>([])
 
   useEffect(() => {
-
-  AsyncStorage.getItem(LocalStorageKeys.UserId)
-    .then((result) => {
-      if (result != null) {
-        setUserId(result);
+    // Exemple d'utilisation de la fonction getFilteredRecords
+    const fetchData = async () => {
+      try {
+        const data = await getFilteredRecords('events', 'userId', currentUser?.uid)
+        const newEvent = data.map((record) => record.data as Event)
+        console.log(newEvent.length)
+        setEvent(newEvent)
+      } catch (error) {
+        console.error('Error fetching data:', error)
       }
-    })
-    .catch(error => console.log(error))
-  let contributions: Contribution[] = [];
-  const events = state.events.filter((event) => event.userId === userId);
-  events.map((event, index) => {
-    const donations = state.contributions.find((donation) => donation.eventId === event.id) as Contribution;
-    contributions[index] = donations;
-  });
-  setContributions(contributions);
-}, []);
-  const generateTableData = (contributions: Contribution[]) => {
-    const data: any[] = [];
-    if (contributions === undefined) {
-      contributions = [];
     }
-    console.log('Adama objet' + contributions);
-    console.log('Adama' + contributions.length);
-    if (contributions.length > 0) {
-    contributions.map((contribution, index) => {
-      const event = state.events.find((e) => e.id === contribution.eventId);
-      const user = state.user.find((e) => e.id === contribution.userId);
-      let row: any[] = [];
-      if(event!==undefined){
-        row[0] = event.name;
-      }
-      if(user!==undefined){
-        row[1] = user.name;
-      }
-      row[2] = contribution.nature;
-      row[3] = contribution.montant;
-      
-       data.push(row);
-    });
-  }
-    return data;
- };
- 
- const data = generateTableData(contributions);
- console.log(data)
-
-  const styles = StyleSheet.create({
-    container: { padding: 16, paddingTop: 30, backgroundColor: "#fff" },
-    head: { height: 40, backgroundColor: "#f1f8ff" },
-    text: { textAlign: "center", fontWeight: "bold" },
-    dataWrapper: { marginTop: -1 },
-    row: { height: 30 },
-  })
+    fetchData()
+  }, [currentUser?.uid])
 
   return (
     <SafeAreaView>
-      <BacktoHome textRoute={t('HomeScreen.title')} />
-      <Header>{t('Contributions.title')}</Header>
-      <View style={{ justifyContent: 'center', alignContent: 'center' }}>
-        {contributions.length === 0 && (
+      <BacktoHome textRoute={t('Settings.title')} />
+      <Header>{t('ContributionsList.title')}</Header>
+      <View style={{justifyContent: 'center', alignContent: 'center'}}>
+        {event.length === 0 && (
           <Text
             style={[
               defaultStyles.text,
@@ -93,36 +49,15 @@ export const ContributionsList = () => {
             {t('Contributions.EmptyList')}
           </Text>
         )}
-        <View style={styles.container}>
-         <ScrollView horizontal={true}>
-            <View>
-               <Table borderStyle={{ borderColor: "#C1C0B9" }}>
-                  <Row
-                     data={tableHead}
-                     widthArr={widthArr}
-                     style={styles.head}
-                     textStyle={styles.text}
-                  />
-               </Table>
-               <ScrollView style={styles.dataWrapper}>
-                  <Table borderStyle={{ borderColor: "#C1C0B9" }}>
-                     {data.map((dataRow, index) => {
-          
-                      return (
-                        <Row
-                           key={index}
-                           data={dataRow}
-                           widthArr={widthArr}
-                           style={[styles.row,{ backgroundColor: index % 2 ? "#ffffff": "#C1C0B9" }]}
-                           textStyle={styles.text}
-                        />
-                     )})}
-                  </Table>
-               </ScrollView>
-            </View>
-         </ScrollView>
-      </View>
-        
+         <ScrollView
+        scrollEnabled
+        showsVerticalScrollIndicator
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled">
+          {event.map((item: Event, index: number) => {
+            return <ContributionItemList key={index.toString()} event={item} />
+          })}
+        </ScrollView>
       </View>
     </SafeAreaView>
   )

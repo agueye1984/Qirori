@@ -1,41 +1,44 @@
-import React from 'react';
-import {SafeAreaView, ScrollView, View} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import Header from '../components/Header';
-import {BacktoHome} from '../components/BacktoHome';
-import {useNavigation} from '@react-navigation/native';
-import {Accueil} from '../contexts/types';
-import {AchatsItem} from '../components/AchatsItem';
-import {AchatsList} from '../components/AchatsList';
+import React from 'react'
+import {View, SafeAreaView, FlatList} from 'react-native'
+import {useTranslation} from 'react-i18next'
+import Header from '../components/Header'
+import {BacktoHome} from '../components/BacktoHome'
+import {ManageEventsParamList} from '../contexts/types'
+import {useNavigation} from '@react-navigation/native'
+import {CategoryList} from '../components/CategoryList'
+import {CategoryView} from '../components/CategoryView'
+import {StackNavigationProp} from '@react-navigation/stack'
+
+type serviceOfferProp = StackNavigationProp<ManageEventsParamList, 'ServicesOffertsList'>
 
 export const Achats = () => {
-  const {t} = useTranslation();
-  const achat = AchatsList(t);
-  const {navigate} = useNavigation();
+  const {t} = useTranslation()
+  const categories = CategoryList(t)
+  const navigation = useNavigation<serviceOfferProp>()
 
-  function handleSelection(item: Accueil) {
-    navigate(item.route as never);
-  }
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <ScrollView style={{padding: 10}}>
-        <BacktoHome textRoute={t('HomeScreen.title')} />
-        <Header>{t('Achats.title')}</Header>
-        <View
-          style={{justifyContent: 'center', alignContent: 'center', flex: 1}}>
-          <View style={{padding: 10}}>
-            {achat.map((item: Accueil) => {
-              return (
-                <AchatsItem
-                  key={item.id}
-                  item={item}
-                  action={() => handleSelection(item)}
-                />
-              );
-            })}
-          </View>
-        </View>
-      </ScrollView>
+    <SafeAreaView>
+      <BacktoHome textRoute={t('HomeScreen.title')} />
+      <Header>{t('Achats.title')}</Header>
+      <View>
+        <FlatList
+          style={{margin: 5}}
+          data={categories}
+          numColumns={1}
+          keyExtractor={(item) => item.id}
+          renderItem={(item) => (
+            <CategoryView
+              name={item.item.name}
+              key={item.index}
+              onPress={() => {
+                navigation.navigate('ServicesOffertsList', {
+                  item: item.item.id,
+                })
+              }}
+            />
+          )}
+        />
+      </View>
     </SafeAreaView>
-  );
-};
+  )
+}

@@ -22,6 +22,15 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+			<string>app-1-190882182392-ios-9b3885c2cff2e95d1cf70d</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -37,6 +46,13 @@
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<true/>
 			</dict>
+			<key>api.geonames.org</key>
+			<dict>
+			<key>NSExceptionAllowsInsecureHTTPLoads</key>
+			<true/>
+			<key>NSIncludesSubdomains</key>
+			<true/>
+			</dict>
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
@@ -45,6 +61,8 @@
 	<string>Allow Contact Access For Details</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
   	<string>This app requires access to the calendar</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cette application a besoin d'accéder à votre caméra pour vous permettre de prendre des photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is required to show the place of the event</string>
 	<key>NSLocationAlwaysUsageDescription</key>

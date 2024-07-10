@@ -4,22 +4,25 @@ export interface Onboarding {
 
 export interface State {
   onboarding: Onboarding
-  user: User[]
   language: String
-  events: Event[]
-  invitations: Invitation[]
-  contributions: Contribution[]
-  products: Product[]
-  services: Service[]
-  carts: Panier[]
-  contactUs: Mail[]
+  currency: String
+  country: String
+  didAgreeTermVendor: boolean
 }
 
 export interface User {
   id: string
   email: string
-  phone: string
+  phoneNumber: string
   password: string
+  displayName: string
+  profilId: string
+  vendor: boolean
+  actif: boolean
+}
+
+export interface Profil {
+  id: string
   name: string
 }
 
@@ -42,7 +45,7 @@ export interface Event {
   localisation: Location
 }
 
-export type Location = {
+export interface Location {
   placeId: string
   description: string
 }
@@ -70,19 +73,48 @@ export type ManageEventsParamList = {
   }
   ProductDetails: {
     item: Product
-  },
+  }
   ResetPassword: {
-    userId: string
-  },
+    user: any
+  }
   ContactsList: {
     item: Event
-  },
+  }
   ServicesOffertsList: {
     item: string
-  },
+  }
   ServiceDetails: {
     item: Service
-  },
+  }
+  EditProduct: {
+    item: Product
+  }
+  EditService: {
+    item: Service
+  }
+  CommandesEffectuees: {
+    item: Commande
+  }
+  EditPanier: {
+    item: Panier
+  }
+  EditTypeEvent: {
+    item: TypeEvent
+  }
+  OTPAuthScreen: {
+    code: string
+  }
+  OTPForgotPwdScreen: {
+    confirmResult: any
+  }
+  RatingScreen: {
+    item: Commande
+  }
+  PaymentScreen: {
+    mnt: string
+    item: any
+    type: string
+  }
 }
 
 export interface Invitation {
@@ -109,17 +141,20 @@ export interface Contribution {
   contribution: string
   Produits?: Product[]
   montant: number
+  paymentId?: string
 }
 
 export interface Product {
   id: string
+  category: string
   name: string
   description: string
-  userId: string | null 
+  userId: string | null
   devise: string
   quantite: number
   prixUnitaire: number
   images: string
+  actif: boolean
 }
 
 export interface Service {
@@ -127,46 +162,66 @@ export interface Service {
   category: string
   name: string
   description: string
-  userId: string | null 
+  userId: string | null
   images: string
   offres: Offre[]
+  offresIds: string[]
+  conditions: string[]
+  zone: string
 }
 
 export interface Panier {
-  id:string,
-  qty: number,
-  product: string,
-  totalPrice: number,
-  paid: boolean,
+  id: string
+  qty: number
+  product: string
+  name: string
+  description: string
+  prix: number
+  devise: string
+  tax: number
+  offre: string
+  totalPrice: number
+  paid: boolean
   userId: string | null
+  images: string
+  vendorId: string
+  dateDelivered: string
+  statut: string
+  commandeId: string
 }
 
 export interface Mail {
-  id: string,
-  subject: string,
-  message: string,
+  id: string
+  subject: string
+  message: string
   userId: string | null
 }
 
 export interface Commande {
-  id: string,
-  paniers: Panier[],
-  adresse: Adresse,
-  paymentId: string,
-  orderId: string,
+  id: string
+  paniers: Panier[]
+  adresse: Adresse
+  paymentId: string
+  orderId: string
+  statut: string
+  dateDelivered: string
   userId: string | null
+  rating: number
+  avis: string
 }
 
 export interface Adresse {
-  id: string,
-  adresse: string,
-  city: string,
-  province: string,
-  postalCode: string,
+  id: string
+  address_line_1: string
+  address_line_2: string
+  city: string
+  province: string
+  postalCode: string
+  countryCode: string
   userId: string | null
 }
 
-export type PredictionType = {
+export interface PredictionType {
   description: string
   place_id: string
   reference: string
@@ -176,13 +231,42 @@ export type PredictionType = {
   types: string[]
 }
 
-export type Offre= {
+export interface Offre {
+  id: string
+  typeOffre: string
   name: string
+  typeMontant: string
   montant: number
   devise: string
+  images: string
 }
 
 export interface Category {
   id: string
   name: string
+}
+
+export interface Select {
+  key: string
+  value: string
+}
+
+export interface TypeEvent {
+  id: string
+  nameFr: string
+  nameEn: string
+  userId: string
+}
+
+export interface TypeOffre {
+  id: string
+  nameFr: string
+  nameEn: string
+  userId: string
+}
+export interface TypeCondition {
+  id: string
+  nameFr: string
+  nameEn: string
+  userId: string
 }

@@ -1,19 +1,19 @@
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import {StyleSheet, Text, TextInput, View, ViewStyle} from 'react-native'
-
-import {useTheme} from '../contexts/theme'
-import { theme } from '../core/theme'
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import {StyleSheet, Text, TextInput, View, ViewStyle} from 'react-native';
+import {useTheme} from '../contexts/theme';
+import {theme} from '../core/theme';
 
 type Props = {
-  value: string
-  setValue: (value: string) => void
-  placeholder?: string
-  multiline?: boolean
-  containerStyle?: ViewStyle
-  maxLength?: number
-  setOpenDate?: () => void
-}
+  value: string;
+  setValue: (value: string) => void;
+  placeholder?: string;
+  multiline?: boolean;
+  containerStyle?: ViewStyle;
+  maxLength?: number;
+  setOpenDate?: () => void;
+  keyboardType?: any;
+};
 
 export const CustomInputText = ({
   value,
@@ -23,9 +23,10 @@ export const CustomInputText = ({
   maxLength,
   multiline = false,
   setOpenDate,
+  keyboardType,
 }: Props) => {
-  const {ColorPallet} = useTheme()
-  const {t} = useTranslation()
+  const {ColorPallet} = useTheme();
+  const {t} = useTranslation();
   const styles = StyleSheet.create({
     container: {
       minHeight: 50,
@@ -49,7 +50,7 @@ export const CustomInputText = ({
       fontSize: 14,
       justifyContent: 'flex-start',
     },
-  })
+  });
   return (
     <View>
       <View style={[styles.container, containerStyle]}>
@@ -63,6 +64,7 @@ export const CustomInputText = ({
           maxLength={maxLength}
           onFocus={setOpenDate}
           onPressIn={setOpenDate}
+          keyboardType={keyboardType}
         />
       </View>
       {maxLength && (
@@ -71,5 +73,5 @@ export const CustomInputText = ({
         </Text>
       )}
     </View>
-  )
-}
+  );
+};

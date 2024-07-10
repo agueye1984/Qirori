@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {
   TouchableOpacity,
   SafeAreaView,
@@ -6,6 +6,7 @@ import {
   Text,
   View,
   BackHandler,
+  ScrollView,
 } from 'react-native';
 import Logo from '../components/Logo';
 import Header from '../components/Header';
@@ -16,25 +17,26 @@ import {emailValidator, passwordValidator} from '../core/utils';
 import {Navigation} from '../types';
 import {useTranslation} from 'react-i18next';
 import Paragraph from '../components/Paragraph';
-import {useStore} from '../contexts/store';
-import {LocalStorageKeys} from '../constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { ManageEventsParamList, User } from '../contexts/types';
+import SmsApi from '../apis/SmsApi';
 
-type Props = {
-  navigation: Navigation;
-};
+type OTPAuthScreenProp = StackNavigationProp<
+  ManageEventsParamList,
+  'OTPAuthScreen'
+>;
 
-const LoginScreen = ({navigation}: Props) => {
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [loginError, setLoginError] = useState('');
   const {t} = useTranslation();
-  const [state] = useStore();
+  const {navigate} = useNavigation<OTPAuthScreenProp>();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -74,11 +76,10 @@ const LoginScreen = ({navigation}: Props) => {
         .signInWithEmailAndPassword(email, password)
         .then(response => {
           const usersRef = firestore().collection('users');
-          console.log(response);
           usersRef
             .doc(response.user.uid)
             .get()
-            .then(firestoreDocument => {
+            .then(async firestoreDocument => {
               if (!firestoreDocument.exists) {
                 setLoginError(t('LoginScreen.LoginError'));
                 return;
@@ -88,7 +89,25 @@ const LoginScreen = ({navigation}: Props) => {
               setEmailError('');
               setPasswordError('');
               setLoginError('');
-              navigation.navigate('HomeScreen');
+              const user = firestoreDocument.data() as User;
+             // const confirmation = await auth().signInWithPhoneNumber(user.phoneNumber);
+             console.log(user)
+             if(user.actif===true){
+              const otp = SmsApi.generateOTP();
+              console.log(otp)
+             // SmsApi.sendOTPBySMS(user.phoneNumber,otp)
+             //navigate('OTPAuthScreen', {code: otp});
+             if(user.profilId==='1'){
+              navigate("Dashboard" as never);
+             } else{
+              navigate("HomeScreen" as never);
+             }
+            } else {
+              setLoginError(t('LoginScreen.LoginActifError'));
+              auth().signOut();
+                return;
+            }
+             
             })
             .catch(error => {
               setLoginError(t('LoginScreen.LoginError'));
@@ -99,20 +118,10 @@ const LoginScreen = ({navigation}: Props) => {
           setLoginError(t('LoginScreen.LoginError'));
           console.log('error2 ' + error);
         });
-      /*const findUser = state.user.find((item) => {return (item.email ==email && item.password==password)});
-      if(findUser != null){
-        await AsyncStorage.setItem(LocalStorageKeys.UserId, findUser.id)
-        setEmail('');
-        setPassword('');
-        setEmailError('');
-        setPasswordError('');
-        setLoginError('');
-        navigation.navigate('HomeScreen');
-      } else {
-        setLoginError(t('LoginScreen.LoginError'));
-      }*/
     }
   };
+
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,6 +129,7 @@ const LoginScreen = ({navigation}: Props) => {
       <Header>{t('LoginScreen.title')}</Header>
       <Paragraph>{t('LoginScreen.paragraph')}</Paragraph>
       <Text style={styles.errorText}>{loginError}</Text>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
       <TextInput
         value={email}
         label={t('LoginScreen.Email')}
@@ -131,6 +141,7 @@ const LoginScreen = ({navigation}: Props) => {
         autoComplete="email"
         textContentType="emailAddress"
         keyboardType="email-address"
+        style={styles.input}
       />
 
       <TextInput
@@ -141,11 +152,12 @@ const LoginScreen = ({navigation}: Props) => {
         error={!!passwordError}
         errorText={passwordError}
         secureTextEntry
+        style={styles.input}
       />
-
+ 
       <View style={styles.forgotPassword}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('ForgotPasswordScreen')}>
+          onPress={() => navigate('ForgotPasswordScreen' as never)}>
           <Text style={styles.label}>{t('LoginScreen.Forgotpassword')}</Text>
         </TouchableOpacity>
       </View>
@@ -156,10 +168,11 @@ const LoginScreen = ({navigation}: Props) => {
 
       <View style={styles.row}>
         <Text style={styles.label}>{t('LoginScreen.DontHaveAccount')} </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('RegisterScreen')}>
+        <TouchableOpacity onPress={() => navigate('RegisterScreen' as never)}>
           <Text style={styles.link}>{t('LoginScreen.SignUp')}</Text>
         </TouchableOpacity>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -194,6 +207,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  input: {
+    width:300
   },
 });
 

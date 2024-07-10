@@ -1,13 +1,12 @@
-
-import React, {useEffect} from 'react'
-import {Image, SafeAreaView, StyleSheet} from 'react-native'
-import Background from '../components/Background';
-import {useNavigation} from '@react-navigation/native'
-import { useStore } from '../contexts/store';
+import React, {useEffect} from 'react';
+import {Image, SafeAreaView, StyleSheet} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useStore} from '../contexts/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
-  const [state] = useStore()
-  const navigation = useNavigation()
+  const [state] = useStore();
+  const navigation = useNavigation();
 
   const styles = StyleSheet.create({
     img: {
@@ -23,22 +22,22 @@ const SplashScreen = () => {
       alignItems: 'center',
       justifyContent: 'center',
     },
-  })
+  });
   useEffect(() => {
     setTimeout(() => {
-    if (state.onboarding.didAgreeToTerms) {
-      navigation.navigate('LoginScreen' as never)
-     } else {
-      navigation.navigate('TermsScreen' as never)
-    }
-  }, 5000);
+      if (state.onboarding.didAgreeToTerms) {
+        navigation.navigate('LoginScreen' as never);
+      } else {
+        navigation.navigate('TermsScreen' as never);
+      }
+    }, 5000);
   }, [state.onboarding.didAgreeToTerms]);
 
   return (
     <SafeAreaView style={styles.container}>
       <Image source={require('../assets/logo.png')} style={styles.img} />
     </SafeAreaView>
-  )
+  );
 };
 
 export default SplashScreen;

@@ -9,8 +9,6 @@ import {
   View,
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
-import {DispatchAction} from '../contexts/reducers/store';
-import {useStore} from '../contexts/store';
 import {useTheme} from '../contexts/theme';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
 import {BacktoHome} from '../components/BacktoHome';
@@ -20,6 +18,7 @@ import {
   Event,
   Invitation,
   ManageEventsParamList,
+  TypeEvent,
 } from '../contexts/types';
 import {DateEvent} from '../components/DateEvent';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -30,6 +29,8 @@ import {theme} from '../core/theme';
 import {useTranslation} from 'react-i18next';
 import axios from 'axios';
 import Config from 'react-native-config';
+import firestore from '@react-native-firebase/firestore';
+import { getFilteredRecords, getRecordById } from '../services/FirestoreServices';
 
 type invitationsContactsProps = StackNavigationProp<
   ManageEventsParamList,
@@ -38,12 +39,21 @@ type invitationsContactsProps = StackNavigationProp<
 
 export const EventDetails = () => {
   const {i18n, t} = useTranslation();
-  const [state, dispatch] = useStore();
   const route = useRoute<RouteProp<ManageEventsParamList, 'EventDetails'>>();
   const item = route.params.item;
   const defaultStyles = DefaultComponentsThemes();
   const {ColorPallet} = useTheme();
   const navigation = useNavigation<invitationsContactsProps>();
+  const [invitation, setInvitation] = useState<Invitation[]>([]);
+  const [contribution, setContribution] = useState<Contribution[]>([]);
+  const [eventName, setEventName] = useState<string>('')
+  const [nombre, setNombre] = useState(0)
+  const [nbYes, setNbYes] = useState(0)
+  const [nbNo, setNbNo] = useState(0)
+  const [mntContribution, setMntContribution] =useState(0)
+  const [nbClose, setNbClose] = useState(0)
+  const [nbMaybe, setNbMaybe] = useState(0)
+
   const anneeDebut = parseInt(item.dateDebut.substring(0, 4));
   const moisDebut = parseInt(item.dateDebut.substring(4, 6)) - 1;
   const jourDebut = parseInt(item.dateDebut.substring(6, 8));
@@ -95,18 +105,118 @@ export const EventDetails = () => {
     minute: 'numeric',
     hourCycle: 'h24',
   });
-  let invitations: Invitation[] = state.invitations.filter(
-    invitation => invitation.eventId === item.id,
-  ) as Invitation[];
-  let contributions: Contribution[] = state.contributions.filter(
-    contribution => contribution.eventId === item.id,
-  ) as Contribution[];
-  let nombre = invitations.length;
-  let nbYes = 0;
+
+  useEffect(() => {
+    // Exemple d'utilisation de la fonction getFilteredRecords
+    const fetchData = async () => {
+      try {
+        const data = await getFilteredRecords('invitations', 'eventId', item.id)
+        const newInvitation = data.map((record) => record.data as Invitation)
+        console.log(newInvitation.length)
+        setInvitation(newInvitation)
+        setNombre(newInvitation.length)
+        const compteur = newInvitation.reduce(
+          (acc, obj) => {
+            if (obj.reponse === t('Global.Yes')) {
+              acc.oui += 1;
+            }
+            if (obj.reponse === t('Global.No')) {
+              acc.non += 1;
+            }
+            if (obj.closeDonation) {
+              acc.close += 1;
+            }
+            return acc;
+          },
+          { oui: 0, non: 0, close:0 }
+        );
+        setNbClose(compteur.close)
+        setNbNo(compteur.non)
+        setNbYes(compteur.oui)
+        const data1 = await getFilteredRecords('contributions', 'eventId', item.id)
+        let mntDonation = 0
+        data1.map((record) =>{
+            const donation= record.data as Contribution
+            mntDonation += Number(donation.montant)
+        })
+       setMntContribution(mntDonation)
+        const typeEvent = (await getRecordById('type_events', item.name)) as TypeEvent
+        let evenName = typeEvent.nameFr
+        if (selectedLanguageCode === 'en') {
+          evenName = typeEvent.nameEn
+        }
+        setEventName(evenName)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    fetchData()
+  }, [item])
+
+  /* useEffect(() => {
+    firestore()
+      .collection('invitations')
+      // Filter results
+      .where('eventId', '==', item.id)
+      .get()
+      .then(querySnapshot => {
+        if (querySnapshot.empty) {
+          setInvitation([]);
+        } else {
+          const invitations: Invitation[] = [];
+          querySnapshot.forEach(documentSnapshot => {
+            invitations.push(documentSnapshot.data() as Invitation);
+          });
+          setInvitation(invitations);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    firestore()
+      .collection('contributions')
+      // Filter results
+      .where('eventId', '==', item.id)
+      .get()
+      .then(querySnapshot => {
+        if (querySnapshot.empty) {
+          setContribution([]);
+        } else {
+          const contributions: Contribution[] = [];
+          querySnapshot.forEach(documentSnapshot => {
+            contributions.push(documentSnapshot.data() as Contribution);
+          });
+          setContribution(contributions);
+        }
+      });
+  }, []);
+  useEffect(() => {
+    firestore()
+    .collection('type_events')
+    .get()
+    .then(querySnapshot => {
+      const events: TypeEvent[] = [];
+      querySnapshot.forEach(documentSnapshot => {
+        events.push(documentSnapshot.data() as TypeEvent);
+      });
+      setTypeEvents(events);
+    });
+  }, []); */
+
+  /* const typeEvent = typeEvents.find(e => e.id === item.name);
+  let nameEvent = typeEvent === undefined ? '' : typeEvent.nameFr;
+  if (selectedLanguageCode === 'en') {
+    nameEvent = typeEvent === undefined ? '' : typeEvent.nameEn;
+  }
+ */
+ /*  let invitations = invitation;
+  let contributions = contribution; */
+  //let nombre = invitations.length;
+  /* let nbYes = 0;
   let nbNo = 0;
   let mntContribution = 0;
-  let nbClose = 0;
-  invitations.map(invitation => {
+  let nbClose = 0; */
+  /* invitations.map(invitation => {
     if (invitation.reponse === t('Global.Yes')) {
       nbYes += 1;
     }
@@ -117,16 +227,15 @@ export const EventDetails = () => {
       nbClose += 1;
     }
   });
-  let nbMaybe = nombre - nbNo - nbYes;
+  let nbMaybe = nombre - nbNo - nbYes; */
   useEffect(() => {
-    if (nombre > 0) {
+    /* if (nombre > 0) {
       setCloseContribution(nombre === nbClose);
-    }
+    } */
     const apiUrl = `${Config.GOOGLE_PACES_API_BASE_URL}/details/json?key=${Config.GOOGLE_API_KEY}&place_id=${item.localisation.placeId}&components=country:ca`;
     axios
       .request({method: 'post', url: apiUrl})
       .then(result => {
-        console.log(result);
         if (result) {
           const {width, height} = Dimensions.get('window');
           const ASPECT_RATIO = width / height;
@@ -147,19 +256,17 @@ export const EventDetails = () => {
             latitudeDelta: latDelta,
             longitudeDelta: lngDelta,
           });
-          console.log(region)
         }
       })
       .catch(error => console.log(error));
-  }, [closeContribution]);
+  }, [nombre, closeContribution]);
 
-  contributions.map(contribution => {
-    mntContribution +=
-      contribution.montant === undefined ? 0 : contribution.montant;
-  });
-
+  /* contributions.map(contribution => {
+    mntContribution += Number(contribution.montant === undefined ? 0 : contribution.montant)
+      ;
+  }); */
+console.log(closeContribution)
   const addToCalendar = (title: string, startDate: string, endDate: string) => {
-    
     const eventConfig = {
       title,
       startDate: startDate.replace('Z', 'ZZ'),
@@ -171,18 +278,30 @@ export const EventDetails = () => {
         // These are two different identifiers on iOS.
         // On Android, where they are both equal and represent the event id, also strings.
         // when { action: 'CANCELED' } is returned, the dialog was dismissed
-        console.warn("adama");
+        console.warn('adama');
         console.warn(JSON.stringify(eventInfo));
       })
       .catch((error: string) => {
         // handle error such as when user rejected permissions
-        console.warn("adama1");
+        console.warn('adama1');
         console.warn(error);
       });
   };
 
-  const closeDonation = () => {
-    invitations.map(invitation => {
+   const closeDonation = () => {
+    invitation.map(invitation => {
+    firestore()
+          .collection('invitations')
+          .doc(invitation.id)
+          .update({
+            closeDonation: true,
+          })
+          .then(() => {
+            console.log('Invitations updated!');
+          });
+        });
+        navigation.navigate('Events' as never);
+    /* invitations.map(invitation => {
       let invite: Invitation = {
         ...invitation,
         closeDonation: true,
@@ -191,8 +310,8 @@ export const EventDetails = () => {
         type: DispatchAction.UPDATE_INVITE,
         payload: invite,
       });
-    });
-  };
+    }); */
+  }; 
 
   const handleInvitationsContacts = (item: Event) => {
     navigation.navigate('InvitationsContacts', {item: item});
@@ -324,7 +443,7 @@ export const EventDetails = () => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <BacktoHome textRoute={t('Events.title')} />
-      <Header>{item.name}</Header>
+      <Header>{eventName}</Header>
 
       <ScrollView scrollEnabled>
         <View style={styles.section}>
@@ -426,19 +545,10 @@ export const EventDetails = () => {
                   <Text style={{color: theme.colors.primary}}> {nombre}</Text>
                 </View>
                 <View style={{marginHorizontal: 15}}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      addToCalendar(
-                        item.name,
-                        dateDebut.toISOString(),
-                        dateFin.toISOString(),
-                      )
-                    }>
                     <Text style={{color: theme.colors.primary}}>
                       {' '}
                       {t('Events.Invited')}
                     </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
               <View
@@ -447,20 +557,11 @@ export const EventDetails = () => {
                   <Text style={{color: theme.colors.primary}}> {nbYes}</Text>
                 </View>
                 <View style={{marginHorizontal: 15}}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      addToCalendar(
-                        item.name,
-                        dateDebut.toISOString(),
-                        dateFin.toISOString(),
-                      )
-                    }>
                     <Text style={{color: theme.colors.primary}}>
                       {' '}
                       {t('Global.Yes')}
                     </Text>
-                  </TouchableOpacity>
-                </View>
+             </View>
               </View>
               <View
                 style={{flexDirection: 'column', flex: 4, marginVertical: 5}}>
@@ -468,19 +569,10 @@ export const EventDetails = () => {
                   <Text style={{color: theme.colors.primary}}> {nbNo}</Text>
                 </View>
                 <View style={{marginHorizontal: 15}}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      addToCalendar(
-                        item.name,
-                        dateDebut.toISOString(),
-                        dateFin.toISOString(),
-                      )
-                    }>
                     <Text style={{color: theme.colors.primary}}>
                       {' '}
                       {t('Global.No')}
                     </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
               <View
@@ -489,19 +581,10 @@ export const EventDetails = () => {
                   <Text style={{color: theme.colors.primary}}> {nbMaybe}</Text>
                 </View>
                 <View style={{marginHorizontal: 15}}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      addToCalendar(
-                        item.name,
-                        dateDebut.toISOString(),
-                        dateFin.toISOString(),
-                      )
-                    }>
                     <Text style={{color: theme.colors.primary}}>
                       {' '}
                       {t('Events.Maybe')}
                     </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -519,19 +602,10 @@ export const EventDetails = () => {
                   </Text>
                 </View>
                 <View style={{marginHorizontal: 15}}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      addToCalendar(
-                        item.name,
-                        dateDebut.toISOString(),
-                        dateFin.toISOString(),
-                      )
-                    }>
                     <Text style={{color: theme.colors.primary}}>
                       {' '}
                       {t('Events.AmountDonation')}
                     </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
               {!closeContribution && (

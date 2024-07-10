@@ -1,148 +1,146 @@
-import { useEffect, useState } from "react";
-import { LocalStorageKeys } from "../constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Panier, Product } from "../contexts/types";
-import { FlatList, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import { BacktoHome } from "../components/BacktoHome";
-import { t } from "i18next";
-import Header from "../components/Header";
-import { useStore } from "../contexts/store";
-import CartItem from "../components/CartItem";
-import { Button } from "react-native-paper";
-import { widthPercentageToDP as widthToDp } from 'react-native-responsive-screen';
-import { useNavigation } from "@react-navigation/native";
+import {SafeAreaView, ScrollView, Text, View} from 'react-native'
+import {t} from 'i18next'
+import Header from '../components/Header'
+import CartItem from '../components/CartItem'
+import {Button} from 'react-native-paper'
+import {useNavigation} from '@react-navigation/native'
+import {useEffect, useState} from 'react'
+import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore'
+import {Panier} from '../contexts/types'
+import Paragraph from '../components/Paragraph'
+import CartItemOffre from '../components/CartItemOffre'
+import DefaultComponentsThemes from '../defaultComponentsThemes'
 
 export const Cart = () => {
-  const [state] = useStore();
+  const currentUser = auth().currentUser
   const navigation = useNavigation()
-  let total = 0
-  state.carts.map((panier) => {
-    total = total + panier.totalPrice;
-  });
-  // Styles....
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      alignItems: "center",
-    },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      width: widthToDp(90),
-      marginTop: 10,
-    },
-    total: {
-      borderTopWidth: 1,
-      paddingTop: 10,
-      borderTopColor: "#E5E5E5",
-      marginBottom: 10,
-    },
-    cartTotalText: {
-      fontSize: widthToDp(4.5),
-      color: "#989899",
-    },
-    section: {
-      marginHorizontal: 10,
-      paddingVertical: 5,
-    },
-  });
-  const checkout = () => {
+  const [total, setTotal] = useState(0)
+  const [totalTaxe, setTotalTaxe] = useState(0)
+  const [carts, setCarts] = useState<Panier[]>([])
+  const defaultStyles = DefaultComponentsThemes()
 
+  const getCarts = () => {
+    firestore()
+      .collection('carts')
+      // Filter results
+      .where('userId', '==', currentUser?.uid)
+      .where('paid', '==', false)
+      .get()
+      .then((querySnapshot) => {
+        let tot = 0
+        let tax = 0
+        let cart: Panier[] = []
+        querySnapshot.forEach((documentSnapshot) => {
+          const panier = documentSnapshot.data() as Panier
+          cart.push(panier)
+          tot += panier.totalPrice
+          const taxUnit = Number(panier.tax.toFixed(2))
+          const taxTot = taxUnit * panier.qty
+          tax = Number((tax + taxTot).toFixed(2))
+        })
+        setCarts(cart)
+        setTotal(tot)
+        setTotalTaxe(Number(tax.toFixed(2)))
+      })
   }
 
+  useEffect(() => {
+    getCarts()
+  }, [currentUser?.uid])
 
   return (
-    <SafeAreaView style={[styles.container]}>
+    <SafeAreaView style={{flex: 1}}>
       {/* SchrollView is used in order to scroll the content */}
-      <ScrollView scrollEnabled>
+      <ScrollView
+        scrollEnabled
+        showsVerticalScrollIndicator
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={defaultStyles.scrollViewContent}>
         <Header>{t('Cart.title')}</Header>
 
-        {state.carts.map((panier, index) => (
-
-          <CartItem key={index} panier={panier} />
-        ))}
+        {carts.map((panier, index) => {
+          if (panier.product != undefined) {
+            return <CartItem key={index} panier={panier} />
+          } else {
+            return <CartItemOffre key={index} panier={panier} />
+          }
+        })}
       </ScrollView>
-      <View>
-        <View style={styles.row}>
-          <Text style={styles.cartTotalText}>Items</Text>
+      {carts.length > 0 ? (
+        <View style={defaultStyles.bottomButtonContainer}>
+          <View style={defaultStyles.rowCart}>
+            <Text style={defaultStyles.cartTotalText}>{t('Cart.Subtotal')}</Text>
 
-          {/* Showing Cart Total */}
-          <Text
-            style={[
-              styles.cartTotalText,
-              {
-                color: "#4C4C4C",
-              },
-            ]}
-          >
-            {/* Dividing the total by 100 because Medusa doesn't store numbers in decimal */}
-            {total}
-          </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.cartTotalText}>TPS</Text>
+            {/* Showing Cart Total */}
+            <Text
+              style={[
+                defaultStyles.cartTotalText,
+                {
+                  color: '#4C4C4C',
+                },
+              ]}>
+              {/* Dividing the total by 100 because Medusa doesn't store numbers in decimal */}
+              {total}
+            </Text>
+          </View>
+          <View style={defaultStyles.rowCart}>
+            <Text style={defaultStyles.cartTotalText}>{t('Cart.tax')}</Text>
 
-          {/* Showing Cart Total */}
-          <Text
-            style={[
-              styles.cartTotalText,
-              {
-                color: "#4C4C4C",
-              },
-            ]}
-          >
-            {/* Dividing the total by 100 because Medusa doesn't store numbers in decimal */}
-            {total * 0.05}
-          </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.cartTotalText}>TFQ</Text>
+            {/* Showing Cart Total */}
+            <Text
+              style={[
+                defaultStyles.cartTotalText,
+                {
+                  color: '#4C4C4C',
+                },
+              ]}>
+              {/* Dividing the total by 100 because Medusa doesn't store numbers in decimal */}
+              {totalTaxe}
+            </Text>
+          </View>
+          <View style={[defaultStyles.rowCart, defaultStyles.total]}>
+            <Text style={defaultStyles.cartTotalText}>{t('Cart.Total')}</Text>
+            <Text
+              style={[
+                defaultStyles.cartTotalText,
+                {
+                  color: '#4C4C4C',
+                },
+              ]}>
+              {/* Calculating the total */}
+              {Number((total + totalTaxe).toFixed(2))}
+            </Text>
+          </View>
 
-          {/* Showing Cart Total */}
-          <Text
-            style={[
-              styles.cartTotalText,
-              {
-                color: "#4C4C4C",
-              },
-            ]}
-          >
-            {/* Dividing the total by 100 because Medusa doesn't store numbers in decimal */}
-            {total * 0.09975}
-          </Text>
-        </View>
-        <View style={[styles.row, styles.total]}>
-          <Text style={styles.cartTotalText}>Total</Text>
-          <Text
-            style={[
-              styles.cartTotalText,
-              {
-                color: "#4C4C4C",
-              },
-            ]}
-          >
-            {/* Calculating the total */}
-            {total + total * 0.09975 + total * 0.05}
-          </Text>
-        </View>
-        <View style={styles.section}>
-          <View style={styles.row}>
-            <View style={{ marginRight: 80, alignItems: 'flex-start' }}>
-              <Button mode="contained" onPress={() => navigation.navigate('BuyProduct' as never)}>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%', padding: 10}}>
+            <View style={{width: 150}}>
+              <Button mode="contained" onPress={() => navigation.goBack()} style={defaultStyles.button}>
                 {t('Global.Back')}
               </Button>
             </View>
-            <View style={[{ marginLeft: 80, alignItems: 'flex-end' }]}>
-              <Button mode="contained" onPress={() => navigation.navigate('Checkout' as never)}>
-                {state.carts.length > 0 ? "Checkout" : "Empty Cart"}
-              </Button>
-            </View>
+            {carts.length > 0 && (
+              <View style={{width: 220}}>
+                <Button
+                  mode="contained"
+                  onPress={() => navigation.navigate('Checkout' as never)}
+                  style={defaultStyles.button}>
+                  {t('Cart.Checkout')}
+                </Button>
+              </View>
+            )}
           </View>
         </View>
-      </View>
+      ) : (
+        <View style={defaultStyles.bottomButtonContainer}>
+          <Paragraph>{t('Cart.EmptyCart')}</Paragraph>
+          <Button mode="contained" onPress={() => navigation.goBack()}>
+            {t('Global.Back')}
+          </Button>
+        </View>
+      )}
       {/* Creating a seperate view to show the total amount and checkout button */}
     </SafeAreaView>
-
-  );
+  )
 }

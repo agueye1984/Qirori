@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { TextInput as Input } from 'react-native-paper';
-import { theme } from '../core/theme';
+import {View, StyleSheet, Text} from 'react-native';
+import {TextInput as Input} from 'react-native-paper';
+import {theme} from '../core/theme';
 
-type Props = React.ComponentProps<typeof Input> & { errorText?: string };
+type Props = React.ComponentProps<typeof Input> & {errorText?: string};
 
-const TextInput = ({ errorText, ...props }: Props) => (
+const TextInput = ({errorText, ...props}: Props) => (
   <View style={styles.container}>
     <Input
       style={styles.input}

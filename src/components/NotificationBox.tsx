@@ -1,25 +1,25 @@
-import React from 'react'
-import {StyleSheet, Text, View} from 'react-native'
-import Icon from 'react-native-vector-icons/AntDesign'
+import React from 'react';
+import {StyleSheet, Text, View} from 'react-native';
+import Icon from 'react-native-vector-icons/AntDesign';
 
-import {useTheme} from '../contexts/theme'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
+import {useTheme} from '../contexts/theme';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
 
 interface Props {
-  type: 'checkcircle' | 'warning'
-  title?: string
-  body: string
+  type: 'checkcircle' | 'warning';
+  title?: string;
+  body: string;
 }
 
 export const NotificationBox = ({type, title, body}: Props) => {
-  const {ColorPallet} = useTheme()
-  const defaultTheme = DefaultComponentsThemes()
+  const {ColorPallet} = useTheme();
+  const defaultTheme = DefaultComponentsThemes();
 
-  let bgColorPallet = ''
+  let bgColorPallet = '';
   if (type == 'checkcircle') {
-    bgColorPallet = ColorPallet.success
+    bgColorPallet = ColorPallet.success;
   } else {
-    bgColorPallet = ColorPallet.warning
+    bgColorPallet = ColorPallet.warning;
   }
 
   const styles = StyleSheet.create({
@@ -50,7 +50,7 @@ export const NotificationBox = ({type, title, body}: Props) => {
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
     },
-  })
+  });
 
   return (
     <View style={styles.container}>
@@ -58,9 +58,11 @@ export const NotificationBox = ({type, title, body}: Props) => {
         <Icon name={type} size={25} color={ColorPallet.white} />
       </View>
       <View style={styles.rightSection}>
-        {title && <Text style={[defaultTheme.text, {fontWeight: 'bold'}]}>{title}</Text>}
+        {title && (
+          <Text style={[defaultTheme.text, {fontWeight: 'bold'}]}>{title}</Text>
+        )}
         <Text style={defaultTheme.text}>{body}</Text>
       </View>
     </View>
-  )
-}
+  );
+};

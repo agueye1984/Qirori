@@ -1,18 +1,5 @@
-import React, { useState } from 'react';
-import { Text, Image, View, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign';
-import Icon1 from 'react-native-vector-icons/FontAwesome';
-import { useTheme } from '../contexts/theme';
-import { Category, Panier, Product } from '../contexts/types';
-import { v4 as uuidv4 } from 'uuid';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LocalStorageKeys } from '../constants';
-import { useStore } from '../contexts/store';
-import { DispatchAction } from '../contexts/reducers/store';
-import { NumericFormat } from 'react-number-format';
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-import { theme } from '../core/theme';
+import React from 'react';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 
 
 type Props = {
@@ -21,12 +8,6 @@ type Props = {
 }
 
 export const CategoryView = ({ name, onPress }: Props) => {
-  const { ColorPallet } = useTheme();
-  const [quantity, setQuantity] = useState(1);
-  const [state, dispatch] = useStore();
-  const [userId, setUserId] = useState('');
-  const navigation = useNavigation();
-  const { t } = useTranslation();
 
   const styles = StyleSheet.create({
     card: {
@@ -53,7 +34,7 @@ export const CategoryView = ({ name, onPress }: Props) => {
     },
     name: {
       fontSize: 22,
-      fontWeight: 'bold',
+      //fontWeight: 'bold',
       
     },
     price: {
@@ -63,7 +44,7 @@ export const CategoryView = ({ name, onPress }: Props) => {
     },
     itemContainerForm: {
       height: 70,
-      width:150,
+      width:350,
       marginHorizontal: 5,
       borderWidth: 0.5,
       borderTopLeftRadius: 10,

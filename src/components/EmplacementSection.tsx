@@ -27,9 +27,10 @@ export const EmplacementSection = ({
   const {t} = useTranslation();
   const [showPredictions, setShowPredictions] = useState(false);
   const [predictions, setPredictions] = useState<PredictionType[]>([]);
+  const [placeIds, setPlaceIds] = useState('');
 
   const handleChange = async (text: string) => {
-    let locations: Location = {placeId:'', description:text};
+    let locations: Location = {placeId: placeIds, description: text};
     setEventLocalisation(locations);
     if (text.trim() === '') {
       return;
@@ -44,6 +45,7 @@ export const EmplacementSection = ({
         const {
           data: {predictions},
         } = result;
+        console.log(predictions)
         setPredictions(predictions);
         setShowPredictions(true);
       }
@@ -54,22 +56,32 @@ export const EmplacementSection = ({
 
   const onPredictionTapped = async (placeId: string, description: string) => {
     const apiUrl = `${Config.GOOGLE_PACES_API_BASE_URL}/details/json?key=${Config.GOOGLE_API_KEY}&place_id=${placeId}&components=country:ca`;
-    
     try {
       const result = await axios.request({
         method: 'post',
         url: apiUrl,
       });
       if (result) {
+       // console.log(result);
+       // console.log(result.data);
         const {
           data: {
             result: {
               geometry: {location},
+              formatted_address,
             },
           },
         } = result;
+       // const codePostal = result.data.formatted_address;
+        //console.log(result);
+        //console.log(result.data);
+        console.log(result.data.result.formatted_address);
         setShowPredictions(false);
-       const locations: Location = {placeId:placeId, description:description}
+        const locations: Location = {
+          placeId: placeId,
+          description: description,
+        };
+        setPlaceIds(placeId);
         setEventLocalisation(locations);
       }
     } catch (e) {
@@ -137,6 +149,7 @@ export const EmplacementSection = ({
           value={eventLocalisation.description}
           onChangeText={text => handleChange(text)}
           autoCapitalize="none"
+          multiline={true}
           error={!!error}
           errorText={error}
         />

@@ -1,19 +1,25 @@
-import React from 'react'
-import {View, StyleSheet, TouchableOpacity, Text} from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialIcons'
-import defaultComponentsThemes from '../defaultComponentsThemes'
-import { theme } from '../core/theme'
+import React from 'react';
+import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import defaultComponentsThemes from '../defaultComponentsThemes';
+import {theme} from '../core/theme';
 
 interface Props {
-  title: string
-  accessibilityLabel?: string
-  testID?: string
-  checked: boolean
-  onPress: () => void
+  title: string;
+  accessibilityLabel?: string;
+  testID?: string;
+  checked: boolean;
+  onPress: () => void;
 }
 
-const CheckBoxRow: React.FC<Props> = ({title, accessibilityLabel, testID, checked, onPress}) => {
-  const defaultStyle = defaultComponentsThemes()
+const CheckBoxRow: React.FC<Props> = ({
+  title,
+  accessibilityLabel,
+  testID,
+  checked,
+  onPress,
+}) => {
+  const defaultStyle = defaultComponentsThemes();
 
   const style = StyleSheet.create({
     container: {
@@ -27,8 +33,9 @@ const CheckBoxRow: React.FC<Props> = ({title, accessibilityLabel, testID, checke
       flexShrink: 1,
       marginLeft: 10,
     },
-  })
-  const accessible = accessibilityLabel && accessibilityLabel !== '' ? true : false
+  });
+  const accessible =
+    accessibilityLabel && accessibilityLabel !== '' ? true : false;
 
   return (
     <View style={style.container}>
@@ -40,12 +47,16 @@ const CheckBoxRow: React.FC<Props> = ({title, accessibilityLabel, testID, checke
         {checked ? (
           <Icon name={'check-box'} size={30} color={theme.colors.primary} />
         ) : (
-          <Icon name={'check-box-outline-blank'} size={30} color={theme.colors.primary} />
+          <Icon
+            name={'check-box-outline-blank'}
+            size={30}
+            color={theme.colors.primary}
+          />
         )}
       </TouchableOpacity>
       <Text style={[style.text]}>{title}</Text>
     </View>
-  )
-}
+  );
+};
 
-export default CheckBoxRow
+export default CheckBoxRow;

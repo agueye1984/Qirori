@@ -64,7 +64,8 @@ interface ColorPallet {
 const ColorPalletLight: ColorPallet = {
   primaryBackground: '#F2EFEF',
   primaryText: '#223654',
-  primary: '#095797',
+  //primary: '#095797',
+  primary: '#E37627',
   secondary: '#0C2550',
   titleHighlight: '#E58271',
   white: '#FFFFFF',
@@ -80,7 +81,8 @@ const ColorPalletLight: ColorPallet = {
 const ColorPalletDark: ColorPallet = {
   primaryBackground: '#575757',
   primaryText: '#FFFFFF',
-  primary: '#095797',
+  // primary: '#095797',
+  primary: '#E37627',
   secondary: '#0C2550',
   titleHighlight: '#E58271',
   white: '#FFFFFF',
@@ -106,27 +108,27 @@ export const defaultColorSheme: ColorSheme = {
   light: themeLight,
 }
 
-export const appColors={
-  primary:'#00C569',
-  secondary:"#fff",
-  white:"#ffffff",
-  black:"#000",
-  yellow:"#FFC107",
-  redOrange:"#FF3D00",
-  red:"#E80057",
-  darkGray:"#929292",
-  lightGray:'#DDDDDD',
-  gray:"#BEBEBE",
-  lightGreen:"rgba(0,197,105, 0.2)"
+export const appColors = {
+  //primary: '#00C569',
+  primary: '#E37627',
+  secondary: '#fff',
+  white: '#ffffff',
+  black: '#000',
+  yellow: '#FFC107',
+  redOrange: '#FF3D00',
+  red: '#E80057',
+  darkGray: '#929292',
+  lightGray: '#DDDDDD',
+  gray: '#BEBEBE',
+  lightGreen: 'rgba(0,197,105, 0.2)',
 }
 export const shadow = {
-  shadowColor: "#000",
+  shadowColor: '#000',
   shadowOffset: {
-      width: 0,
-      height: 2,
+    width: 0,
+    height: 2,
   },
   //shadowOpacity: 0.25,
   shadowRadius: 3.84,
   elevation: 2,
 }
-

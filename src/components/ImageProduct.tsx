@@ -1,17 +1,26 @@
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import {Button, Image, StyleSheet, View} from 'react-native'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Button, Image, View} from 'react-native';
 import {MediaType, launchImageLibrary} from 'react-native-image-picker';
 
-
 type Props = {
-  productImage: string
-  setProductImage: (value: string) => void
-}
+  productImage: string;
+  setProductImage: (value: string) => void;
+  imageUrl?: string;
+};
 
-export const ImageProduct = ({productImage, setProductImage}: Props) => {
-  const {t} = useTranslation()
+export const ImageProduct = ({
+  productImage,
+  setProductImage,
+  imageUrl,
+}: Props) => {
+  const {t} = useTranslation();
+  const [imageDisplay, setImageDisplay] = useState<string>('');
+
+  useEffect(() => {
+    setImageDisplay(imageUrl === undefined ? '' : imageUrl);
+  }, [imageUrl]); 
+
   const openImagePicker = () => {
     const options = {
       mediaType: 'photo' as MediaType,
@@ -20,7 +29,7 @@ export const ImageProduct = ({productImage, setProductImage}: Props) => {
       maxWidth: 2000,
     };
 
-    launchImageLibrary(options, (response) => {
+    launchImageLibrary(options, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorMessage) {
@@ -28,18 +37,26 @@ export const ImageProduct = ({productImage, setProductImage}: Props) => {
       } else {
         let imageUri = response.assets?.[0]?.uri as string;
         setProductImage(imageUri);
+        imageUrl = imageUri;
+        console.log(imageUrl);
+        setImageDisplay(imageUri);
       }
     });
   };
 
   return (
     <View>
-      <Button title={t('Global.ChooseImage')}onPress={openImagePicker} />
-      {productImage!='' && 
-        <Image 
-        source={{uri:productImage}} 
-        style={{height:50,width:50}}/>
-      }
+      <Button title={t('Global.ChooseImage')} onPress={openImagePicker} />
+      {imageDisplay != '' && (
+        <Image
+          source={
+            imageDisplay === ''
+              ? require('../../assets/No_image_available.svg.png')
+              : {uri: imageDisplay}
+          }
+          style={{height: 200, width: 400}}
+        />
+      )}
     </View>
-  )
-}
+  );
+};

@@ -1,16 +1,15 @@
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import {View} from 'react-native'
-import TextInput from './TextInput'
-
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import {View} from 'react-native';
+import TextInput from './TextInput';
 
 type Props = {
-  productName: string
-  setProductName: (value: string) => void
-}
+  productName: string;
+  setProductName: (value: string) => void;
+};
 
 export const NameProduct = ({productName, setProductName}: Props) => {
-  const {t} = useTranslation()
+  const {t} = useTranslation();
 
   return (
     <View>
@@ -22,5 +21,5 @@ export const NameProduct = ({productName, setProductName}: Props) => {
         autoCapitalize="none"
       />
     </View>
-  )
-}
+  );
+};

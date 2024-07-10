@@ -1,4 +1,3 @@
-import {uuid} from '@aries-framework/core/build/utils/uuid'
 import {Category} from '../contexts/types'
 
 export const CategoryList = (t: any): Category[] => {

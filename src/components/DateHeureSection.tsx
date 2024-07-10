@@ -1,22 +1,21 @@
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {PixelRatio, StyleSheet, Text, View} from 'react-native';
-import DefaultComponentsThemes from '../defaultComponentsThemes';
-import TextInput from '../components/TextInput';
-import DatePicker from 'react-native-date-picker';
-import {CustomInputTextDate} from './CustomInputTextDate';
-import {i18n} from '../localization';
+import React, {useState} from 'react'
+import {useTranslation} from 'react-i18next'
+import {StyleSheet, Text, View} from 'react-native'
+import DefaultComponentsThemes from '../defaultComponentsThemes'
+import TextInput from '../components/TextInput'
+import DatePicker from 'react-native-date-picker'
+import {i18n} from '../localization'
 
 type Props = {
-  dateDeb: Date;
-  heureDeb: Date;
-  dateF: Date;
-  heureF: Date;
-  setDateDeb: (value: Date) => void;
-  setHeureDeb: (value: Date) => void;
-  setDateF: (value: Date) => void;
-  setHeureF: (value: Date) => void;
-};
+  dateDeb: Date
+  heureDeb: Date
+  dateF: Date
+  heureF: Date
+  setDateDeb: (value: Date) => void
+  setHeureDeb: (value: Date) => void
+  setDateF: (value: Date) => void
+  setHeureF: (value: Date) => void
+}
 
 export const DateHeureSection = ({
   dateDeb,
@@ -28,82 +27,94 @@ export const DateHeureSection = ({
   setDateF,
   setHeureF,
 }: Props) => {
-  const {t} = useTranslation();
-  const defaultStyles = DefaultComponentsThemes();
-  const [dateDebut, setDateDebut] = useState<Date>(dateDeb);
-  const [heureDebut, setHeureDebut] = useState<Date>(heureDeb);
-  const [dateFin, setDateFin] = useState<Date>(dateF);
-  const [heureFin, setHeureFin] = useState<Date>(heureF);
-  const [openDateDebut, setOpenDateDebut] = useState(false);
-  const [openHeureDebut, setOpenHeureDebut] = useState(false);
-  const [openDateFin, setOpenDateFin] = useState(false);
-  const [openHeureFin, setOpenHeureFin] = useState(false);
-  const selectedLanguageCode = i18n.language;
-  console.log(dateDeb)
-  let sizeDateDeb = 15;
-  let sizeDateFin = 40;
-  let languageDate = 'fr-fr';
-  if (selectedLanguageCode=='en'){
-    sizeDateDeb = 15;
-    sizeDateFin = 23;
-    languageDate = 'en-GB';
-  }
+  const {t} = useTranslation()
+  const defaultStyles = DefaultComponentsThemes()
+  const [dateDebut, setDateDebut] = useState<Date>(dateDeb)
+  const [heureDebut, setHeureDebut] = useState<Date>(heureDeb)
+  const [dateFin, setDateFin] = useState<Date>(dateF)
+  const [heureFin, setHeureFin] = useState<Date>(heureF)
+  const [openDateDebut, setOpenDateDebut] = useState(false)
+  const [openHeureDebut, setOpenHeureDebut] = useState(false)
+  const [openDateFin, setOpenDateFin] = useState(false)
+  const [openHeureFin, setOpenHeureFin] = useState(false)
+  const selectedLanguageCode = i18n.language
+  let sizeDateDeb = 15
+  let sizeDateFin = 40
+  let languageDate = 'fr-fr'
+  const timezones = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-  let dateFormatDebut = dateDebut.toLocaleDateString(languageDate, {
-    year: 'numeric',
-    day: '2-digit',
-    month: 'short',
-    timeZone: "UTC"
-  });
-  console.log(dateFormatDebut)
-  let heureFormatDebut = heureDebut.toLocaleTimeString(languageDate, {
-    hour: 'numeric',
-    minute: 'numeric',
-    timeZone: "UTC"
-  });
-  let dateFormatFin = dateFin.toLocaleDateString(languageDate, {
-    year: 'numeric',
-    day: '2-digit',
-    month: 'short',
-    timeZone: "UTC"
-  });
-  let heureFormatFin = heureFin.toLocaleTimeString(languageDate, {
-    hour: 'numeric',
-    minute: 'numeric',
-    timeZone: "UTC"
-  });
+  let dateFormatDebut = new Intl.DateTimeFormat(languageDate, {
+    dateStyle: 'medium',
+    timeZone: timezones,
+  }).format(dateDebut)
+  let heureFormatDebut = new Intl.DateTimeFormat(languageDate, {
+    timeStyle: 'short',
+    timeZone: timezones,
+  }).format(heureDebut)
+  let dateFormatFin = new Intl.DateTimeFormat(languageDate, {
+    dateStyle: 'medium',
+    timeZone: timezones,
+  }).format(dateFin)
+  let heureFormatFin = new Intl.DateTimeFormat(languageDate, {
+    timeStyle: 'short',
+    timeZone: timezones,
+  }).format(heureFin)
 
   const handleOpenDateDebutChange = () => {
-    setOpenDateDebut(true);
-  };
+    setOpenDateDebut(true)
+  }
 
   const handleOpenHeureDebutChange = () => {
-    setOpenHeureDebut(true);
-  };
+    setOpenHeureDebut(true)
+  }
 
   const handleOpenDateFinChange = () => {
-    setOpenDateFin(true);
-  };
+    setOpenDateFin(true)
+  }
 
   const handleOpenHeureFinChange = () => {
-    setOpenHeureFin(true);
-  };
+    setOpenHeureFin(true)
+  }
 
   const styles = StyleSheet.create({
     detailsTitle: {
       ...defaultStyles.text,
       ...defaultStyles.requestDetailsTitle,
     },
-  });
+    container: {
+      flex: 1,
+      padding: 16,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 10,
+    },
+    labelContainer: {
+      width: 100, // Ajustez cette valeur pour correspondre à la longueur de vos textes
+    },
+    inputContainer: {
+      flex: 1,
+      flexDirection: 'column',
+    },
+    textInput: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 10,
+    },
+  })
 
   return (
     <View>
       <Text style={styles.detailsTitle}>{t('AddEvent.DateHeure')}</Text>
-      <View style={{flexDirection: 'row'}}>
-        <View style={{marginVertical: 25, marginRight:sizeDateDeb}}>
+      <View style={styles.container}>
+      <View style={styles.row}>
+        <View style={styles.labelContainer}>
           <Text style={styles.detailsTitle}>{t('AddEvent.DateDebut')}</Text>
         </View>
-        <View>
+        <View style={styles.inputContainer}>
           <TextInput
             returnKeyType="next"
             value={dateFormatDebut}
@@ -118,21 +129,22 @@ export const DateHeureSection = ({
             open={openDateDebut}
             mode="date"
             date={dateDebut}
-            onDateChange={text => {
-              setDateDebut(text);
-              setDateDeb(text);
+            locale={languageDate}
+            onDateChange={(text) => {
+              setDateDebut(text)
+              setDateDeb(text)
             }}
-            onConfirm={date => {
-              setOpenDateDebut(false);
-              setDateDebut(date);
-              setDateDeb(date);
+            onConfirm={(date) => {
+              setOpenDateDebut(false)
+              setDateDebut(date)
+              setDateDeb(date)
             }}
             onCancel={() => {
-              setOpenDateDebut(false);
+              setOpenDateDebut(false)
             }}
           />
         </View>
-        <View style={{marginLeft: 25}}>
+        <View style={{marginHorizontal: 15}}>
           <TextInput
             returnKeyType="next"
             value={heureFormatDebut}
@@ -146,26 +158,26 @@ export const DateHeureSection = ({
             open={openHeureDebut}
             mode="time"
             date={heureDebut}
-            onDateChange={text => {
-              setHeureDebut(text);
-              setHeureDeb(text);
+            onDateChange={(text) => {
+              setHeureDebut(text)
+              setHeureDeb(text)
             }}
-            onConfirm={date => {
-              setOpenHeureDebut(false);
-              setHeureDebut(date);
-              setHeureDeb(date);
+            onConfirm={(date) => {
+              setOpenHeureDebut(false)
+              setHeureDebut(date)
+              setHeureDeb(date)
             }}
             onCancel={() => {
-              setOpenHeureDebut(false);
+              setOpenHeureDebut(false)
             }}
           />
         </View>
       </View>
-      <View style={{flexDirection: 'row'}}>
-        <View style={{marginVertical: 25, marginRight:sizeDateFin}}>
+      <View style={styles.row}>
+        <View style={styles.labelContainer}>
           <Text style={styles.detailsTitle}>{t('AddEvent.DateFin')}</Text>
         </View>
-        <View>
+        <View style={styles.inputContainer}>
           <TextInput
             returnKeyType="next"
             value={dateFormatFin}
@@ -179,21 +191,22 @@ export const DateHeureSection = ({
             open={openDateFin}
             mode="date"
             date={dateFin}
-            onDateChange={text => {
-              setDateFin(text);
-              setDateF(text);
+            locale={languageDate}
+            onDateChange={(text) => {
+              setDateFin(text)
+              setDateF(text)
             }}
-            onConfirm={date => {
-              setOpenDateFin(false);
-              setDateFin(date);
-              setDateF(date);
+            onConfirm={(date) => {
+              setOpenDateFin(false)
+              setDateFin(date)
+              setDateF(date)
             }}
             onCancel={() => {
-              setOpenDateFin(false);
+              setOpenDateFin(false)
             }}
           />
         </View>
-        <View style={{marginLeft: 25}}>
+        <View style={{marginHorizontal: 15}}>
           <TextInput
             returnKeyType="next"
             value={heureFormatFin}
@@ -207,21 +220,22 @@ export const DateHeureSection = ({
             open={openHeureFin}
             mode="time"
             date={heureFin}
-            onDateChange={text => {
-              setHeureFin(text);
-              setHeureF(text);
+            onDateChange={(text) => {
+              setHeureFin(text)
+              setHeureF(text)
             }}
-            onConfirm={date => {
-              setOpenHeureFin(false);
-              setHeureFin(date);
-              setHeureF(date);
+            onConfirm={(date) => {
+              setOpenHeureFin(false)
+              setHeureFin(date)
+              setHeureF(date)
             }}
             onCancel={() => {
-              setOpenHeureFin(false);
+              setOpenHeureFin(false)
             }}
           />
         </View>
       </View>
+      </View>
     </View>
-  );
-};
+  )
+}

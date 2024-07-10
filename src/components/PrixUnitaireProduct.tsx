@@ -1,16 +1,18 @@
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import { View} from 'react-native'
-import TextInput from './TextInput'
-
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import {View} from 'react-native';
+import TextInput from './TextInput';
 
 type Props = {
-  productPrixUnitaire: string
-  setProductPrixUnitaire: (value: string) => void
-}
+  productPrixUnitaire: string;
+  setProductPrixUnitaire: (value: string) => void;
+};
 
-export const PrixUnitaireProduct = ({productPrixUnitaire, setProductPrixUnitaire}: Props) => {
-  const {t} = useTranslation()
+export const PrixUnitaireProduct = ({
+  productPrixUnitaire,
+  setProductPrixUnitaire,
+}: Props) => {
+  const {t} = useTranslation();
 
   return (
     <View>
@@ -20,8 +22,8 @@ export const PrixUnitaireProduct = ({productPrixUnitaire, setProductPrixUnitaire
         value={productPrixUnitaire}
         onChangeText={text => setProductPrixUnitaire(text)}
         autoCapitalize="none"
-        keyboardType='number-pad'
+        keyboardType="number-pad"
       />
     </View>
-  )
-}
+  );
+};

@@ -1,18 +1,18 @@
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import {StyleSheet, Text, View, ViewStyle} from 'react-native'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import { CustomInputText } from './CustomInputText'
-import TextInput from './TextInput'
-
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+import {View} from 'react-native';
+import TextInput from './TextInput';
 
 type Props = {
-  productQuantite: string
-  setProductQuantite: (value: string) => void
-}
+  productQuantite: string;
+  setProductQuantite: (value: string) => void;
+};
 
-export const QuantiteProduct = ({productQuantite, setProductQuantite}: Props) => {
-  const {t} = useTranslation()
+export const QuantiteProduct = ({
+  productQuantite,
+  setProductQuantite,
+}: Props) => {
+  const {t} = useTranslation();
 
   return (
     <View>
@@ -22,8 +22,8 @@ export const QuantiteProduct = ({productQuantite, setProductQuantite}: Props) =>
         value={productQuantite}
         onChangeText={text => setProductQuantite(text)}
         autoCapitalize="none"
-        keyboardType='number-pad'
+        keyboardType="number-pad"
       />
     </View>
-  )
-}
+  );
+};

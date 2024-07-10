@@ -1,37 +1,37 @@
-import {uuid} from '@aries-framework/core/build/utils/uuid'
-import {Accueil} from '../contexts/types'
+import {v4 as uuidv4} from 'uuid'
+import {Accueil} from '../contexts/types';
 
 export const SettingsList = (t: any): Accueil[] => {
   return [
     {
-      id: uuid(),
+      id: uuidv4(),
       title: t('SettingsList.Settings'),
-      route : 'Setting',
+      route: 'Setting',
       images: 'Icon3:setting',
     },
     {
-        id: uuid(),
-        title: t('SettingsList.ContributionsList'),
-        route : 'ContributionsList',
-        images: 'Icon:money',
+      id: uuidv4(),
+      title: t('SettingsList.ContributionsList'),
+      route: 'ContributionsList',
+      images: 'Icon:money',
     },
     {
-      id: uuid(),
+      id: uuidv4(),
       title: t('SettingsList.InvitationsList'),
-      route : 'InvitationsList',
+      route: 'InvitationsList',
       images: 'Icon2:envelope-letter',
-  },
+    },
     {
-      id: uuid(),
+      id: uuidv4(),
       title: t('SettingsList.ProductOrderings'),
-      route : 'ProductOrderings',
+      route: 'ProductOrderings',
       images: 'Icon1:hand-holding-usd',
-  },
+    },
     {
-      id: uuid(),
+      id: uuidv4(),
       title: t('SettingsList.ProductDelivering'),
-      route : 'ProductDelivering',
+      route: 'ProductDelivering',
       images: 'Icon:shopping-cart',
-  },
-  ]
-}
+    },
+  ];
+};

@@ -1,26 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Image, Pressable} from 'react-native';
-import { theme } from '../core/theme';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
 import storage from '@react-native-firebase/storage';
-import { Product } from '../contexts/types';
-import { useTranslation } from 'react-i18next';
-import { Swipeable } from 'react-native-gesture-handler';
-import { useTheme } from '../contexts/theme';
+import {ManageEventsParamList, Product} from '../contexts/types';
+import {useTranslation} from 'react-i18next';
+import {Swipeable} from 'react-native-gesture-handler';
+import {useTheme} from '../contexts/theme';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import firestore from '@react-native-firebase/firestore';
 
 type Props = {
-  product: Product
-    color: string
-  }
+  product: Product;
+  color: string;
+};
+
+type EditProductProps = StackNavigationProp<
+  ManageEventsParamList,
+  'EditProduct'
+>;
 
 const ProductLists = ({product, color}: Props) => {
   const {t} = useTranslation();
-  const {ColorPallet} = useTheme()
-  const [imageUrl, setImageUrl] = useState('');
+  const {ColorPallet} = useTheme();
+  const navigation = useNavigation<EditProductProps>();
+  const [imageUrl, setImageUrl] = useState<string>('');
 
   useEffect(() => {
-    storage().ref(product.images).getDownloadURL().then( url => setImageUrl(url))
-  }, [imageUrl]);
+    const getImages = async () => {
+      const url = await storage().ref(product.images).getDownloadURL();
+      setImageUrl(url);
+    };
+      getImages();
+  }, [product.images]); 
 
   const styles = StyleSheet.create({
     contactCon: {
@@ -39,7 +51,7 @@ const ProductLists = ({product, color}: Props) => {
       backgroundColor: '#d9d9d9',
       alignItems: 'center',
       justifyContent: 'center',
-      color:color,
+      color: color,
     },
     contactDat: {
       flex: 1,
@@ -48,11 +60,11 @@ const ProductLists = ({product, color}: Props) => {
     },
     txt: {
       fontSize: 18,
-      color:color,
+      color: color,
     },
     name: {
       fontSize: 16,
-      color:color,
+      color: color,
     },
     phoneNumber: {
       color: '#888',
@@ -70,7 +82,6 @@ const ProductLists = ({product, color}: Props) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingVertical: 50,
       paddingHorizontal: 34,
       backgroundColor: ColorPallet.error,
     },
@@ -79,44 +90,75 @@ const ProductLists = ({product, color}: Props) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingVertical: 50,
       paddingHorizontal: 34,
       backgroundColor: ColorPallet.primary,
     },
   });
 
   const handleDelete = () => {
-    
-  }
+    firestore()
+      .collection('products')
+      .doc(product.id)
+      .delete()
+      .then(() => {
+        console.log('Products deleted!');
+      });
+  };
+
+  const handleEdit = () => {
+    navigation.navigate('EditProduct', {item: product});
+  };
 
   const RightSwipeActions = () => {
     return (
       <>
-      <Pressable onPress={() => handleDelete()} style={({pressed}) => [styles.deleteContainer, pressed && {opacity: 0.8}]}>
-        <Icon name="trash" size={24} color={ColorPallet.white} />
-      </Pressable>
-      <Pressable onPress={() => handleDelete()} style={({pressed}) => [styles.editContainer, pressed && {opacity: 0.8}]}>
-      <Icon name="edit" size={24} color={ColorPallet.white} />
-    </Pressable>
-    </>
-    )
-  }
+        <Pressable
+          onPress={() => handleDelete()}
+          style={({pressed}) => [
+            styles.deleteContainer,
+            pressed && {opacity: 0.8},
+          ]}>
+          <Icon name="trash" size={30} color={ColorPallet.white} />
+        </Pressable>
+        <Pressable
+          onPress={() => handleEdit()}
+          style={({pressed}) => [
+            styles.editContainer,
+            pressed && {opacity: 0.8},
+          ]}>
+          <Icon name="edit" size={30} color={ColorPallet.white} />
+        </Pressable>
+      </>
+    );
+  };
 
   return (
     <Swipeable renderRightActions={RightSwipeActions}>
-    <View style={styles.contactCon}>
-      <View style={styles.imgCon}>
-        <Image
-          style={styles.thumb}
-          source={imageUrl==='' ? require('../../assets/No_image_available.svg.png') : {uri:imageUrl}} 
-        />
+      <View style={styles.contactCon}>
+        <View style={styles.imgCon}>
+          <Image
+            style={styles.thumb}
+            source={
+              imageUrl === ''
+                ? require('../../assets/No_image_available.svg.png')
+                : {uri: imageUrl}
+            }
+          />
+        </View>
+        <View style={styles.contactDat}>
+          <Text style={styles.name}>
+            {t('AddProduct.Name')} : {product.name} {t('AddProduct.Quantite')} :{' '}
+            {product.quantite}{' '}
+          </Text>
+          <Text style={styles.name}>
+            {t('AddProduct.PrixUnitaire')} : {product.prixUnitaire}{' '}
+            {t('AddProduct.Devise')} : {product.devise}{' '}
+          </Text>
+          <Text style={styles.name}>
+            {t('AddProduct.Description')} : {product.description}
+          </Text>
+        </View>
       </View>
-      <View style={styles.contactDat}>
-        <Text style={styles.name}>{t('AddProduct.Name')} : {product.name} {t('AddProduct.Quantite')} : {product.quantite} </Text>
-        <Text style={styles.name}>{t('AddProduct.PrixUnitaire')} : {product.prixUnitaire} {t('AddProduct.Devise')} : {product.devise} </Text>
-        <Text style={styles.name}>{t('AddProduct.Description')} : {product.description}</Text>
-      </View>
-    </View>
     </Swipeable>
   );
 };
