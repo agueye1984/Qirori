@@ -11,7 +11,6 @@ import Paragraph from '../components/Paragraph';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
 import firestore from '@react-native-firebase/firestore';
-import SmsApi from '../apis/SmsApi';
 
 const OTPAuthScreen = () => {
 const route = useRoute<RouteProp<ManageEventsParamList, 'OTPAuthScreen'>>();
@@ -49,9 +48,9 @@ const route = useRoute<RouteProp<ManageEventsParamList, 'OTPAuthScreen'>>();
           .get()
           .then(async document => {
             const userData = document.data() as User;
-            const otp = SmsApi.generateOTP();
+           /*  const otp = SmsApi.generateOTP();
               SmsApi.sendOTPBySMS(userData.phoneNumber,otp);
-            setOtp(otp);
+            setOtp(otp); */
           })
           .catch(error => {
             console.log('error1 ' + error);

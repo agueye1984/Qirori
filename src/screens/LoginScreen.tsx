@@ -22,7 +22,6 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ManageEventsParamList, User } from '../contexts/types';
-import SmsApi from '../apis/SmsApi';
 
 type OTPAuthScreenProp = StackNavigationProp<
   ManageEventsParamList,
@@ -93,8 +92,8 @@ const LoginScreen = () => {
              // const confirmation = await auth().signInWithPhoneNumber(user.phoneNumber);
              console.log(user)
              if(user.actif===true){
-              const otp = SmsApi.generateOTP();
-              console.log(otp)
+            /*   const otp = SmsApi.generateOTP();
+              console.log(otp) */
              // SmsApi.sendOTPBySMS(user.phoneNumber,otp)
              //navigate('OTPAuthScreen', {code: otp});
              if(user.profilId==='1'){

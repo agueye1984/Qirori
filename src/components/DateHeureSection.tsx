@@ -40,7 +40,10 @@ export const DateHeureSection = ({
   const selectedLanguageCode = i18n.language
   let sizeDateDeb = 15
   let sizeDateFin = 40
-  let languageDate = 'fr-fr'
+  let languageDate = 'fr-FR'
+  if(selectedLanguageCode==='en'){
+    languageDate = 'en-US'
+  }
   const timezones = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   let dateFormatDebut = new Intl.DateTimeFormat(languageDate, {

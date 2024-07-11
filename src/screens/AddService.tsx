@@ -39,6 +39,7 @@ import axios from 'axios'
 import TextInput from '../components/TextInput'
 import { QuantiteProduct } from '../components/QuantiteProduct'
 import WeekSchedule from '../components/WeekSchedule'
+import MultiImagePicker from '../components/MultiImagePicker'
 
 export const AddService = () => {
   const currentUser = auth().currentUser
@@ -447,7 +448,7 @@ export const AddService = () => {
 },
     { key: 'image', component: (
         <View style={defaultStyles.section}>
-          <ImageProduct productImage={serviceImage} setProductImage={handleImageChange} />
+          <MultiImagePicker  />
         </View>
       )
     },
