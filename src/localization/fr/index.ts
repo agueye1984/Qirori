@@ -59,6 +59,12 @@ const translation = {
     Paid: "Payer",
     Confirm: "Confirmer",
     ZoneErrorEmpty: 'Zone ne peut pas être vide.',
+    ChooseImages: 'Choisir des images',
+    SelectTime: "Sélectionner l'heure",
+    SelectDate: "Sélectionner la date",
+    ProvinceErrorEmpty: 'Province ne peut pas être vide.',
+    RegionErrorEmpty: 'Region ne peut pas être vide.',
+    TypePrixErrorEmpty: 'Type de Prix ne peut pas être vide.',
   },
   LoginScreen: {
     title: 'Connectez-vous',
@@ -386,6 +392,20 @@ const translation = {
   TypePrix:{
     Unit: "Par unité",
     Person: "Par Personne",
+  },
+  WeekendList:{
+    Lundi: "Lundi",
+    Mardi: "Mardi",
+    Mercredi: "Mercredi",
+    Jeudi: "Jeudi",
+    Vendredi: "Vendredi",
+    Samedi: "Samedi",
+    Dimanche: "Dimanche",
+  },
+  WeekSchedule:{
+    StartTime:"Heure de début",
+    EndTime:"Heure de fin",
+    Capacity:"Capacité"
   },
 };
 

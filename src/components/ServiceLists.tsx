@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
+import {View, Text, StyleSheet, Image, Pressable, Dimensions} from 'react-native';
 import storage from '@react-native-firebase/storage';
 import {ManageEventsParamList, Offre, Service} from '../contexts/types';
 import {useTranslation} from 'react-i18next';
@@ -10,11 +10,14 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 import { CategoryList } from './CategoryList';
+import Carousel from 'react-native-snap-carousel';
 
 type Props = {
   service: Service;
   color: string;
 };
+
+const { width: viewportWidth } = Dimensions.get('window');
 
 type EditServiceProps = StackNavigationProp<
   ManageEventsParamList,
@@ -25,17 +28,29 @@ const ServiceLists = ({service, color}: Props) => {
   const {t} = useTranslation();
   const {ColorPallet} = useTheme();
   const navigation = useNavigation<EditServiceProps>();
-  const [imageUrl, setImageUrl] = useState('');
+  const [imagesUrl, setImagesUrl] = useState<string[]>([]);
 
   const category = CategoryList(t).find(product => product.id == service.category);
 
    useEffect(() => {
     const getImages = async () => {
-      const url = await storage().ref(service.images).getDownloadURL();
-      setImageUrl(url);
+      const tabUrl:  string[]=[]
+      service.images.map(async imageServ => {
+      const url = await storage().ref(imageServ).getDownloadURL();
+      tabUrl.push(url)
+    })
+    setImagesUrl(tabUrl);
     };
       getImages();
   }, [service.images]); 
+
+  const renderItem = ({ item }: any) => {
+    return (
+      <View style={styles.slide}>
+        <Image source={{ uri: item }} style={styles.image} />
+      </View>
+    );
+  };
 
   const styles = StyleSheet.create({
     contactCon: {
@@ -96,6 +111,15 @@ const ServiceLists = ({service, color}: Props) => {
       paddingHorizontal: 34,
       backgroundColor: ColorPallet.primary,
     },
+    slide: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    image: {
+      width: viewportWidth,
+      height: viewportWidth * 0.75, // Adjust according to your aspect ratio
+    },
   });
 
   const handleDelete = async () => {
@@ -139,14 +163,22 @@ const ServiceLists = ({service, color}: Props) => {
     <Swipeable renderRightActions={RightSwipeActions}>
       <View style={styles.contactCon}>
         <View style={styles.imgCon}>
-          <Image
+        <Carousel
+      data={imagesUrl}
+      renderItem={renderItem}
+      sliderWidth={viewportWidth}
+      itemWidth={viewportWidth}
+      autoplay={true}
+      loop={true}
+    />
+         {/*  <Image
             style={styles.thumb}
             source={
               imageUrl === ''
                 ? require('../../assets/No_image_available.svg.png')
                 : {uri: imageUrl}
             }
-          />
+          /> */}
         </View>
         <View style={styles.contactDat}>
           <Text style={styles.name}>

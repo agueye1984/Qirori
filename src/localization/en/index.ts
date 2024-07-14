@@ -59,6 +59,12 @@ const translation = {
     Paid: "Paid",
     Confirm: "Confirm",
     ZoneErrorEmpty: 'Area cannot be empty.',
+    ChooseImages: 'Choose images',
+    SelectTime: 'Select time',
+    SelectDate: 'Select date',
+    ProvinceErrorEmpty: 'Province cannot be empty.',
+    RegionErrorEmpty: 'Region cannot be empty.',
+    TypePrixErrorEmpty: 'Type of Price cannot be empty.',
   },
   LoginScreen: {
     title: 'Login',
@@ -386,6 +392,20 @@ const translation = {
   TypePrix:{
     Unit: "Per unit",
     Person: "Per Person",
+  },
+  WeekendList:{
+    Lundi: "Monday",
+    Mardi: "Tuesday",
+    Mercredi: "Wednesday",
+    Jeudi: "Thursday",
+    Vendredi: "Friday",
+    Samedi: "Saturday",
+    Dimanche: "Sunday",
+  },
+  WeekSchedule:{
+    StartTime:"Start Time",
+    EndTime:"End Time",
+    Capacity:"Capacity"
   },
   
   TermsV2: {

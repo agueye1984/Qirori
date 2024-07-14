@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Button, Image, ScrollView, StyleSheet } from 'react-native';
 import ImagePicker, { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 
+type Props = {
+    setServiceImages: (value: any[]) => void;
+  };
 
-const MultiImagePicker = () => {
+const MultiImagePicker = ({setServiceImages}: Props) => {
+  const {t} = useTranslation();
   const [images, setImages] = useState<string[]>([]);
 
   const handleChooseImages = () => {
     const options = {
       mediaType: 'photo' as MediaType,
-      selectionLimit: 5, // Limite de sélection d'images
+      selectionLimit: 10, // Limite de sélection d'images
     };
   
     launchImageLibrary(options, (response: ImagePickerResponse) => {
@@ -22,14 +27,15 @@ const MultiImagePicker = () => {
           .map(asset => asset.uri)
           .filter(uri => uri !== undefined) as string[]; // Utilisation de filter pour exclure les undefined
   
-        setImages(prevImages => [...prevImages, ...selectedImages]);
+        setImages((prevImages) => [...prevImages, ...selectedImages]);
+        setServiceImages(selectedImages)
       }
     });
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Button title="Choisir des images" onPress={handleChooseImages} />
+      <Button title={t('Global.ChooseImages')} onPress={handleChooseImages} />
       <View style={styles.imageContainer}>
         {images.map((imageUri, index) => (
           <Image key={index} source={{ uri: imageUri }} style={styles.image} />

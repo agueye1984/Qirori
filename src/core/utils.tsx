@@ -1,5 +1,5 @@
 import {TFunction} from 'i18next';
-import {Location} from '../contexts/types';
+import {Location, ScheduleState} from '../contexts/types';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 
 export const emailValidator = (
@@ -207,7 +207,7 @@ export const categoryValidator = (
 };
 
 export const offreValidator = (
-  offre: string,
+  offre: string[],
   t: TFunction<'translation', undefined>,
 ) => {
   if (!offre || offre.length <= 0) {
@@ -218,10 +218,10 @@ export const offreValidator = (
 };
 
 export const conditionValidator = (
-  conditions: string,
+  conditions: ScheduleState | null,
   t: TFunction<'translation', undefined>,
 ) => {
-  if (!conditions || conditions.length <= 0) {
+  if (!conditions || conditions===null) {
     return t('Global.ConditionsErrorEmpty');
   }
 
@@ -229,11 +229,55 @@ export const conditionValidator = (
 };
 
 export const zoneValidator = (
-  zone: string,
+  zone: string[],
   t: TFunction<'translation', undefined>,
 ) => {
   if (!zone || zone.length <= 0) {
     return t('Global.ZoneErrorEmpty');
+  }
+
+  return '';
+};
+
+export const provinceValidator = (
+  province: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!province || province.length <= 0) {
+    return t('Global.ProvinceErrorEmpty');
+  }
+
+  return '';
+};
+
+export const regionValidator = (
+  region: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!region || region.length <= 0) {
+    return t('Global.RegionErrorEmpty');
+  }
+
+  return '';
+};
+
+export const typePrixValidator = (
+  type_prix: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!type_prix || type_prix.length <= 0) {
+    return t('Global.TypePrixErrorEmpty');
+  }
+
+  return '';
+};
+
+export const imagesValidator = (
+  image: string[],
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!image || image.length <= 0) {
+    return t('Global.ImageErrorEmpty');
   }
 
   return '';

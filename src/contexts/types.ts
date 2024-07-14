@@ -163,11 +163,13 @@ export interface Service {
   name: string
   description: string
   userId: string | null
-  images: string
+  images: string[]
   offres: Offre[]
-  offresIds: string[]
-  conditions: string[]
-  zone: string
+  conditions: ScheduleState
+  zone: string[]
+  province: string
+  region: string
+  typePrix: string
 }
 
 export interface Panier {
@@ -270,3 +272,13 @@ export interface TypeCondition {
   nameEn: string
   userId: string
 }
+
+export type DaySchedule = {
+  startTime: string;
+  endTime: string;
+  capacity: string;
+};
+
+export type ScheduleState = {
+  [key: string]: DaySchedule;
+};

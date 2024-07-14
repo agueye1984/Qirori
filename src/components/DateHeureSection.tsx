@@ -38,8 +38,6 @@ export const DateHeureSection = ({
   const [openDateFin, setOpenDateFin] = useState(false)
   const [openHeureFin, setOpenHeureFin] = useState(false)
   const selectedLanguageCode = i18n.language
-  let sizeDateDeb = 15
-  let sizeDateFin = 40
   let languageDate = 'fr-FR'
   if(selectedLanguageCode==='en'){
     languageDate = 'en-US'
@@ -145,6 +143,9 @@ export const DateHeureSection = ({
             onCancel={() => {
               setOpenDateDebut(false)
             }}
+            confirmText={t('Global.Confirm')}
+        cancelText={t('Global.Cancel')}
+        title={t('Global.SelectDate')}
           />
         </View>
         <View style={{marginHorizontal: 15}}>
@@ -173,6 +174,9 @@ export const DateHeureSection = ({
             onCancel={() => {
               setOpenHeureDebut(false)
             }}
+            confirmText={t('Global.Confirm')}
+        cancelText={t('Global.Cancel')}
+        title={t('Global.SelectTime')}
           />
         </View>
       </View>
@@ -207,6 +211,9 @@ export const DateHeureSection = ({
             onCancel={() => {
               setOpenDateFin(false)
             }}
+            confirmText={t('Global.Confirm')}
+        cancelText={t('Global.Cancel')}
+        title={t('Global.SelectDate')}
           />
         </View>
         <View style={{marginHorizontal: 15}}>
@@ -235,6 +242,9 @@ export const DateHeureSection = ({
             onCancel={() => {
               setOpenHeureFin(false)
             }}
+            confirmText={t('Global.Confirm')}
+        cancelText={t('Global.Cancel')}
+        title={t('Global.SelectTime')}
           />
         </View>
       </View>
