@@ -193,6 +193,11 @@ const translation = {
     Conditions: 'Conditions',
     Capacites: 'Capacité',
     Calendrier: 'Calendrier',
+    AddFormulas: 'Ajouter des formules',
+    AddFormula: 'Ajouter une formule',
+    FormulasAdded: 'Formules Ajoutées',
+    Formula: 'Formule',
+    TypePrix: 'Type de prix',
   },
   Achats: {
     title: 'Acheter',

@@ -1,5 +1,5 @@
 import {TFunction} from 'i18next';
-import {Location, ScheduleState} from '../contexts/types';
+import {Formula, Location, ScheduleState} from '../contexts/types';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 
 export const emailValidator = (
@@ -278,6 +278,17 @@ export const imagesValidator = (
 ) => {
   if (!image || image.length <= 0) {
     return t('Global.ImageErrorEmpty');
+  }
+
+  return '';
+};
+
+export const formulaValidator = (
+  formule: Formula[],
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!formule || formule.length <= 0) {
+    return t('Global.FormulaErrorEmpty');
   }
 
   return '';

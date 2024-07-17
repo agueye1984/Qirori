@@ -164,12 +164,11 @@ export interface Service {
   description: string
   userId: string | null
   images: string[]
-  offres: Offre[]
+  formules: Formula[]
   conditions: ScheduleState
   zone: string[]
   province: string
   region: string
-  typePrix: string
 }
 
 export interface Panier {
@@ -282,3 +281,10 @@ export type DaySchedule = {
 export type ScheduleState = {
   [key: string]: DaySchedule;
 };
+
+export type Formula= {
+  id: number;
+  offers: string[];
+  priceType: string;
+  amount: string;
+}

@@ -2,21 +2,19 @@ import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   FlatList,
+  Pressable,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
 import {BacktoHome} from '../components/BacktoHome';
 import Header from '../components/Header';
 import {v4 as uuidv4} from 'uuid';
-import {Offre, ScheduleState} from '../contexts/types';
+import {Formula, ScheduleState, TypeOffre} from '../contexts/types';
 import {NameProduct} from '../components/NameProduct';
 import {DescriptionProduct} from '../components/DescriptionProduct';
-import {ImageProduct} from '../components/ImageProduct';
 import {useTranslation} from 'react-i18next';
 import Button from '../components/Button';
 import {OffreService} from '../components/OffreService';
@@ -30,7 +28,6 @@ import {
   conditionValidator,
   descriptionValidator,
   imagesValidator,
-  imageValidator,
   nameSectionValidator,
   offreValidator,
   prixUnitaireValidator,
@@ -40,22 +37,20 @@ import {
   zoneValidator,
 } from '../core/utils';
 import {useStore} from '../contexts/store';
-import {ConditionsService} from '../components/ConditionsService';
 import {ZoneService} from '../components/ZoneService';
-import Icon from 'react-native-vector-icons/AntDesign';
 import {SelectList} from 'react-native-dropdown-select-list';
 import {theme} from '../core/theme';
 import {useTheme} from '../contexts/theme';
 import countryGeonameIds from '../services/countryGeonameIds.json';
 import axios from 'axios';
-import TextInput from '../components/TextInput';
-import {QuantiteProduct} from '../components/QuantiteProduct';
 import WeekSchedule from '../components/WeekSchedule';
 import MultiImagePicker from '../components/MultiImagePicker';
+import {getRecordById} from '../services/FirestoreServices';
+import {Swipeable} from 'react-native-gesture-handler';
+import Icon1 from 'react-native-vector-icons/FontAwesome';
 
 export const AddService = () => {
   const currentUser = auth().currentUser;
-  let initOffre: Offre[] = [];
   const {i18n, t} = useTranslation();
   const defaultStyles = DefaultComponentsThemes();
   const navigation = useNavigation();
@@ -64,9 +59,7 @@ export const AddService = () => {
   const [state] = useStore();
   const [serviceDescription, setServiceDescription] = useState<string>('');
   const [descriptionError, setDescriptionError] = useState('');
-  const [serviceImage, setServiceImage] = useState<string>('');
   const [imageError, setImageError] = useState('');
-  const [offres, setOffres] = useState(initOffre);
   const [offreService, setOffreService] = useState<string[]>([]);
   const [offreError, setOffreError] = useState('');
   const [serviceCategory, setServiceCategory] = useState<string>('');
@@ -74,18 +67,12 @@ export const AddService = () => {
   const [montant, setMontant] = useState<string>('');
   const [montantError, setMontantError] = useState('');
   const devise = state.currency.toString();
-  const [offresIds, setOffresIds] = useState<string[]>([]);
   const [serviceConditions, setServiceConditions] =
     useState<ScheduleState | null>(null);
-  const [conditionsError, setConditionsError] = useState('');
+    const [conditionsError, setConditionsError] = useState<string>('');
   const [boutonActif, setBoutonActif] = useState(false);
   const [zoneService, setZoneService] = useState<string[]>([]);
   const [zoneError, setZoneError] = useState('');
-  const [zones, setZones] = useState<string[]>([]);
-  const [zonesIds, setZonesIds] = useState<string[]>([]);
-  const [showCustomRegionInput, setShowCustomRegionInput] =
-    useState<boolean>(false);
-  const [customOffre, setCustomOffre] = useState<string>('');
   const {ColorPallet} = useTheme();
   const [provinces, setProvinces] = useState<{key: string; value: string}[]>(
     [],
@@ -99,10 +86,11 @@ export const AddService = () => {
   const selectedLanguageCode = i18n.language;
   const [typePrix, setTypePrix] = useState<string>('');
   const [typePrixError, setTypePrixError] = useState('');
-  const [capacite, setCapacite] = useState<string>('');
-  const [capaciteError, setCapaciteError] = useState('');
   const [serviceImages, setServiceImages] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<ScheduleState | null>(null);
+  const [formulas, setFormulas] = useState<Formula[]>([]);
+  const [loadedOffers, setLoadedOffers] = useState<{[key: number]: string[]}>(
+    {},
+  );
 
   const typesPrix: any[] = [
     {
@@ -129,7 +117,6 @@ export const AddService = () => {
             url: apiUrl,
           });
           if (result) {
-            // console.log(result)
             const provinceList = result.data.geonames.map((province: any) => ({
               key: province.geonameId,
               value: province.name,
@@ -158,7 +145,6 @@ export const AddService = () => {
             url: apiUrl,
           });
           if (result) {
-            // console.log(result)
             const regionList = result.data.geonames.map((region: any) => ({
               key: region.geonameId,
               value: region.name,
@@ -176,6 +162,28 @@ export const AddService = () => {
     fetchData();
   }, [province]);
 
+  useEffect(() => {
+    const loadOffers = async () => {
+      const newLoadedOffers = {...loadedOffers};
+      for (const formula of formulas) {
+        if (!newLoadedOffers[formula.id]) {
+          const tabOffer: string[] = [];
+          for (const offer of formula.offers) {
+            const typeOffre = (await getRecordById(
+              'type_offres',
+              offer,
+            )) as TypeOffre;
+            tabOffer.push(typeOffre.nameFr);
+          }
+          newLoadedOffers[formula.id] = tabOffer;
+        }
+      }
+      setLoadedOffers(newLoadedOffers);
+    };
+
+    loadOffers();
+  }, [formulas]);
+
   const handleNameChange = (value: string) => {
     setNameError('');
     setServiceName(value);
@@ -184,27 +192,6 @@ export const AddService = () => {
     setDescriptionError('');
     setServiceDescription(value);
   };
-
-  const handleImageChange = (value: string) => {
-    setImageError('');
-    setServiceImage(value);
-  };
-
-  /*  const handleOffreChange = (value: string[]) => {
-    setOffreError('')
-    console.log('handleOffreService values:', JSON.stringify(value))
-
-    if (Array.isArray(value)) {
-      if (value.includes('-1')) {
-        setShowCustomRegionInput(true)
-      } else {
-        setShowCustomRegionInput(false)
-      }
-      setOffreService(value)
-    } else {
-      console.warn('Expected array but got:', value)
-    }
-  } */
 
   const handleOffreChange = (value: string[]) => {
     setOffreError('');
@@ -252,38 +239,18 @@ export const AddService = () => {
     setRegion(value);
   };
 
-  /* const deleteOffre = (offres: Offre[], offresId: string[], number: number) => {
-    setOffres(offres.filter((offer, index) => index !== number))
-    setOffresIds(offresId.filter((offer, index) => index !== number))
-  }
-
-  const addOffre = (offres: Offre[], offresId: string[]) => {
-    const offreEmpty = offreValidator(offre, t)
-    const montantEmpty = prixUnitaireValidator(montant, t)
-    if (offreEmpty || montantEmpty) {
-      setOffreError(offreEmpty)
-      setMontantError(montantEmpty)
-    } else {
-      const id = uuidv4()
-      const offer = {
-        id: id,
-        name: offre,
-        montant: parseInt(montant),
-        devise: devise,
-        typeOffre: '',
-        typeMontant:'',
-        images:'',
-      }
-      offres.push(offer)
-      offresId.push(id)
-      setOffre('')
-      setOffreError('')
-      setMontant('')
-      setMontantError('')
-      setOffres(offres)
-      setOffresIds(offresId)
-    }
-  } */
+  const handleSubmit = () => {
+    const newFormula = {
+      id: formulas.length + 1,
+      offers: offreService,
+      priceType: typePrix,
+      amount: montant,
+    };
+    setFormulas([...formulas, newFormula]);
+    setOffreService([]);
+    setTypePrix('');
+    setMontant('');
+  };
 
   const handleSaveProducts = async () => {
     setBoutonActif(true);
@@ -296,14 +263,14 @@ export const AddService = () => {
       const conditionEmpty = conditionValidator(serviceConditions, t);
       const provinceEmpty = provinceValidator(province, t);
       const regionEmpty = regionValidator(region, t);
-      const offreEmpty = offreValidator(offreService, t);
-      const typePrixEmpty = typePrixValidator(typePrix, t);
-      const montantEmpty = prixUnitaireValidator(montant, t);
-      console.log(descriptionEmpty)
-      /*  if (offres.length === 0) {
-        offreEmpty = offreValidator(offre, t)
-        montantEmpty = prixUnitaireValidator(montant, t)
-      } */
+      let offreEmpty = '';
+      let typePrixEmpty = '';
+      let montantEmpty = '';
+      if (formulas.length === 0) {
+        offreEmpty = offreValidator(offreService, t);
+        typePrixEmpty = typePrixValidator(typePrix, t);
+        montantEmpty = prixUnitaireValidator(montant, t);
+      }
       if (
         nameEmpty ||
         descriptionEmpty ||
@@ -331,9 +298,10 @@ export const AddService = () => {
         setBoutonActif(false);
       } else {
         const uid = uuidv4();
-        let imagesServices: string[] =[]
+        let imagesServices: string[] = [];
         serviceImages.map(async imageServ => {
           const filename = imageServ.split('/').pop();
+          imagesServices.push(filename == undefined ? '' : filename);
           const task = storage().ref(filename).putFile(imageServ);
           try {
             await task;
@@ -341,19 +309,8 @@ export const AddService = () => {
             console.error(e);
             setBoutonActif(false);
           }
-          imagesServices.push(filename==undefined ? '' : filename)
-        })
-        console.log(imagesServices)
-       // const filename = serviceImage.split('/').pop();
-       /*  const task = storage().ref(filename).putFile(serviceImage);
-        try {
-          await task;
-        } catch (e) {
-          console.error(e);
-          setBoutonActif(false);
-        } */
-     //   setBoutonActif(false);
-         firestore()
+        });
+        firestore()
           .collection('services')
           .doc(uid)
           .set({
@@ -362,19 +319,18 @@ export const AddService = () => {
             description: serviceDescription,
             images: imagesServices,
             userId: currentUser?.uid,
-            offres: offreService,
+            formules: formulas,
             zone: zoneService,
             category: serviceCategory,
             conditions: serviceConditions,
             province: province,
             region: region,
-            typePrix: typePrix,
           })
           .then(() => {
-            console.log('Service added!')
-            setBoutonActif(false)
-            navigation.navigate('Ventes' as never)
-          }) 
+            console.log('Service added!');
+            setBoutonActif(false);
+            navigation.navigate('Ventes' as never);
+          });
       }
     } catch (e: unknown) {
       setBoutonActif(false);
@@ -427,7 +383,60 @@ export const AddService = () => {
       fontSize: 14,
       marginTop: 5,
     },
+    formulaItem: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 10,
+      borderRadius: 5,
+      marginTop: 10,
+    },
+    formulaText: {
+      fontSize: 16,
+    },
+    deleteContainer: {
+      marginVertical: 5,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 34,
+      backgroundColor: ColorPallet.error,
+    },
   });
+
+  const handleDelete = (id: number) => {
+    const newFormulas = formulas.filter(formula => formula.id !== id);
+    setFormulas(newFormulas);
+  };
+
+  const renderItem = ({item}: {item: Formula}) => {
+    const tabOffer = loadedOffers[item.id] || [];
+    return (
+      <Swipeable
+        renderRightActions={() => (
+          <Pressable
+            onPress={() => handleDelete(item.id)}
+            style={({pressed}) => [
+              styles.deleteContainer,
+              pressed && {opacity: 0.8},
+            ]}>
+            <Icon1 name="trash" size={30} color={ColorPallet.white} />
+          </Pressable>
+        )}>
+        <View style={styles.formulaItem}>
+          <Text style={styles.formulaText}>
+            {t('AddService.Offre')}s: {tabOffer.join('+')}
+          </Text>
+          <Text style={styles.formulaText}>
+            {t('AddService.TypePrix')}:{' '}
+            {item.priceType === '1' ? t('TypePrix.Unit') : t('TypePrix.Person')}
+          </Text>
+          <Text style={styles.formulaText}>
+            {t('AddProduct.PrixUnitaire')}: {item.amount} {devise}
+          </Text>
+        </View>
+      </Swipeable>
+    );
+  };
 
   const data = [
     {key: 'header', component: <Header>{t('AddService.title')}</Header>},
@@ -442,6 +451,39 @@ export const AddService = () => {
           {categoryError && (
             <Text style={defaultStyles.error}>
               {t('Global.CategoryErrorEmpty')}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      key: 'name',
+      component: (
+        <View style={defaultStyles.section}>
+          <NameProduct
+            productName={serviceName}
+            setProductName={handleNameChange}
+          />
+          {nameError && (
+            <Text style={defaultStyles.error}>
+              {t('Global.NameSectionErrorEmpty')}
+            </Text>
+          )}
+        </View>
+      ),
+    },
+    {
+      key: 'description',
+      component: (
+        <View style={defaultStyles.section}>
+          <DescriptionProduct
+            maxLength={200}
+            productDescription={serviceDescription}
+            setProductDescription={handleDescriptionChange}
+          />
+          {descriptionError && (
+            <Text style={defaultStyles.error}>
+              {t('Global.DescriptionErrorEmpty')}
             </Text>
           )}
         </View>
@@ -495,6 +537,9 @@ export const AddService = () => {
       key: 'offre',
       component: (
         <View style={defaultStyles.section}>
+          <Text style={{fontSize: 20, marginBottom: 10}}>
+            {t('AddService.AddFormulas')}
+          </Text>
           <View style={{marginVertical: 10}}>
             <Text>{t('AddService.Offre')}</Text>
           </View>
@@ -506,22 +551,6 @@ export const AddService = () => {
               </Text>
             )}
           </View>
-        </View>
-      ),
-    },
-    {
-      key: 'name',
-      component: (
-        <View style={defaultStyles.section}>
-          <NameProduct
-            productName={serviceName}
-            setProductName={handleNameChange}
-          />
-          {nameError && (
-            <Text style={defaultStyles.error}>
-              {t('Global.NameSectionErrorEmpty')}
-            </Text>
-          )}
         </View>
       ),
     },
@@ -564,31 +593,32 @@ export const AddService = () => {
       ),
     },
     {
+      key: 'formule',
+      component: (
+        <View style={defaultStyles.section}>
+          <Button mode="contained" onPress={handleSubmit}>
+            {t('AddService.AddFormula')}
+          </Button>
+          <Text style={{fontSize: 20, marginTop: 20}}>
+            {t('AddService.FormulasAdded')}:
+          </Text>
+          <FlatList
+            data={formulas}
+            keyExtractor={item => item.id.toString()}
+            renderItem={renderItem}
+          />
+        </View>
+      ),
+    },
+    {
       key: 'conditions',
       component: (
         <View style={defaultStyles.section}>
           <Text>{t('AddService.Conditions')}</Text>
           <WeekSchedule onScheduleChange={handleConditionsChange} />
-          {offreError && (
+          {conditionsError && (
             <Text style={defaultStyles.error}>
-              {t('Global.OffreErrorEmpty')}
-            </Text>
-          )}
-        </View>
-      ),
-    },
-    {
-      key: 'description',
-      component: (
-        <View style={defaultStyles.section}>
-          <DescriptionProduct
-            maxLength={200}
-            productDescription={serviceDescription}
-            setProductDescription={handleDescriptionChange}
-          />
-          {descriptionError && (
-            <Text style={defaultStyles.error}>
-              {t('Global.DescriptionErrorEmpty')}
+              {t('Global.ConditionsErrorEmpty')}
             </Text>
           )}
         </View>
@@ -607,81 +637,9 @@ export const AddService = () => {
         </View>
       ),
     },
-    /*   { key: 'bottomButtons', component: (
-        <View style={defaultStyles.bottomButtonContainer}>
-          <View style={defaultStyles.buttonContainer}>
-            <Button mode="contained" onPress={() => navigation.navigate('Ventes' as never)} style={defaultStyles.button}>
-              {t('Global.Cancel')}
-            </Button>
-            <Button mode="contained" onPress={handleSaveProducts} style={defaultStyles.button} disabled={boutonActif}>
-              {t('Global.Create')}
-            </Button>
-          </View>
-        </View>
-      )
-    } */
   ];
 
   return (
-    /*  <SafeAreaView style={{flex: 1}}>
-      <BacktoHome textRoute={t('Ventes.title')} />
-      <Header>{t('AddService.title')}</Header>
-      <ScrollView
-        scrollEnabled
-        showsVerticalScrollIndicator
-        automaticallyAdjustKeyboardInsets={true}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={defaultStyles.scrollViewContent}>
-        <View style={defaultStyles.section}>
-          <CategoryService categoryService={serviceCategory} setCategoryService={handleCategoryChange} />
-          {categoryError && <Text style={defaultStyles.error}>{t('Global.CategoryErrorEmpty')}</Text>}
-        </View>
-        <View style={defaultStyles.section}>
-          <Text>{t('AddService.Zone')}</Text>
-          <SelectList
-            boxStyles={styles.container}
-            setSelected={(val: string) => setProvince(val)}
-            data={provinces}
-            search={true}
-            save="key"
-            placeholder={t('Dropdown.Province')}
-            dropdownTextStyles={{backgroundColor: theme.colors.surface}}
-            inputStyles={{backgroundColor: theme.colors.surface}}
-          />
-          <SelectList
-            boxStyles={styles.container}
-            setSelected={(val: string) => setRegion(val)}
-            data={regions}
-            search={true}
-            save="key"
-            placeholder={t('Dropdown.Region')}
-            dropdownTextStyles={{backgroundColor: theme.colors.surface}}
-            inputStyles={{backgroundColor: theme.colors.surface}}
-          />
-          <ZoneService region={region} setZoneService={handleZoneChange} />
-          {zoneError && <Text style={defaultStyles.error}>{t('Global.ZoneErrorEmpty')}</Text>}
-        </View>
-        <View style={defaultStyles.section}>
-          <Text>{t('AddService.Offre')}</Text>
-          <OffreService setOffreService={handleOffreChange} />
-          {offreError && <Text style={defaultStyles.error}>{t('Global.OffreErrorEmpty')}</Text>}
-        </View>
-        <View style={defaultStyles.section}>
-          <ImageProduct productImage={serviceImage} setProductImage={handleImageChange} />
-        </View>
-        {imageError && <Text style={defaultStyles.error}>{t('Global.ImageErrorEmpty')}</Text>}
-      </ScrollView>
-      <View style={defaultStyles.bottomButtonContainer}>
-        <View style={defaultStyles.buttonContainer}>
-          <Button mode="contained" onPress={() => navigation.navigate('Ventes' as never)} style={defaultStyles.button}>
-            {t('Global.Cancel')}
-          </Button>
-          <Button mode="contained" onPress={handleSaveProducts} style={defaultStyles.button} disabled={boutonActif}>
-            {t('Global.Create')}
-          </Button>
-        </View>
-      </View>
-    </SafeAreaView> */
     <SafeAreaView style={{flex: 1}}>
       <BacktoHome textRoute={t('Ventes.title')} />
       <FlatList

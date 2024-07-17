@@ -35,7 +35,27 @@ const WeekSchedule = ({ onScheduleChange }: Props) => {
   }, [schedule]);
 
   const handleDateChange = (day: string, type: 'startTime' | 'endTime', date: Date) => {
-    const formattedTime = date.toTimeString().substr(0, 5);
+    const formattedTime = date.toTimeString().slice(0, 5);
+    const updatedSchedule = {
+      ...schedule,
+      [day]: {
+        ...schedule[day],
+        [type]: formattedTime
+      }
+    };
+
+    if (day === daysOfWeek[0].id) {
+      daysOfWeek.slice(1).forEach(otherDay => {
+        updatedSchedule[otherDay.id][type] = formattedTime;
+      });
+    }
+    onScheduleChange(updatedSchedule);
+    setSchedule(updatedSchedule);
+    setOpenPicker({ day: null, type: null });
+  };
+
+  /* const handleDateChange = (day: string, type: 'startTime' | 'endTime', date: Date) => {
+    const formattedTime = date.toTimeString().slice(0, 5);
     setSchedule(prevSchedule => ({
       ...prevSchedule,
       [day]: {
@@ -45,9 +65,9 @@ const WeekSchedule = ({ onScheduleChange }: Props) => {
     }));
     setOpenPicker({ day: null, type: null });
     onScheduleChange(schedule);
-  };
+  }; */
 
-  const handleCapacityChange = (day: string, capacity: string) => {
+  /* const handleCapacityChange = (day: string, capacity: string) => {
     const numericValue = capacity.replace(/[^0-9]/g, '')
     console.log(numericValue)
     setSchedule(prevSchedule => ({
@@ -58,6 +78,26 @@ const WeekSchedule = ({ onScheduleChange }: Props) => {
       }
     }));
     onScheduleChange(schedule);
+  }; */
+
+  const handleCapacityChange = (day: string, capacity: string) => {
+    const numericValue = capacity.replace(/[^0-9]/g, '');
+    const updatedSchedule = {
+      ...schedule,
+      [day]: {
+        ...schedule[day],
+        capacity: numericValue
+      }
+    };
+
+    if (day === daysOfWeek[0].id) {
+      daysOfWeek.slice(1).forEach(otherDay => {
+        updatedSchedule[otherDay.id].capacity = numericValue;
+      });
+    }
+
+    setSchedule(updatedSchedule);
+    onScheduleChange(updatedSchedule);
   };
 
   return (

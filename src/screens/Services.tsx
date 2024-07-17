@@ -66,7 +66,7 @@ export const Services = () => {
   }, [service]); */
 
 
-  console.log(images)
+  console.log(service)
 
   return (
     <SafeAreaView>

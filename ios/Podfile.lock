@@ -1504,11 +1504,11 @@ PODS:
     - React-Core
   - react-native-randombytes (3.6.1):
     - React-Core
-  - react-native-safe-area-context (4.10.7):
+  - react-native-safe-area-context (4.10.8):
     - React-Core
   - react-native-version-number (0.3.6):
     - React
-  - react-native-webview (13.10.4):
+  - react-native-webview (13.10.5):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - React-NativeModulesApple (0.72.15):
@@ -1622,7 +1622,7 @@ PODS:
     - React-logger (= 0.72.15)
     - React-perflogger (= 0.72.15)
   - RecaptchaInterop (100.0.0)
-  - RNCAsyncStorage (1.23.1):
+  - RNCAsyncStorage (1.24.0):
     - React-Core
   - RNFBApp (20.1.0):
     - Firebase/CoreOnly (= 10.27.0)
@@ -1649,7 +1649,7 @@ PODS:
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
     - React-RCTImage
-  - RNSVG (15.3.0):
+  - RNSVG (15.4.0):
     - React-Core
   - RNVectorIcons (10.1.0):
     - RCT-Folly (= 2021.07.22.00)
@@ -1981,9 +1981,9 @@ SPEC CHECKSUMS:
   react-native-image-picker: b561409791bdb2b97fe2c4bfdbc50981f8067a68
   react-native-maps: 7b2c2cee95271592a92ba485eea1dec66a363a6e
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
-  react-native-safe-area-context: 422017db8bcabbada9ad607d010996c56713234c
+  react-native-safe-area-context: b7daa1a8df36095a032dff095a1ea8963cb48371
   react-native-version-number: b415bbec6a13f2df62bf978e85bc0d699462f37f
-  react-native-webview: d05247ec4e1b7f1b677ff8a4b7404e09dcc10199
+  react-native-webview: 3a96de61dfdbbf8fe842cbd0a5533a1c8498500e
   React-NativeModulesApple: a2c783eea2b9354534d6e991669d5051435b51db
   React-perflogger: 6acc671f527e69c0cd93b8e62821d33d3ddf25ca
   React-RCTActionSheet: 569bb9db46d85565d14697e15ecf2166e035eb07
@@ -2002,7 +2002,7 @@ SPEC CHECKSUMS:
   React-utils: a2dfc4c77bb4f7fe4080219a82ace8929f334b1a
   ReactCommon: 69acb76221a4c9d1b5740821ee1f0df89068fd6d
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
-  RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
+  RNCAsyncStorage: ec53e44dc3e75b44aa2a9f37618a49c3bc080a7a
   RNFBApp: 9acbe359ef3559d6f8ca5c350db471f2b352f98a
   RNFBAuth: 58a7a5591755a4f078cfa03e29a60be009a93931
   RNFBFirestore: a60f00920799fa7bb71a1ecb682e4e6918f6f2b0
@@ -2010,7 +2010,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: 669a19ea8d0002e27873bd636e4a93cb240cab02
   RNLocalize: b77875884750cb6a58cd6865863fe2ba2729b72b
   RNScreens: 63bef6a0e43add62eaa82d2e4ee753d89f3bc42d
-  RNSVG: a48668fd382115bc89761ce291a81c4ca5f2fd2e
+  RNSVG: cb24fb322de8c1ebf59904e7aca0447bb8dbed5a
   RNVectorIcons: 82be274d00be231e5eee45f7c73d4a516aed50ab
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Stripe: 9fec845645e39f371e6898926d096fd9c2feb5a5
