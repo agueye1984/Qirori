@@ -97,5 +97,9 @@
   },
   "browser": {
     "crypto": "react-native-crypto"
+  },
+  "resolutions": {
+    "cross-spawn": "^7.0.3",
+    "execa": "^5.1.1"
   }
 }
