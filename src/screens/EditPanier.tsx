@@ -1,6 +1,6 @@
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native'
 import React, {useState} from 'react'
-import {SafeAreaView, ScrollView, Text, View} from 'react-native'
+import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
 import {BacktoHome} from '../components/BacktoHome'
 import Header from '../components/Header'
@@ -68,21 +68,55 @@ export const EditPanier = () => {
     } catch (e: unknown) {}
   }
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 20,
+    },
+    section: {
+      marginVertical: 10,
+      padding: 10,
+      backgroundColor: 'white',
+      borderRadius: 8,
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    scrollViewContainer: {
+      flexGrow: 1,
+      paddingHorizontal: 20,
+      paddingBottom: 100, // Espace pour éviter que le dernier champ soit masqué
+    },
+    bottomButtonContainer: {
+      position: 'absolute',
+      bottom: 0,
+      width: '100%',
+      padding: 20,
+      backgroundColor: '#fff',
+    },
+  });
+
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <BacktoHome textRoute={t('Ventes.title')} />
-      <Header>{t('AddProduct.title')}</Header>
+    <SafeAreaView style={styles.container}>
+      <BacktoHome textRoute={t('ProductDelivering.title')} />
+      <Header>{t('Global.Modify')}</Header>
       <ScrollView
         scrollEnabled
         showsVerticalScrollIndicator
         automaticallyAdjustKeyboardInsets={true}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={defaultStyles.scrollViewContent}>
-        <View style={defaultStyles.section}>
+        contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.section}>
           <StatutPanier statut={statut} setStatut={handleStatutChange} />
           {statutError && <Text style={defaultStyles.error}>statutError</Text>}
         </View>
-        <View style={defaultStyles.section}>
+        <View style={styles.section}>
           <DatePanier dateDelivered={dateDelivered} setDateDelivered={handleDateDeliveredChange} />
         </View>
         {dateDeliveredError != '' && <Text style={defaultStyles.error}>{dateDeliveredError}</Text>}

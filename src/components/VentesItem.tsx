@@ -1,7 +1,5 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-
-import {useTheme} from '../contexts/theme';
 import {Accueil} from '../contexts/types';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
 import Icon from 'react-native-vector-icons/FontAwesome';

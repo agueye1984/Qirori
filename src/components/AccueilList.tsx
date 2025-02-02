@@ -32,7 +32,7 @@ export const AccueilList = (t: any): Accueil[] => {
         id: uuidv4(),
         title: t('AccueilList.Achats'),
         route : 'Achats',
-        images: 'Icon:shopping-cart',
+        images: 'Icon4:shopping-outline',
     },
   ]
 }

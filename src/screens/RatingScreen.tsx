@@ -1,14 +1,20 @@
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, SafeAreaView } from 'react-native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import React, {useState} from 'react';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+  Keyboard,
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData,
+} from 'react-native';
 import StarRating from 'react-native-star-rating';
-import { ManageEventsParamList, User } from '../contexts/types';
+import {ManageEventsParamList} from '../contexts/types';
 import firestore from '@react-native-firebase/firestore';
-import auth from '@react-native-firebase/auth';
-import {v4 as uuidv4} from 'uuid';
-import { LargeButton } from '../components/LargeButton';
-import { useTranslation } from 'react-i18next';
-import { BacktoHome } from '../components/BacktoHome';
+import {LargeButton} from '../components/LargeButton';
+import {useTranslation} from 'react-i18next';
+import {BacktoHome} from '../components/BacktoHome';
 import Header from '../components/Header';
 
 const RatingScreen = () => {
@@ -17,51 +23,68 @@ const RatingScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<ManageEventsParamList, 'RatingScreen'>>();
   const item = route.params.item;
-  const {t} = useTranslation()
+  const {t} = useTranslation();
 
   const handleSubmit = () => {
     // Logique pour soumettre la notation et la critique
-    console.log('Rating:', rating);
-    console.log('Review:', review);
-    console.log('Review:', item.id);
     firestore()
-          .collection('commandes')
-          .doc(item.id)
-          .update({
-            rating: rating,
-            avis: review,
-          })
-          .then(() => {
-            navigation.navigate('ProductOrderings' as never);
-          });
+      .collection('commandes')
+      .doc(item.id)
+      .update({
+        rating: rating,
+        avis: review,
+      })
+      .then(() => {
+        navigation.navigate('ProductOrderings' as never);
+      });
+  };
+
+  const handleKeyPress = (
+    event: NativeSyntheticEvent<TextInputKeyPressEventData>,
+  ) => {
+    if (event.nativeEvent.key === 'Enter') {
+      Keyboard.dismiss(); // Masquer le clavier
+    }
   };
 
   return (
     <SafeAreaView>
-       <BacktoHome textRoute={t('ProductOrderings.title')} />
+      <BacktoHome textRoute={t('ProductOrderings.title')} />
       <Header>{t('RatingScreen.title')}</Header>
       <View style={styles.section}>
-      <StarRating
-        disabled={false}
-        maxStars={5}
-        rating={rating}
-        selectedStar={(rating: React.SetStateAction<number>) => setRating(rating)}
-        fullStarColor={'gold'}
-        emptyStarColor={'grey'}
-        starSize={30}
-      />
-      <TextInput
-        style={styles.textInput}
-        placeholder={t('RatingScreen.avis')}
-        multiline
-        value={review}
-        onChangeText={setReview}
-      />
+        <StarRating
+          disabled={false}
+          maxStars={5}
+          rating={rating}
+          selectedStar={(rating: React.SetStateAction<number>) =>
+            setRating(rating)
+          }
+          fullStarColor={'gold'}
+          emptyStarColor={'grey'}
+          starSize={30}
+        />
+        <TextInput
+          style={styles.textInput}
+          placeholder={t('RatingScreen.avis')}
+          multiline
+          value={review}
+          onChangeText={setReview}
+          onSubmitEditing={Keyboard.dismiss}
+          onKeyPress={handleKeyPress} // Interception de la touche "Entrée"
+        />
 
-      <LargeButton title={t('Global.Submit')} action={handleSubmit} isPrimary={true} /> 
-      <View style={styles.spacer} />
-      <LargeButton title={t('Global.Back')} action={()=>navigation.goBack()} isPrimary={true} />
-    </View>
+        <LargeButton
+          title={t('Global.Submit')}
+          action={handleSubmit}
+          isPrimary={true}
+        />
+        <View style={styles.spacer} />
+        <LargeButton
+          title={t('Global.Back')}
+          action={() => navigation.goBack()}
+          isPrimary={true}
+        />
+      </View>
     </SafeAreaView>
   );
 };

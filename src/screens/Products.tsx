@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, ScrollView, View} from 'react-native';
+import {FlatList, SafeAreaView, StyleSheet, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import Header from '../components/Header';
 import {BacktoHome} from '../components/BacktoHome';
 import {useNavigation} from '@react-navigation/native';
-import {Product, User} from '../contexts/types';
+import {Product, Vendeur} from '../contexts/types';
 import {theme} from '../core/theme';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -14,33 +14,40 @@ import {EmptyList} from '../components/EmptyList';
 export const Products = () => {
   const {t} = useTranslation();
   const navigation = useNavigation();
-  const [userId, setUserId] = useState('');
   const [product, setProduct] = useState<Product[]>([]);
+  const currentUser = auth().currentUser;
+  const [categorieVendeur, setCategorieVendeur] = useState<string[]>([]);
 
   useEffect(() => {
-    const usersRef = firestore().collection('users');
-    auth().onAuthStateChanged(user => {
-      if (user) {
-        usersRef
-          .doc(user.uid)
-          .get()
-          .then(document => {
-            const userData = document.data() as User;
-            setUserId(userData.id);
-          })
-          .catch(error => {
-            console.log('error1 ' + error);
+    const unsubscribe = firestore()
+      .collection('vendeurs')
+      .where('actif', '==', true)
+      .where('userId', '==', currentUser?.uid)
+      .onSnapshot(querySnapshot => {
+        const cat: string[] = [];
+        if (querySnapshot.empty) {
+          setCategorieVendeur(cat);
+        } else {
+          querySnapshot.forEach(documentSnapshot => {
+            const vendeur = documentSnapshot.data() as Vendeur;
+            cat.push(vendeur.category);
           });
-      }
-    });
-  }, []);
+          setCategorieVendeur(cat);
+        }
+      });
+    return () => unsubscribe();
+  }, [currentUser?.uid]);
 
   useEffect(() => {
-    firestore()
+    if (categorieVendeur.length === 0 || !currentUser?.uid) {
+      setProduct([]);
+      return; // Si aucune catégorie n'est définie, évitez d'effectuer une requête
+    }
+    const unsubscribe = firestore()
       .collection('products')
-      .where('userId', '==', userId)
-      .get()
-      .then(querySnapshot => {
+      .where('userId', '==', currentUser?.uid)
+      .where('category', 'in', categorieVendeur)
+      .onSnapshot(querySnapshot => {
         if (querySnapshot.empty) {
           setProduct([]);
         } else {
@@ -51,31 +58,39 @@ export const Products = () => {
           setProduct(products);
         }
       });
-  }, [product]);
+
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, [currentUser?.uid, categorieVendeur]);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1, // Prend tout l'espace disponible
+      paddingTop: 20,
+    },
+  });
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <BacktoHome textRoute={t('Ventes.title')} />
       <Header>{t('Products.title')}</Header>
-      <View style={{justifyContent: 'center', alignContent: 'center'}}>
-        {product.length === 0 && (
+      <View style={{flex: 1, justifyContent: 'center', alignContent: 'center'}}>
+        {product.length === 0 ? (
           <EmptyList
             body={t('Products.EmptyList')}
             actionLabel={t('AddProduct.title')}
             action={() => navigation.navigate('AddProduct' as never)}
           />
+        ) : (
+          <FlatList
+            data={product}
+            renderItem={({item}) => (
+              <ProductLists product={item} color={theme.colors.black} />
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={{padding: 10}}
+          />
         )}
-        <ScrollView style={{padding: 10}} scrollEnabled>
-          {product.map((item: Product, index: number) => {
-            return (
-              <ProductLists
-                key={index.toString()}
-                product={item}
-                color={theme.colors.black}
-              />
-            );
-          })}
-        </ScrollView>
       </View>
     </SafeAreaView>
   );

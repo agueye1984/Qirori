@@ -1,77 +1,82 @@
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
-import {createStackNavigator} from '@react-navigation/stack'
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import {View} from 'react-native'
-import {useTheme} from '../contexts/theme'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import {Events} from '../screens/Events'
-import {Invitations} from '../screens/Invitations'
-import {Contributions} from '../screens/Contributions'
-import {Settings} from '../screens/Settings'
-import TermsScreen from '../screens/TermsScreen'
-import {Ventes} from '../screens/Ventes'
-import {Achats} from '../screens/Achats'
-import {AddEvent} from '../screens/AddEvent'
-import {EventDetails} from '../screens/EventDetails'
-import Icon from 'react-native-vector-icons/FontAwesome'
-import Icon1 from 'react-native-vector-icons/MaterialIcons'
-import {InvitationsContacts} from '../screens/InvitationsContacts'
-import {ContactsList} from '../screens/ContactsList'
-import {EditEvent} from '../screens/EditEvent'
-import {InvitationDetails} from '../screens/InvitationDetails'
-import {ContributionsDetails} from '../screens/ContributionsDetails'
-import {AddProduct} from '../screens/AddProduct'
-import {Products} from '../screens/Products'
-import {AddService} from '../screens/AddService'
-import {Services} from '../screens/Services'
-import {ProductDetails} from '../screens/ProductDetails'
-import {Cart} from '../screens/Cart'
-import {theme} from '../core/theme'
-import {Checkout} from '../screens/Checkout'
-import {Setting} from '../screens/Setting'
-import {LanguageSetting} from '../screens/LanguageSetting'
-import {ContactUs} from '../screens/ContactUs'
-import {ContributionsList} from '../screens/ContributionsList'
-import {InvitationsList} from '../screens/InvitationsList'
-import ResetPassword from '../screens/ResetPassword'
-import {RequestService} from '../screens/RequestService'
-import {ProductOrderings} from '../screens/ProductOrderings'
-import {ProductDelivering} from '../screens/ProductDelivering'
-import {ServicesOffertsList} from '../screens/ServicesOffertsList'
-import {EditProduct} from '../screens/EditProduct'
-import {EditService} from '../screens/EditService'
-import SplashScreen from '../screens/SplashScreen'
-import LoginScreen from '../screens/LoginScreen'
-import RegisterScreen from '../screens/RegisterScreen'
-import ForgotPasswordScreen from '../screens/ForgotPasswordScreen'
-import HomeScreen from '../screens/HomeScreen'
-import {DeviseSetting} from '../screens/DeviseSetting'
-import {CountrySetting} from '../screens/CountrySetting'
-import {CommandesEffectuees} from '../screens/CommandesEffectuees'
-import {ServiceDetails} from '../screens/ServiceDetails'
-import {EditPanier} from '../screens/EditPanier'
-import {TypeEvents} from '../screens/TypeEvents'
-import {AddTypeEvent} from '../screens/AddTypeEvent'
-import {EditTypeEvent} from '../screens/EditTypeEvent'
-import OTPAuthScreen from '../screens/OTPAuthScreen'
-import OTPForgotPwdScreen from '../screens/OTPForgotPwdScreen'
-import Dashboard from '../screens/Dashboard'
-import Dashboards from '../screens/Dashboards'
-import ManageProducts from '../screens/ManageProducts'
-import Users from '../screens/Users'
-import Administrators from '../screens/Administrators'
-import AddAdmin from '../screens/AddAdmin'
-import TermsVendor from '../screens/TermsVendor'
-import RatingScreen from '../screens/RatingScreen'
-import PaymentScreen from '../screens/PaymentScreen'
-
-type Props = {
-  user: any
-}
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createStackNavigator} from '@react-navigation/stack';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Text, View} from 'react-native';
+import {useTheme} from '../contexts/theme';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+import {Events} from '../screens/Events';
+import {Invitations} from '../screens/Invitations';
+import {Contributions} from '../screens/Contributions';
+import {Settings} from '../screens/Settings';
+import TermsScreen from '../screens/TermsScreen';
+import {Ventes} from '../screens/Ventes';
+import {Achats} from '../screens/Achats';
+import {AddEvent} from '../screens/AddEvent';
+import {EventDetails} from '../screens/EventDetails';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon1 from 'react-native-vector-icons/MaterialIcons';
+import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
+import {InvitationsContacts} from '../screens/InvitationsContacts';
+import {ContactsList} from '../screens/ContactsList';
+import {InvitationDetails} from '../screens/InvitationDetails';
+import {ContributionsDetails} from '../screens/ContributionsDetails';
+import {AddProduct} from '../screens/AddProduct';
+import {Products} from '../screens/Products';
+import {AddService} from '../screens/AddService';
+import {Services} from '../screens/Services';
+import {ProductDetails} from '../screens/ProductDetails';
+import {Cart} from '../screens/Cart';
+import {theme} from '../core/theme';
+import {Checkout} from '../screens/Checkout';
+import {Setting} from '../screens/Setting';
+import {LanguageSetting} from '../screens/LanguageSetting';
+import {ContactUs} from '../screens/ContactUs';
+import {ContributionsList} from '../screens/ContributionsList';
+import {InvitationsList} from '../screens/InvitationsList';
+import ResetPassword from '../screens/ResetPassword';
+import {ProductOrderings} from '../screens/ProductOrderings';
+import {ProductDelivering} from '../screens/ProductDelivering';
+import {ServicesOffertsList} from '../screens/ServicesOffertsList';
+import SplashScreen from '../screens/SplashScreen';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import HomeScreen from '../screens/HomeScreen';
+import {DeviseSetting} from '../screens/DeviseSetting';
+import {CountrySetting} from '../screens/CountrySetting';
+import {CommandesEffectuees} from '../screens/CommandesEffectuees';
+import {ServiceDetails} from '../screens/ServiceDetails';
+import {EditPanier} from '../screens/EditPanier';
+import {TypeEvents} from '../screens/TypeEvents';
+import {AddTypeEvent} from '../screens/AddTypeEvent';
+import OTPAuthScreen from '../screens/OTPAuthScreen';
+import OTPForgotPwdScreen from '../screens/OTPForgotPwdScreen';
+import Dashboard from '../screens/Dashboard';
+import Dashboards from '../screens/Dashboards';
+import ManageProducts from '../screens/ManageProducts';
+import Users from '../screens/Users';
+import Administrators from '../screens/Administrators';
+import AddAdmin from '../screens/AddAdmin';
+import TermsVendor from '../screens/TermsVendor';
+import RatingScreen from '../screens/RatingScreen';
+import PaymentScreen from '../screens/PaymentScreen';
+import ManageCategories from '../screens/ManageCategories';
+import {AddCategory} from '../screens/AddCategory';
+import ManageTypeOffres from '../screens/ManageTypeOffres';
+import {AddTypeOffre} from '../screens/AddTypeOffre';
+import ManageTypePrix from '../screens/ManageTypePrix';
+import {AddTypePrix} from '../screens/AddTypePrix';
+import {AddProdServEvent} from '../screens/AddProdServEvent';
+import {ProdServEvents} from '../screens/ProdServEvents';
+import {EventsList} from '../screens/EventsList';
+import {ValidationVendeur} from '../screens/ValidationVendeur';
+import ManageVendeur from '../screens/ManageVendeur';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 const RootStack = () => {
-  const Stack = createStackNavigator()
+  const Stack = createStackNavigator();
 
   return (
     <Stack.Navigator
@@ -189,15 +194,6 @@ const RootStack = () => {
           headerLeft: () => false,
         }}
         component={InvitationsContacts}
-      />
-      <Stack.Screen
-        name="EditEvent"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-          headerLeft: () => false,
-        }}
-        component={EditEvent}
       />
       <Stack.Screen
         name="InvitationDetails"
@@ -344,15 +340,6 @@ const RootStack = () => {
         component={ResetPassword}
       />
       <Stack.Screen
-        name="RequestService"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-          headerLeft: () => false,
-        }}
-        component={RequestService}
-      />
-      <Stack.Screen
         name="ProductOrderings"
         options={{
           headerShown: false,
@@ -378,24 +365,6 @@ const RootStack = () => {
           headerLeft: () => false,
         }}
         component={ServicesOffertsList}
-      />
-      <Stack.Screen
-        name="EditProduct"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-          headerLeft: () => false,
-        }}
-        component={EditProduct}
-      />
-      <Stack.Screen
-        name="EditService"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-          headerLeft: () => false,
-        }}
-        component={EditService}
       />
       <Stack.Screen
         name="DeviseSetting"
@@ -441,15 +410,6 @@ const RootStack = () => {
           headerLeft: () => false,
         }}
         component={EditPanier}
-      />
-      <Stack.Screen
-        name="EditTypeEvent"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-          headerLeft: () => false,
-        }}
-        component={EditTypeEvent}
       />
       <Stack.Screen
         name="TypeEvents"
@@ -569,15 +529,134 @@ const RootStack = () => {
         }}
         component={RatingScreen}
       />
+      <Stack.Screen
+        name="ManageCategories"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ManageCategories}
+      />
+      <Stack.Screen
+        name="AddCategory"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={AddCategory}
+      />
+      <Stack.Screen
+        name="ManageTypeOffres"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ManageTypeOffres}
+      />
+      <Stack.Screen
+        name="AddTypeOffre"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={AddTypeOffre}
+      />
+      <Stack.Screen
+        name="ManageTypePrix"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ManageTypePrix}
+      />
+      <Stack.Screen
+        name="AddTypePrix"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={AddTypePrix}
+      />
+      <Stack.Screen
+        name="AddProdServEvent"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={AddProdServEvent}
+      />
+      <Stack.Screen
+        name="ProdServEvents"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ProdServEvents}
+      />
+      <Stack.Screen
+        name="EventsList"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={EventsList}
+      />
+      <Stack.Screen
+        name="ValidationVendeur"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ValidationVendeur}
+      />
+      <Stack.Screen
+        name="ManageVendeur"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+          headerLeft: () => false,
+        }}
+        component={ManageVendeur}
+      />
     </Stack.Navigator>
-  )
-}
+  );
+};
 
 const BottomNav = () => {
-  const Tab = createBottomTabNavigator()
-  const {t} = useTranslation()
-  const {ColorPallet} = useTheme()
-  const styles = DefaultComponentsThemes()
+  const Tab = createBottomTabNavigator();
+  const {t} = useTranslation();
+  const {ColorPallet} = useTheme();
+  const styles = DefaultComponentsThemes();
+  // State pour le nombre de produits dans le panier
+  const [cartCount, setCartCount] = useState(0);
+  const currentUser = auth().currentUser;
+
+  useEffect(() => {
+    // Fonction pour écouter les modifications des produits du panier
+    const unsubscribe = firestore()
+      .collection('carts')
+      .where('userId', '==', currentUser?.uid)
+      .where('paid', '==', false) // Seuls les produits non payés
+      .onSnapshot(snapshot => {
+        const count = snapshot.docs.reduce(
+          (sum, doc) => sum + doc.data().qty,
+          0,
+        );
+        setCartCount(count); // Mettre à jour le nombre total de produits
+      });
+
+    return () => unsubscribe(); // Nettoyer l'écouteur
+  }, [currentUser?.uid]);
 
   return (
     <Tab.Navigator
@@ -628,10 +707,10 @@ const BottomNav = () => {
         }}
       />
       <Tab.Screen
-        name={'Achats'}
-        component={Achats}
+        name={'Carts'}
+        component={Cart}
         options={{
-          title: t('Screens.Achats') || '',
+          title: t('Global.Cart') || '',
           tabBarIcon: ({focused}) => (
             <View style={{width: '100%', height: '100%'}}>
               {focused && <View style={styles.tabBarActive} />}
@@ -641,10 +720,53 @@ const BottomNav = () => {
                 color={focused ? theme.colors.primary : ColorPallet.lightGray}
                 size={20}
               />
+              {cartCount > 0 && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 5, // Ajustez pour positionner verticalement
+                    right: 5, // Position horizontale au-dessus de l'icône
+                    //left: -15,
+                    backgroundColor: 'red',
+                    borderRadius: 12, // Crée un badge circulaire
+                    height: 15, // Taille fixe pour le badge
+                    width: 15, // Taille fixe pour le badge
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}>
+                    {cartCount}
+                  </Text>
+                </View>
+              )}
             </View>
           ),
         }}
       />
+      <Tab.Screen
+        name={'Achats'}
+        component={Achats}
+        options={{
+          title: t('Screens.Achats') || '',
+          tabBarIcon: ({focused}) => (
+            <View style={{width: '100%', height: '100%'}}>
+              {focused && <View style={styles.tabBarActive} />}
+              <Icon2
+                style={styles.tabBarIcone}
+                name={'shopping-outline'}
+                color={focused ? theme.colors.primary : ColorPallet.lightGray}
+                size={20}
+              />
+            </View>
+          ),
+        }}
+      />
+
       <Tab.Screen
         name={'Settings'}
         component={Settings}
@@ -664,7 +786,7 @@ const BottomNav = () => {
         }}
       />
     </Tab.Navigator>
-  )
-}
+  );
+};
 
-export default RootStack
+export default RootStack;

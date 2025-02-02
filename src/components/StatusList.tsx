@@ -1,6 +1,4 @@
-import {Category} from '../contexts/types'
-
-export const StatusList = (t: any): Category[] => {
+export const StatusList = (t: any): any[] => {
   return [
     {
       id: '1',

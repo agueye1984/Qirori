@@ -1,7 +1,7 @@
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {View} from 'react-native';
-import TextInput from './TextInput';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 
 type Props = {
   contactUsName: string;
@@ -13,7 +13,7 @@ export const NameContactUs = ({contactUsName, setContactUsName}: Props) => {
 
   return (
     <View>
-      <TextInput
+      <PaperTextInput
         label={t('AddProduct.Name')}
         returnKeyType="next"
         value={contactUsName}

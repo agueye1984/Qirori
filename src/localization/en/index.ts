@@ -65,6 +65,28 @@ const translation = {
     ProvinceErrorEmpty: 'Province cannot be empty.',
     RegionErrorEmpty: 'Region cannot be empty.',
     TypePrixErrorEmpty: 'Type of Price cannot be empty.',
+    TypeErrorEmpty: 'Type cannot be empty.',
+    ProductErrorEmpty: 'Product cannot be empty.',
+    ServiceErrorEmpty: 'Service cannot be empty.',
+    Soit: 'either ',
+    Total: 'Total',
+    Offre: 'Enter a custom offer',
+    TypePrix: 'Enter a custom type of price',
+    Condition: 'Enter a custom condition',
+    Prix: 'Price',
+    Stock: 'Stock',
+    FileErrorEmpty: 'You must select a file',
+    AdresseErrorEmpty: 'Address cannot be empty.',
+    ConfirmeErrorEmpty: 'You must check this confirmation.',
+    AccepteErrorEmpty: 'You must check this acceptation.',
+    ProductService: 'Products/Services.',
+    Rating: 'Rating',
+    Customer: 'Customer',
+    FormulaErrorEmpty: 'Formula cannot be empty.',
+    Participants: 'Number of participants',
+    NameFrErrorEmpty: 'Name of FR cannot be empty.',
+    NameEnErrorEmpty: 'Name of EN cannot be empty.',
+    Cart: 'Cart',
   },
   LoginScreen: {
     title: 'Login',
@@ -118,6 +140,8 @@ const translation = {
     Maybe: 'Maybe',
     AmountDonation: 'Total Amount',
     CloseDonation: 'Close Donation',
+    AmountNature: 'Amount donated in kind',
+    AmountArgent: 'Amount donated in money',
   },
   AddEvent: {
     title: 'Create an event',
@@ -129,6 +153,8 @@ const translation = {
     Emplacement: 'Location',
     CharacterCount: 'characters',
     titleModify: 'Modify an event',
+    HeureDebut: 'Start Time',
+    HeureFin: 'End Time',
   },
   InvitationsContacts: {
     title: 'Invite your contacts',
@@ -165,6 +191,7 @@ const translation = {
     Paypal: 'Pay Using PayPal',
     Montant: 'Contribution amount',
     AddProduct: 'Add a Product',
+    TypeNature: 'Nature of contribution',
   },
   Ventes: {
     title: 'Become Vendor',
@@ -183,6 +210,7 @@ const translation = {
     PrixUnitaire: 'Unit Price',
     Devise: 'Currency',
     ProductExistError: 'The product has already been added',
+    Modify: 'Modify a product',
   },
   AddService: {
     title: 'Add a service',
@@ -198,6 +226,9 @@ const translation = {
     FormulasAdded: 'Formulas Added',
     Formula: 'Formula',
     TypePrix: 'Type of price',
+    EditFormulas: 'Edit Formulas',
+    EditFormula: 'Edit Formula',
+    Modify: 'Modify a service',
   },
   Achats: {
     title: 'Buy',
@@ -223,7 +254,7 @@ const translation = {
   Dropdown: {
     Select: 'Select a currency',
     Category: 'Select a category',
-    Product: ' Select a product',
+    Product: 'Select a product',
     Event: 'Select an event',
     Autre:'Others',
     Zone:'Choose an area to serve',
@@ -232,6 +263,12 @@ const translation = {
     Region: 'Select a region',
     TypePrix: 'Select a type of price',
     Search: 'Search',
+    Formula: 'Select a formula',
+    Type: 'Choose a type',
+    Conditions: 'Select a condition',
+    Service: 'Select a service',
+    Statut: 'Select a status',
+    New: 'New formula',
   },
   Products: {
     title: 'List of Products',
@@ -250,6 +287,8 @@ const translation = {
     InvitationsList: 'Invitations List',
     ProductOrderings: 'My orders',
     ProductDelivering: 'Orders to be delivered',
+    EventsList: 'Events List',
+    ValidationVendeur: 'Validation Form',
   },
   Setting: {
     title: 'Settings',
@@ -309,11 +348,13 @@ const translation = {
     TotalAmount: 'Total Amount',
     DateDelivered: 'Estimated delivery date',
     Status: 'Status',
+    EmptyList: 'No order for the moment',
   },
   ProductDelivering: {
     title: 'Orders to be delivered',
     Statut: 'Status',
     DateDelivered: 'Date delivered',
+    EmptyList: 'No order for the moment',
   },
   ContributionsList: {
     title: 'Contributions List',
@@ -363,6 +404,11 @@ const translation = {
     Administrators: "Manage Administrators",
     Users: "Manage Users",
     Products: "Manage Products",
+    Categories: "Manage Categories",
+    TypeOffres: "Manage Type Offers",
+    TypeEvents: "Manage Type Events",
+    TypePrix: "Manage Type Prices",
+    ValidationVendeur: "Manage Vendors",
   },
   Administrators:{
     AddButtonText: "Add a new Administrator",
@@ -394,10 +440,10 @@ const translation = {
     title: "Restore Password",
     Reset: "Restore",
   },
-  TypePrix:{
-    Unit: "Per unit",
-    Person: "Per Person",
-  },
+   Type:{
+    Product: "Product",
+    Service: "Service",
+  }, 
   WeekendList:{
     Lundi: "Monday",
     Mardi: "Tuesday",
@@ -412,7 +458,72 @@ const translation = {
     EndTime:"End Time",
     Capacity:"Capacity"
   },
-  
+  Categories: {
+    title: "Categories",
+    EmptyList: 'Category Added',
+    List: "List Categories",
+    AddButtonText: "Add a new category",
+  },
+  AddCategory: {
+    title: "Add Category",
+    NameFr: "Name of FR",
+    NameEn: "Name of EN",
+  },
+  EditCategory: {
+    title: "Edit Category",
+  },
+  TypeOffres: {
+    title: "Type of Offers",
+    EmptyList: 'Type of Offer Added',
+    List: "List Type of Offers",
+    AddButtonText: "Add a new type of offer",
+  },
+  AddTypeOffre: {
+    title: "Add Type of offer",
+    NameFr: "Name of FR",
+    NameEn: "Name of EN",
+  },
+  EditTypeOffre: {
+    title: "Edit Type of offer",
+  },
+  TypePrix: {
+    title: "Type of Prices",
+    EmptyList: 'Type of Price Added',
+    List: "List Type of Prices",
+    AddButtonText: "Add a new type of price",
+  },
+  AddTypePrix: {
+    title: "Add Type of price",
+    NameFr: "Name of FR",
+    NameEn: "Name of EN",
+  },
+  EditTypePrix: {
+    title: "Edit Type of price",
+  },
+  Vendeur: {
+    title: "Validation form",
+    Adresse: "Address",
+    SelectFile: "Select a file",
+    IdRegistration: 'ID or Business Registration',
+    OtherDocs: 'Others Docs',
+    Confirme: 'I confirm that the information is correct.',
+    Accepte: 'I accept the terms and conditions'
+  },
+  AddProdServ: {
+    title: "Gift Shop",
+    Add: "Add Products or Services",
+    List: "List Products or Services",
+    Custom: 'Custom',
+    AddFormProdServ: 'Add Product/Service',
+    EditFormProdServ: 'Modify Product/Service',
+    FormProdServAdded: ' Products/Services added',
+    EmptyList: 'No Product/Service Added',
+    type: 'Type',
+  },
+  ProdServEvents:{
+    title: "Products/Services for donations",
+
+  },
   TermsV2: {
     title: 'Terms and Conditions',
     IAgree: 'I Agree',

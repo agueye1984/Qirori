@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {SelectList} from 'react-native-dropdown-select-list';
 import {useTheme} from '../contexts/theme';
 import {theme} from '../core/theme';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
-import { i18n } from '../localization';
-import {CategoryList} from './CategoryList';
 import {StatusList} from './StatusList';
 
 type Props = {
@@ -15,7 +13,7 @@ type Props = {
 };
 
 export const StatutPanier = ({statut, setStatut}: Props) => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const statuts = StatusList(t);
   const {ColorPallet} = useTheme();
   const [current, setCurrent] = useState({
@@ -88,27 +86,18 @@ export const StatutPanier = ({statut, setStatut}: Props) => {
   };
 
   return (
-    <View>
-      <View style={{flexDirection: 'row'}}>
-        <View style={{marginVertical: 25, marginRight: sizeDateFin}}>
-          <Text style={styles.detailsTitle}>
-            {t('ProductDelivering.Statut')}{' '}
-          </Text>
-        </View>
-        <View>
-          <SelectList
-            boxStyles={styles.container}
-            setSelected={(val: string) => setStatut(val)}
-            data={transformed}
-            search={true}
-            save="key"
-            placeholder={t('Dropdown.Statut')}
-            defaultOption={defaultOption()}
-            dropdownTextStyles={{backgroundColor: theme.colors.surface}}
-            inputStyles={{backgroundColor: theme.colors.surface}}
-          />
-        </View>
-      </View>
+    <View style={defaultStyles.sectionStyle}>
+      <SelectList
+        boxStyles={styles.container}
+        setSelected={(val: string) => setStatut(val)}
+        data={transformed}
+        search={true}
+        save="key"
+        placeholder={t('Dropdown.Statut')}
+        defaultOption={defaultOption()}
+        dropdownTextStyles={{backgroundColor: theme.colors.surface}}
+        inputStyles={{backgroundColor: theme.colors.surface}}
+      />
     </View>
   );
 };

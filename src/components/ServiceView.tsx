@@ -1,46 +1,39 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Text,
-  Image,
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign';
-import Icon1 from 'react-native-vector-icons/FontAwesome';
+import {Text, Image, View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useTheme} from '../contexts/theme';
 import {
+  Category,
   ManageEventsParamList,
-  Offre,
-  Panier,
+  ScheduleState,
   Service,
-  User,
+  TypePrix,
 } from '../contexts/types';
 import {useTranslation} from 'react-i18next';
 import {theme} from '../core/theme';
 import Icon2 from 'react-native-vector-icons/Fontisto';
 import defaultComponentsThemes from '../defaultComponentsThemes';
 import storage from '@react-native-firebase/storage';
-import {CategoryList} from './CategoryList';
 import {useNavigation} from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import {v4 as uuidv4} from 'uuid';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {
   widthPercentageToDP as widthToDp,
   heightPercentageToDP as heightToDp,
 } from 'react-native-responsive-screen';
-import {TextInput} from 'react-native-paper';
 import {useStore} from '../contexts/store';
-import { offreValidator } from '../core/utils';
-//import TextInput from './TextInput';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
+import {getRecordById} from '../services/FirestoreServices';
+import {GetWeekendList} from './WeekendList';
+import {addToCartService} from '../services/CartsServices';
+import Stepper from './Stepper';
+import Button from './Button';
 
 type Props = {
   service: Service;
+  images: string[];
+  participantCount: number;
   onPress: () => void;
-  image: string;
+  selectFormule: string;
 };
 
 type serviceOfferProp = StackNavigationProp<
@@ -48,146 +41,150 @@ type serviceOfferProp = StackNavigationProp<
   'ServicesOffertsList'
 >;
 
-export const ServiceView = ({service, image, onPress}: Props) => {
-  const {ColorPallet} = useTheme();
+interface GroupedSchedule {
+  startTime: string;
+  endTime: string;
+  capacity: string;
+  days: string[];
+}
+
+const groupSchedule = (schedule: ScheduleState): GroupedSchedule[] => {
+  const grouped: {[key: string]: GroupedSchedule} = {};
   const {t} = useTranslation();
+  const daysNames = GetWeekendList(t);
+
+  for (const [day, {startTime, endTime, capacity}] of Object.entries(
+    schedule,
+  )) {
+    const key = `${startTime}-${endTime}-${capacity}`;
+    if (!grouped[key]) {
+      grouped[key] = {startTime, endTime, capacity, days: []};
+    }
+    grouped[key].days.push(daysNames[day]);
+  }
+
+  return Object.values(grouped);
+};
+
+export const ServiceView = ({
+  service,
+  images,
+  participantCount,
+  onPress,
+  selectFormule,
+}: Props) => {
+  const currentUser = auth().currentUser;
+  const {ColorPallet} = useTheme();
+  const {t, i18n} = useTranslation();
   const defaultStyles = defaultComponentsThemes();
-  const [quantity, setQuantity] = useState('1');
-  const [imageUrl, setImageUrl] = useState('');
-  const [offreId, setOffreId] = useState('');
-  const [userId, setUserId] = useState('');
+  const [quantity, setQuantity] = useState(participantCount);
+  const [formuleId, setFormuleId] = useState(selectFormule);
   const navigation = useNavigation<serviceOfferProp>();
-  const category = CategoryList(t).find(cat => cat.id === service.category);
+  //const category = CategoryList(t).find(cat => cat.id === service.category);
+  const [category, setCategory] = useState<Category>();
   const [state] = useStore();
-  const currencyCode = state.currency.toString();
   const [offreError, setOffreError] = useState('');
+  const [imagesUrl, setImagesUrl] = useState<string[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [loadedTypePrix, setLoadedTypePrix] = useState<{
+    [key: string]: string[];
+  }>({});
+
+  const selectedLanguage = i18n.language;
+  const [loadedOffers, setLoadedOffers] = useState<{[key: string]: string}>({});
+  const devise = state.currency.toString();
 
   useEffect(() => {
-    const usersRef = firestore().collection('users');
-    auth().onAuthStateChanged(user => {
-      if (user) {
-        usersRef
-          .doc(user.uid)
-          .get()
-          .then(document => {
-            const userData = document.data() as User;
-            setUserId(userData.id);
-          })
-          .catch(error => {
-            console.log('error1 ' + error);
-          });
+    const fetchData = async () => {
+      try {
+        const cat = (await getRecordById(
+          'categories',
+          service.category,
+        )) as Category;
+        setCategory(cat);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    });
-  }, []);
+    };
+    fetchData();
+  }, [service]);
 
   useEffect(() => {
-    storage()
-      .ref(image)
-      .getDownloadURL()
-      .then(url => setImageUrl(url));
-  }, [image]);
+    const getImages = async () => {
+      const tabUrl: string[] = [];
+      for (const imageServ of images) {
+        const url = await storage().ref(imageServ).getDownloadURL();
+        tabUrl.push(url);
+      }
+      setImagesUrl(tabUrl);
+    };
+    getImages();
+  }, [images]);
+
+  useEffect(() => {
+    setQuantity(participantCount);
+  }, [participantCount]);
+
+  useEffect(() => {
+    setFormuleId(selectFormule);
+  }, [selectFormule]);
+
+  useEffect(() => {
+    const loadOffers = async () => {
+      const newLoadedOffers = {...loadedOffers};
+      for (const formula of service.formules) {
+        if (!newLoadedOffers[formula.formuleId]) {
+          const formule = await getRecordById('formules', formula.formuleId);
+          const typePrix = (await getRecordById(
+            'type_prix',
+            formula.priceType,
+          )) as TypePrix;
+          const namePrix =
+            selectedLanguage === 'fr' ? typePrix.nameFr : typePrix.nameEn;
+          newLoadedOffers[formula.formuleId] = formule?.name + '#' + namePrix;
+        }
+      }
+      setLoadedOffers(newLoadedOffers);
+    };
+    loadOffers();
+  }, [service.formules]);
 
   const setSelectedOffre = (id: string) => {
-    setOffreId(id);
+    //console.log(id)
+    setOffreError('');
+    setFormuleId(id);
   };
 
-  const increment = (value: string) => {
-    let val = parseInt(value);
-    val += 1;
-    setQuantity(val.toString());
-  };
-  const decrement = (value: string) => {
-    let val = parseInt(value);
-    val -= 1;
-    if (val <= 1) {
-      val = 1;
-    }
-    setQuantity(val.toString());
+  const increment = () => setQuantity(quantity + 1);
+  const decrement = () => setQuantity(quantity > 0 ? quantity - 1 : 0); // Évite les nombres négatifs
+  const handleQuantity = (text: string) => {
+    const parsed = parseInt(text, 10);
+    setQuantity(isNaN(parsed) ? 0 : parsed);
   };
 
-  const addToCart = () => {
-    const offreEmpty = offreValidator(offreId, t);
-    if (offreEmpty != '') {
-      setOffreError(offreEmpty);
+  const handleAddToCart = () => {
+    if (formuleId === 'All' || formuleId === '') {
+      setOffreError(t('Global.OffreErrorEmpty'));
     } else {
-      firestore()
-        .collection('carts')
-        // Filter results
-        .where('userId', '==', userId)
-        .where('offre', '==', offreId)
-        .where('paid', '==', false)
-        .get()
-        .then(querySnapshot => {
-          let idCart = uuidv4();
-          const offre = service.offres.find(
-            (offre: Offre) => offre.id == offreId,
-          );
-          const offreMontant = offre === undefined ? 0 : offre.montant;
-          const devise = offre === undefined ? currencyCode : offre.devise;
-          if (querySnapshot.empty) {
-            firestore()
-              .collection('carts')
-              .doc(idCart)
-              .set({
-                id: idCart,
-                offre: offreId,
-                qty: quantity,
-                totalPrice: parseInt(quantity) * offreMontant,
-                paid: false,
-                userId: userId,
-                name: service.name,
-                description: service.description,
-                prix: offreMontant,
-                devise: devise,
-                tax: offreMontant * 0.14975,
-                images: service.images,
-                vendorId: service.userId,
-              dateDelivered: '',
-              statut: '',
-              commandeId: '',
-              })
-              .then(() => {
-                console.log('Cart added!');
-              });
-          } else {
-            querySnapshot.forEach(documentSnapshot => {
-              const panier = documentSnapshot.data() as Panier;
-              firestore()
-                .collection('carts')
-                .doc(panier.id)
-                .update({
-                  id: panier.id,
-                  offre: offreId,
-                  qty: quantity,
-                  totalPrice: parseInt(quantity) * offreMontant,
-                  paid: false,
-                  userId: userId,
-                  name: service.name,
-                  description: service.description,
-                  prix: offreMontant,
-                  devise: devise,
-                  tax: offreMontant * 0.14975,
-                  images: service.images,
-                })
-                .then(() => {
-                  console.log('Cart updated!');
-                });
-            });
-          }
-        });
-      navigation.navigate('ServicesOffertsList', {
-        item: service.category,
-      });
+      setOffreError('');
+      addToCartService(
+        formuleId,
+        service,
+        quantity.toString(),
+        currentUser,
+        navigation,
+        'services',
+      );
     }
   };
 
   const styles = StyleSheet.create({
     card: {
-      backgroundColor: 'white',
+      //backgroundColor: 'white',
       borderRadius: 16,
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      shadowColor: 'black',
+      //shadowOpacity: 0.2,
+      // shadowRadius: 4,
+      // shadowColor: 'black',
       shadowOffset: {
         height: 0,
         width: 0,
@@ -203,6 +200,7 @@ export const ServiceView = ({service, image, onPress}: Props) => {
     },
     infoContainer: {
       padding: 16,
+      flex: 1,
     },
     name: {
       fontSize: 22,
@@ -238,6 +236,7 @@ export const ServiceView = ({service, image, onPress}: Props) => {
     },
     image: {
       height: heightToDp(40),
+      width: '100%', // Assurez-vous que l'image prend toute la largeur
       borderRadius: 7,
       marginBottom: heightToDp(2),
     },
@@ -263,8 +262,6 @@ export const ServiceView = ({service, image, onPress}: Props) => {
     },
     itemContainer: {
       marginHorizontal: 15,
-      //borderBottomWidth: 0.2,
-      // borderBottomStyle: 'solid',
       paddingBottom: 10,
     },
     input: {
@@ -273,13 +270,11 @@ export const ServiceView = ({service, image, onPress}: Props) => {
     },
     center: {
       flexDirection: 'row',
-      // backgroundColor:'#710096',
       padding: 7,
       paddingHorizontal: 10,
       borderRadius: 20,
     },
     icon: {
-      // color: 'white',
       margin: 2,
       marginVertical: 20,
     },
@@ -288,34 +283,101 @@ export const ServiceView = ({service, image, onPress}: Props) => {
       color: ColorPallet.error,
       fontWeight: 'bold',
     },
+    slide: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    paginationContainer: {
+      paddingVertical: 10,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginHorizontal: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.92)',
+    },
+    inactiveDot: {
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    },
+    container2: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+      marginVertical: 8,
+    },
+    labelContainer: {
+      flex: 1,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
   });
+
+  const renderItem = ({item}: {item: string}) => {
+    //console.log('Rendering item:', item);
+    return (
+      <View style={styles.slide}>
+        <Image
+          source={
+            item === ''
+              ? require('../../assets/No_image_available.svg.png')
+              : {uri: item}
+          }
+          style={styles.image}
+        />
+      </View>
+    );
+  };
 
   return (
     <View>
       <View style={styles.container}>
         <TouchableOpacity style={styles.card} onPress={onPress}>
-          <Image
-            style={styles.image}
-            source={
-              imageUrl === ''
-                ? require('../../assets/No_image_available.svg.png')
-                : {uri: imageUrl}
-            }
+          <Carousel
+            data={imagesUrl}
+            renderItem={renderItem}
+            sliderWidth={widthToDp(100)}
+            itemWidth={widthToDp(100)}
+            autoplay={false}
+            loop={false}
+            onSnapToItem={index => setActiveSlide(index)} // Met à jour l'index pour la pagination
+          />
+          <Pagination
+            dotsLength={images.length}
+            activeDotIndex={activeSlide} // Met à jour la pagination selon le slide actif
+            containerStyle={styles.paginationContainer}
+            dotStyle={styles.dot}
+            inactiveDotStyle={styles.inactiveDot}
+            inactiveDotOpacity={0.4}
+            inactiveDotScale={0.6}
           />
           <Text style={styles.name}>{service.name}</Text>
           <Text style={styles.title}>
-            {category == undefined ? '' : category.name}
+            {selectedLanguage === 'fr' ? category?.nameFr : category?.nameEn}{' '}
           </Text>
-          <Text style={styles.category}>
-            {service.conditions == undefined ? '' : service.conditions}
-          </Text>
+          {groupSchedule(service.conditions).map((group, idx) => (
+            <Text key={idx}>
+              {group.days.join(', ')}: {group.startTime} - {group.endTime},{' '}
+              {t('WeekSchedule.Capacity')}: {group.capacity}
+            </Text>
+          ))}
           <View style={styles.infoContainer}>
-            {service.offres.map((offer: any, index: number) => {
-              const selectedOffre = offer.id === offreId;
+            {service.formules.map((item: any, index: number) => {
+              const offer = loadedOffers[item.formuleId] || '';
+              const tabOffer = offer.split('#');
+              const selectedOffre = item.id === formuleId;
+              const totalPrice =
+                parseInt(item.amount) * quantity! + ' ' + devise;
               return (
                 <TouchableOpacity
                   style={styles.itemContainer}
-                  onPress={() => setSelectedOffre(offer.id)}
+                  onPress={() => setSelectedOffre(item.id)}
                   key={index.toString()}>
                   {selectedOffre ? (
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -329,7 +391,8 @@ export const ServiceView = ({service, image, onPress}: Props) => {
                           defaultStyles.text,
                           {paddingLeft: 5, fontWeight: 'bold'},
                         ]}>
-                        {offer.name} : {offer.montant} {offer.devise}
+                        {tabOffer[0]} : {item.amount} {devise} {tabOffer[1]}{' '}
+                        {t('Global.Total')} : {totalPrice}
                       </Text>
                     </View>
                   ) : (
@@ -340,53 +403,38 @@ export const ServiceView = ({service, image, onPress}: Props) => {
                         color={ColorPallet.primary}
                       />
                       <Text style={[defaultStyles.text, {paddingLeft: 5}]}>
-                        {offer.name} : {offer.montant} {offer.devise}
+                        {tabOffer[0]} : {item.amount} {devise} {tabOffer[1]}{' '}
+                        {t('Global.Total')} : {totalPrice}
                       </Text>
                     </View>
                   )}
                 </TouchableOpacity>
               );
             })}
+            {offreError && (
+              <Text style={styles.error}>{t('Global.OfferChoose')}</Text>
+            )}
           </View>
-          {offreError && (
-                <Text style={styles.error}>{t('Global.OfferChoose')}</Text>
-              )}
         </TouchableOpacity>
       </View>
-      <View style={[styles.itemContainerForm, {flexDirection: 'row'}]}>
-        <View style={{flexDirection: 'row'}}>
-          <View style={{marginHorizontal: 10, marginVertical: 25}}>
-            <Text>{t('BuyProduct.Quantity')}</Text>
-          </View>
-          <View style={styles.center}>
-            <TouchableOpacity onPress={() => decrement(quantity)}>
-              <Icon name="minus" size={18} style={styles.icon} />
-            </TouchableOpacity>
-            <TextInput
-              value={quantity.toString()}
-              onChangeText={text => setQuantity(text)}
-              autoCapitalize="none"
-              keyboardType="number-pad"
-              style={styles.input}
-              selectionColor={theme.colors.primary}
-              underlineColor="transparent"
-              mode="outlined"
-            />
-            <TouchableOpacity onPress={() => increment(quantity)}>
-              <Icon name="plus" size={18} style={styles.icon} />
-            </TouchableOpacity>
-          </View>
+      <View style={styles.container2}>
+        <View style={styles.labelContainer}>
+          <Text style={styles.label}>
+            <Text style={styles.price}>{t('BuyProduct.Quantity')}</Text>
+          </Text>
         </View>
-        <View style={{flexDirection: 'row', marginLeft: 50}}>
-          <TouchableOpacity style={styles.card} onPress={addToCart}>
-            <Icon
-              name={'shoppingcart'}
-              color={theme.colors.primary}
-              size={30}
-            />
-          </TouchableOpacity>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Stepper
+            value={quantity}
+            onIncrement={increment}
+            onDecrement={decrement}
+            onChange={handleQuantity}
+          />
         </View>
       </View>
+      <Button mode="contained" onPress={handleAddToCart}>
+        {t('BuyProduct.AddToCart')}
+      </Button>
     </View>
   );
 };

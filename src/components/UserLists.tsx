@@ -1,8 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
-import { User} from '../contexts/types';
+import {User} from '../contexts/types';
 import {useTranslation} from 'react-i18next';
-import {Swipeable} from 'react-native-gesture-handler';
 import {useTheme} from '../contexts/theme';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import firestore from '@react-native-firebase/firestore';
@@ -15,7 +14,6 @@ type Props = {
 const UserLists = ({user, color}: Props) => {
   const {t} = useTranslation();
   const {ColorPallet} = useTheme();
-
 
   const styles = StyleSheet.create({
     contactCon: {
@@ -66,7 +64,7 @@ const UserLists = ({user, color}: Props) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingHorizontal: 34,
+      paddingHorizontal: 5,
       backgroundColor: ColorPallet.error,
     },
     editContainer: {
@@ -74,8 +72,39 @@ const UserLists = ({user, color}: Props) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingHorizontal: 34,
+      paddingHorizontal: 5,
       backgroundColor: ColorPallet.primary,
+    },
+    orderCard: {
+      backgroundColor: '#f8f9fa',
+      marginVertical: 10,
+      padding: 15,
+      borderRadius: 8,
+    },
+    orderId: {fontWeight: 'bold', fontSize: 16},
+    customer: {marginVertical: 5},
+    address: {color: '#6c757d'},
+    imageWrapper: {
+      position: 'relative',
+      marginRight: 10,
+      //marginBottom: 10,
+      width: 100,
+      height: 30,
+      flexDirection: 'row', // Aligner les icônes en ligne
+      alignItems: 'center', // Centrer verticalement les icônes
+    },
+    buttonContainer: {
+      position: 'absolute',
+      top: 5,
+      left: 0,
+      right: 0,
+      flexDirection: 'row', // Aligner les boutons horizontalement
+      justifyContent: 'space-between', // Espacer les boutons uniformément
+    },
+    statusContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
   });
 
@@ -103,51 +132,42 @@ const UserLists = ({user, color}: Props) => {
       });
   };
 
-  const RightSwipeActions = (actif: boolean) => {
-    if(actif===true){
-      return (
-        <Pressable
-          onPress={() => handleDesactive()}
-          style={({pressed}) => [
-            styles.editContainer,
-            pressed && {opacity: 0.8},
-          ]}>
-          <Icon name="lock" size={30} color={ColorPallet.white} />
-        </Pressable>
-        );
-    } else {
-      return (
-        <Pressable
-          onPress={() => handleActive()}
-          style={({pressed}) => [
-            styles.editContainer,
-            pressed && {opacity: 0.8},
-          ]}>
-          <Icon name="unlock" size={30} color={ColorPallet.white} />
-        </Pressable>
-        );
-    }
-  };
-
   return (
-     <Swipeable renderRightActions={() => RightSwipeActions(user.actif)}> 
-      <View style={styles.contactCon}>
-        <View style={styles.contactDat}>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('Administrators.Name')} : </Text>
-          <Text style={styles.txt}>{user.displayName} </Text>
-        </View>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('Administrators.Phone')} : </Text>
-          <Text style={styles.txt}>{user.phoneNumber} </Text>
-        </View>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('Administrators.Email')} : </Text>
-          <Text style={styles.txt}>{user.email}</Text>
-        </View>
-        </View>
+    <View style={styles.orderCard}>
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('Administrators.Name')} : </Text>
+        {user.displayName}
+      </Text>
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('Administrators.Phone')} : </Text>
+        {user.phoneNumber}
+      </Text>
+      <Text style={styles.address}>
+        <Text style={styles.orderId}>{t('Administrators.Email')} : </Text>
+        {user.email}
+      </Text>
+      <View style={styles.statusContainer}>
+      {user.actif ? (
+            <Pressable
+              onPress={() => handleDesactive()}
+              style={({pressed}) => [
+                styles.editContainer,
+                pressed && {opacity: 0.8},
+              ]}>
+              <Icon name="lock" size={30} color={ColorPallet.white} />
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => handleActive()}
+              style={({pressed}) => [
+                styles.editContainer,
+                pressed && {opacity: 0.8},
+              ]}>
+              <Icon name="unlock" size={30} color={ColorPallet.white} />
+            </Pressable>
+          )}
       </View>
-     </Swipeable> 
+    </View>
   );
 };
 

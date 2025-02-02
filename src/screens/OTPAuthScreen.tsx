@@ -9,7 +9,7 @@ import { theme } from '../core/theme';
 import { useTranslation } from 'react-i18next';
 import Paragraph from '../components/Paragraph';
 import Button from '../components/Button';
-import TextInput from '../components/TextInput';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
 
 const OTPAuthScreen = () => {
@@ -108,7 +108,7 @@ const route = useRoute<RouteProp<ManageEventsParamList, 'OTPAuthScreen'>>();
       <Text style={styles.errorText}>{codeError}</Text>
       <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
       <View>
-          <TextInput
+          <PaperTextInput
           label={t('OTPAuthScreen.confirmCode')}
             placeholder={t('OTPAuthScreen.enterConfirmCode')}
             value={confirmCode}

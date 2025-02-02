@@ -41,10 +41,14 @@ target 'Qirori' do
   pod 'stripe-react-native', :path => '../node_modules/@stripe/stripe-react-native'
   pod 'react-native-config/Extension', :path => '../node_modules/react-native-config'
 
-  pod 'Firebase/Core', '10.27.0'
-  pod 'Firebase/Auth', '10.27.0'
-  pod 'Firebase/Firestore', '10.27.0'
-  pod 'Firebase/Storage', '10.27.0'
+  pod 'Firebase/Core', '10.29.0'
+  pod 'Firebase/Auth', '10.29.0'
+  pod 'Firebase/Firestore', '10.29.0'
+  pod 'Firebase/Storage', '10.29.0'
+  #pod 'gRPC-ProtoRPC', '~> 1.28.2'
+  pod 'BoringSSL-GRPC', '~> 0.0.12'
+  pod 'gRPC-Core', '~> 1.62.0'
+
 
   pod 'RNFBAuth', :path => '../node_modules/@react-native-firebase/auth'
 
@@ -76,6 +80,20 @@ target 'Qirori' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+    installer.pods_project.build_configurations.each do |config|
+      config.build_settings['OTHER_CFLAGS'] = '$(inherited) -Wno-unused-command-line-argument'
+    end
+    installer.pods_project.targets.each do |target|
+      if target.name == 'BoringSSL-GRPC'
+        target.source_build_phase.files.each do |file|
+          if file.settings && file.settings['COMPILER_FLAGS']
+            flags = file.settings['COMPILER_FLAGS'].split
+            flags.reject! { |flag| flag == '-GCC_WARN_INHIBIT_ALL_WARNINGS' }
+            file.settings['COMPILER_FLAGS'] = flags.join(' ')
+          end
+        end
+      end
+    end
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
 end

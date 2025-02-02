@@ -54,7 +54,6 @@ const generateToken = () => {
 
     return new Promise((resolve, reject) => {
         fetch(baseUrl + '/v1/oauth2/token', requestOptions).then(response => response.text()).then(result => {
-            console.log("result print", result)
             const { access_token } = JSON.parse(result)
             resolve(access_token)
         }).catch(error => {
@@ -77,7 +76,6 @@ const createOrder = (token = '', orderDetail: any) => {
 
     return new Promise((resolve, reject) => {
         fetch(baseUrl + '/v2/checkout/orders', requestOptions).then(response => response.text()).then(result => {
-            console.log("result print", result)
             const res = JSON.parse(result)
             resolve(res)
         }).catch(error => {
@@ -99,7 +97,6 @@ const capturePayment = (id: any, token = '') => {
 
     return new Promise((resolve, reject) => {
         fetch(baseUrl + `/v2/checkout/orders/${id}/capture`, requestOptions).then(response => response.text()).then(result => {
-            console.log("result print", result)
             const res = JSON.parse(result)
             resolve(res)
         }).catch(error => {

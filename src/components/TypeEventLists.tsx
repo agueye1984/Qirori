@@ -1,9 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
-import storage from '@react-native-firebase/storage';
-import {ManageEventsParamList, Product, TypeEvent} from '../contexts/types';
+import React from 'react';
+import {View, Text, StyleSheet, Pressable} from 'react-native';
+import {ManageEventsParamList, TypeEvent} from '../contexts/types';
 import {useTranslation} from 'react-i18next';
-import {Swipeable} from 'react-native-gesture-handler';
 import {useTheme} from '../contexts/theme';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
@@ -15,19 +13,19 @@ type Props = {
   color: string;
 };
 
-type EditTypeEventProps = StackNavigationProp<
+type AddTypeEventProps = StackNavigationProp<
   ManageEventsParamList,
-  'EditTypeEvent'
+  'AddTypeEvent'
 >;
 
 const TypeEventLists = ({typeEvent, color}: Props) => {
   const {t} = useTranslation();
   const {ColorPallet} = useTheme();
-  const navigation = useNavigation<EditTypeEventProps>();
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const navigation = useNavigation<AddTypeEventProps>();
 
   const styles = StyleSheet.create({
     contactCon: {
+      flex: 1,
       flexDirection: 'row',
       padding: 5,
       borderBottomWidth: 0.5,
@@ -45,6 +43,7 @@ const TypeEventLists = ({typeEvent, color}: Props) => {
       color: color,
     },
     contactDat: {
+      flex: 1,
       justifyContent: 'center',
       paddingLeft: 5,
     },
@@ -54,8 +53,7 @@ const TypeEventLists = ({typeEvent, color}: Props) => {
     },
     name: {
       fontSize: 16,
-      color: ColorPallet.primary,
-      fontWeight: 'bold',
+      color: color,
     },
     phoneNumber: {
       color: '#888',
@@ -73,7 +71,7 @@ const TypeEventLists = ({typeEvent, color}: Props) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingHorizontal: 34,
+      paddingHorizontal: 5,
       backgroundColor: ColorPallet.error,
     },
     editContainer: {
@@ -81,8 +79,46 @@ const TypeEventLists = ({typeEvent, color}: Props) => {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
-      paddingHorizontal: 34,
+      paddingHorizontal: 5,
       backgroundColor: ColorPallet.primary,
+    },
+    copyContainer: {
+      marginVertical: 5,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      paddingHorizontal: 5,
+      backgroundColor: ColorPallet.link,
+    },
+    statusContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    orderCard: {
+      backgroundColor: '#f8f9fa',
+      marginVertical: 10,
+      padding: 15,
+      borderRadius: 8,
+    },
+    orderId: {fontWeight: 'bold', fontSize: 16},
+    customer: {marginVertical: 5},
+    imageWrapper: {
+      position: 'relative',
+      marginRight: 10,
+      //marginBottom: 10,
+      width: 100,
+      height: 30,
+      flexDirection: 'row', // Aligner les icônes en ligne
+      alignItems: 'center', // Centrer verticalement les icônes
+    },
+    buttonContainer: {
+      position: 'absolute',
+      top: 5,
+      left: 0,
+      right: 0,
+      flexDirection: 'row', // Aligner les boutons horizontalement
+      justifyContent: 'space-between', // Espacer les boutons uniformément
     },
   });
 
@@ -97,47 +133,40 @@ const TypeEventLists = ({typeEvent, color}: Props) => {
   };
 
   const handleEdit = () => {
-    navigation.navigate('EditTypeEvent', {item: typeEvent});
-  };
-
-  const RightSwipeActions = () => {
-    return (
-      <>
-        <Pressable
-          onPress={() => handleDelete()}
-          style={({pressed}) => [
-            styles.deleteContainer,
-            pressed && {opacity: 0.8},
-          ]}>
-          <Icon name="trash" size={30} color={ColorPallet.white} />
-        </Pressable>
-        <Pressable
-          onPress={() => handleEdit()}
-          style={({pressed}) => [
-            styles.editContainer,
-            pressed && {opacity: 0.8},
-          ]}>
-          <Icon name="edit" size={30} color={ColorPallet.white} />
-        </Pressable>
-      </>
-    );
+    navigation.navigate('AddTypeEvent', {item: typeEvent, isEditing: true});
   };
 
   return (
-    <Swipeable renderRightActions={RightSwipeActions}>
-      <View style={styles.contactCon}>
-      <View style={styles.contactDat}>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('AddTypeEvent.NameFr')} : </Text>
-          <Text style={styles.txt}>{typeEvent.nameFr}</Text>
-        </View>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('AddTypeEvent.NameEn')} : </Text>
-          <Text style={styles.txt}>{typeEvent.nameEn}</Text>
-        </View>
+    <View style={styles.orderCard}>
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('AddTypeEvent.NameFr')} : </Text>
+        {typeEvent.nameFr}
+      </Text>
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('AddTypeEvent.NameEn')} : </Text>
+        {typeEvent.nameEn}
+      </Text>
+      <View style={styles.imageWrapper}>
+        <View style={styles.buttonContainer}>
+          <Pressable
+            onPress={() => handleEdit()}
+            style={({pressed}) => [
+              styles.editContainer,
+              pressed && {opacity: 0.8},
+            ]}>
+            <Icon name="edit" size={30} color={ColorPallet.white} />
+          </Pressable>
+          <Pressable
+            onPress={() => handleDelete()}
+            style={({pressed}) => [
+              styles.deleteContainer,
+              pressed && {opacity: 0.8},
+            ]}>
+            <Icon name="trash" size={30} color={ColorPallet.white} />
+          </Pressable>
         </View>
       </View>
-    </Swipeable>
+    </View>
   );
 };
 

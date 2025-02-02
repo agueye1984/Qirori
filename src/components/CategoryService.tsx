@@ -4,39 +4,67 @@ import {StyleSheet, View} from 'react-native';
 import {SelectList} from 'react-native-dropdown-select-list';
 import {useTheme} from '../contexts/theme';
 import {theme} from '../core/theme';
-import {CategoryList} from './CategoryList';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+import {
+  getFilteredByInRecords,
+} from '../services/FirestoreServices';
 
 type Props = {
   categoryService: string;
   setCategoryService: (value: string) => void;
+  error: string;
+  categoryVendeur: string[];
 };
 
 export const CategoryService = ({
   categoryService,
   setCategoryService,
+  error,
+  categoryVendeur,
 }: Props) => {
-  const {t} = useTranslation();
-  const categories = CategoryList(t);
+  const {t, i18n} = useTranslation();
+  const [categories, setCategories] = useState<any[]>([]);
   const {ColorPallet} = useTheme();
-  const [current, setCurrent] = useState({
-    key: '',
-    value: t('Dropdown.Category'),
-  });
-
-  let transformed = categories.map(({id, name}) => ({key: id, value: name}));
-
-  transformed.push({key: '', value: t('Dropdown.Category')});
-  transformed.sort((a, b) =>
-    a.key.toLowerCase().localeCompare(b.key.toLowerCase()),
-  );
+  const selectedLanguageCode = i18n.language;
+  const defaultStyles = DefaultComponentsThemes();
+  if (categoryVendeur.length === 1) {
+    categoryService = categoryVendeur[0];
+  }
 
   useEffect(() => {
-    transformed.map(({key, value}) => {
-      if (key === categoryService) {
-        setCurrent({key: key, value: value});
+    let isMounted = true;
+    const fetchData = async () => {
+      try {
+        if (categoryVendeur.length > 0) {
+          const data = await getFilteredByInRecords(
+            'categories',
+            'id',
+            categoryVendeur,
+          );
+          const newProd = data.map(record => ({
+            key: record.id,
+            value:
+              selectedLanguageCode === 'fr'
+                ? record.data.nameFr
+                : record.data.nameEn,
+          }));
+          newProd.sort((a, b) =>
+            a.value.toLowerCase().localeCompare(b.value.toLowerCase()),
+          );
+          if (isMounted) {
+            setCategories(newProd);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    });
-  }, []);
+    };
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, [categoryService, categoryVendeur]);
+
   const styles = StyleSheet.create({
     container: {
       minHeight: 50,
@@ -47,7 +75,7 @@ export const CategoryService = ({
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-     backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.surface,
     },
     buttonStyle: {
       flex: 1,
@@ -68,27 +96,40 @@ export const CategoryService = ({
       maring: '0',
       borderBottomRightRadius: 4,
     },
+    errorBorder: {
+      borderColor: 'red', // Bordure rouge en cas d'erreur
+      borderWidth: 1,
+    },
+    input: {
+      backgroundColor: theme.colors.surface,
+    },
   });
 
-  const defaultOption = (): {key: string; value: string} | undefined => {
-    if (current.key.length > 0) {
-      return {key: current.key, value: current.value};
-    }
-    return undefined;
-  };
-
   return (
-    <View>
+    <View style={defaultStyles.sectionStyle}>
       <SelectList
-        boxStyles={styles.container}
+        key={categoryService}
+        boxStyles={
+          error
+            ? {...styles.container, ...styles.errorBorder}
+            : styles.container
+        }
         setSelected={(val: string) => setCategoryService(val)}
-        data={transformed}
+        data={categories}
         search={true}
         save="key"
         placeholder={t('Dropdown.Category')}
-        defaultOption={defaultOption()}
-        dropdownTextStyles={{ backgroundColor: theme.colors.surface}}
-        inputStyles={{backgroundColor: theme.colors.surface}}
+        defaultOption={
+          categoryService
+            ? categories.find(typ => typ.key === categoryService)
+            : undefined
+        }
+        dropdownTextStyles={{backgroundColor: theme.colors.surface}}
+        inputStyles={
+          error
+            ? {...styles.input, color: 'red'} // Placeholder en rouge en cas d'erreur
+            : styles.input
+        }
       />
     </View>
   );

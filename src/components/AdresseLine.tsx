@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import TextInput from './TextInput';
 import {Location, PredictionType} from '../contexts/types';
 import axios from 'axios';
 import Config from 'react-native-config';
+import { TextInput as PaperTextInput } from 'react-native-paper';
+import { theme } from '../core/theme';
 
 type Props = {
   addressLine: Location;
@@ -102,7 +103,17 @@ export const AdresseLine = ({
       borderBottomColor: 'black',
       borderBottomWidth: 1,
     },
+    input: {
+      width: '100%', // Prend toute la largeur du conteneur
+      marginBottom: 15,
+      //height: 50,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 4,
+      paddingHorizontal: 10,
+    },
   });
+
+  
 
   const _renderPredictions = (predictions: PredictionType[]) => {
     const {predictionRow} = styles;
@@ -132,12 +143,13 @@ export const AdresseLine = ({
   return (
     <SafeAreaView>
       <View>
-        <TextInput
+        <PaperTextInput
            label={t('Checkout.AdresseLine1')}
-          returnKeyType="search"
+          returnKeyType="done"
           value={addressLine.description}
           onChangeText={text => handleChange(text)}
           autoCapitalize="none"
+          style={styles.input}
         />
       </View>
 

@@ -1,112 +1,99 @@
 import {
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-  } from 'react-native';
-  import {useTranslation} from 'react-i18next';
-  import DefaultComponentsThemes from '../defaultComponentsThemes';
-  import Header from '../components/Header';
-  import React, { useEffect, useState } from 'react';
-  import {Accueil, Product} from '../contexts/types';
-  import {useNavigation} from '@react-navigation/native';
-  import Icon from 'react-native-vector-icons/AntDesign';
-  import {theme} from '../core/theme';
-import { DashboardList } from '../components/DashboardList';
-import { DashboardItem } from '../components/DashboardItem';
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import Header from '../components/Header';
+import React, {useEffect, useState} from 'react';
+import {Product} from '../contexts/types';
+import {useNavigation} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/AntDesign';
+import {theme} from '../core/theme';
 import Icon1 from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import ProduitLists from '../components/ProduitLists';
-  
-  const ManageProducts = () => {
-    const {t} = useTranslation();
-    const defaultStyles = DefaultComponentsThemes();
-    const navigation = useNavigation();
-    const [products, setProducts] = useState<Product[]>([]);
 
-    useEffect(() => {
-      firestore()
-        .collection('products')
-        .get()
-        .then(querySnapshot => {
-          if (querySnapshot.empty) {
-            setProducts([]);
-          } else {
-            const product: Product[] = [];
-            querySnapshot.forEach(documentSnapshot => {
-              product.push(documentSnapshot.data() as Product);
-            });
-            setProducts(product);
-          }
-        });
-    }, [products]);
-  
+const ManageProducts = () => {
+  const {t} = useTranslation();
+  const navigation = useNavigation();
+  const [products, setProducts] = useState<Product[]>([]);
 
-    const logout = () => {
-        auth()
-          .signOut()
-          .then(() => navigation.navigate('LoginScreen' as never));
-      };
-  
-    const styles = StyleSheet.create({
-      img: {
-        width: '30%',
-        resizeMode: 'contain',
-        paddingRight: 50,
-      },
-      row: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-      },
-    });
-    return (
-      <SafeAreaView>
-        <View style={{padding: 20}}>
-          <View style={styles.row}>
-            <View style={defaultStyles.leftSectRowContainer}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <Icon1
-                    name={'arrow-back-ios'}
-                    color={theme.colors.primary}
-                    size={30}
-                  />
-                </TouchableOpacity>
-            </View>
-            <View style={defaultStyles.rightSectRowContainer}>
-              <View style={{paddingRight: 5, paddingBottom: 7}}>
-                <TouchableOpacity onPress={logout}>
-                  <Icon
-                    name={'logout'}
-                    color={theme.colors.primary}
-                    size={30}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-          </View>
-          <Header>{t('DashboardList.Products')}</Header>
-          <View style={{justifyContent: 'center', alignContent: 'center'}}>
-       
-        <ScrollView style={{padding: 10}} scrollEnabled>
-        {products.map((item: Product, index: number) => {
-            return (
-              <ProduitLists
-                key={index.toString()}
-                product={item}
-                color={theme.colors.black}
-              />
-            );
-          })}
-        </ScrollView>
-      </View>
-      </SafeAreaView>
-    );
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('products')
+      .onSnapshot(querySnapshot => {
+        if (querySnapshot.empty) {
+          setProducts([]);
+        } else {
+          const product: Product[] = [];
+          querySnapshot.forEach(documentSnapshot => {
+            const prodData = documentSnapshot.data() as Product;
+            prodData.id = documentSnapshot.id; // ajouter l'id du document
+            product.push(prodData);
+          });
+          setProducts(product);
+        }
+      });
+
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, []);
+
+  const logout = () => {
+    auth()
+      .signOut()
+      .then(() => navigation.navigate('LoginScreen' as never));
   };
-  
-  export default ManageProducts;
-  
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1, // Prend tout l'espace disponible
+      paddingTop: 20,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+      padding: 20,
+    },
+    addEventButtonContainer: {
+      alignItems: 'center',
+      marginVertical: 15,
+    },
+    flatListContainer: {
+      paddingBottom: 20,
+    },
+  });
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon1
+            name={'arrow-back-ios'}
+            color={theme.colors.primary}
+            size={30}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={logout}>
+          <Icon name="logout" color={theme.colors.primary} size={30} />
+        </TouchableOpacity>
+      </View>
+      <Header>{t('DashboardList.Products')}</Header>
+      <FlatList
+        data={products}
+        renderItem={({item}) => (
+          <ProduitLists product={item} color={theme.colors.black} />
+        )}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.flatListContainer}
+      />
+    </SafeAreaView>
+  );
+};
+
+export default ManageProducts;

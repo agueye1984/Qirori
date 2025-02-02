@@ -1,6 +1,7 @@
 import {TFunction} from 'i18next';
 import {Formula, Location, ScheduleState} from '../contexts/types';
 import { isValidPhoneNumber } from 'react-phone-number-input';
+import { DocumentPickerResponse } from 'react-native-document-picker';
 
 export const emailValidator = (
   email: string,
@@ -285,6 +286,129 @@ export const imagesValidator = (
 
 export const formulaValidator = (
   formule: Formula[],
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!formule || formule.length <= 0) {
+    return t('Global.FormulaErrorEmpty');
+  }
+
+  return '';
+};
+
+export const conditionsValidator = (
+  conditions: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!conditions || conditions.length <= 0) {
+    return t('Global.ConditionsErrorEmpty');
+  }
+
+  return '';
+};
+
+export const conditionsProductValidator = (
+  conditions: string[],
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!conditions || conditions.length <= 0) {
+    return t('Global.ConditionsErrorEmpty');
+  }
+
+  return '';
+};
+
+export const offresValidator = (
+  offre: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!offre || offre.length <= 0) {
+    return t('Global.OffreErrorEmpty');
+  }
+
+  return '';
+};
+
+export const fileValidator = (
+  file: DocumentPickerResponse | null,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!file || file === null) {
+    return t('Global.FileErrorEmpty');
+  }
+
+  return '';
+};
+
+export const adresseValidator = (
+  localisation: Location,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!localisation.placeId || localisation.placeId.length <= 0) {
+    return t('Global.AdresseErrorEmpty');
+  }
+
+  return '';
+};
+
+
+export const confirmeValidator = (
+  confirme: boolean,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!confirme) {
+    return t('Global.ConfirmeErrorEmpty');
+  }
+
+  return '';
+};
+
+
+export const accepteValidator = (
+  accepte: boolean,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!accepte) {
+    return t('Global.AccepteErrorEmpty');
+  }
+
+  return '';
+};
+
+export const productValidator = (
+  formule: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!formule || formule.length <= 0) {
+    return t('Global.ProductErrorEmpty');
+  }
+
+  return '';
+};
+
+export const serviceValidator = (
+  formule: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!formule || formule.length <= 0) {
+    return t('Global.ServiceErrorEmpty');
+  }
+
+  return '';
+};
+
+export const typeValidator = (
+  type: string,
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!type || type.length <= 0) {
+    return t('Global.TypeErrorEmpty');
+  }
+
+  return '';
+};
+
+export const formuleValidator = (
+  formule: string,
   t: TFunction<'translation', undefined>,
 ) => {
   if (!formule || formule.length <= 0) {

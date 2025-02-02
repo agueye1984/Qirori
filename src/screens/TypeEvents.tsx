@@ -1,115 +1,108 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import Header from '../components/Header';
 import {useNavigation} from '@react-navigation/native';
-import {TypeEvent, User} from '../contexts/types';
+import {TypeEvent} from '../contexts/types';
+import Icon from 'react-native-vector-icons/AntDesign';
 import {theme} from '../core/theme';
+import Icon1 from 'react-native-vector-icons/MaterialIcons';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import TypeEventLists from '../components/TypeEventLists';
 import {LargeButton} from '../components/LargeButton';
-import Paragraph from '../components/Paragraph';
-import defaultComponentsThemes from '../defaultComponentsThemes';
 
 export const TypeEvents = () => {
-  const {t,i18n} = useTranslation();
+  const {t} = useTranslation();
   const navigation = useNavigation();
-  const [userId, setUserId] = useState('');
   const [typeEvents, setTypeEvents] = useState<TypeEvent[]>([]);
-  const defaultStyles = defaultComponentsThemes();
-  const selectLanguage = i18n.language;
 
   useEffect(() => {
-    const usersRef = firestore().collection('users');
-    auth().onAuthStateChanged(user => {
-      if (user) {
-        usersRef
-          .doc(user.uid)
-          .get()
-          .then(document => {
-            const userData = document.data() as User;
-            setUserId(userData.id);
-          })
-          .catch(error => {
-            console.log('error1 ' + error);
-          });
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    var db = firestore()
-    var typeEventsRef = db.collection("type_events") 
-    let query = typeEventsRef.where('nameEn', '==', '');
-    if(selectLanguage=='fr'){
-      query = typeEventsRef.where('nameFr', '==', '');
-    }
-//    query.get().then
- // var queryByAdminOrAge= typeEventsRef.where(Filter.OR or(Filter.equalTo("nameFr", ''),Filter.equalTo("nameEn", '')));
-//  console.log(queryByAdminOrAge);
-//    firestore()
-//      .collection('type_events')
-//      .where(Filter.or(Filter('name', '==', 'Ada'), Filter('name', '==', 'Bob')))
-    query.get()
-      .then(querySnapshot => {
+    const unsubscribe = firestore()
+      .collection('type_events')
+      .onSnapshot(querySnapshot => {
         if (querySnapshot.empty) {
           setTypeEvents([]);
         } else {
-          const typeEvent: TypeEvent[] = [];
+          const newTypeEvent: TypeEvent[] = [];
           querySnapshot.forEach(documentSnapshot => {
-            typeEvent.push(documentSnapshot.data() as TypeEvent);
+            const typeEventData = documentSnapshot.data() as TypeEvent;
+            typeEventData.id = documentSnapshot.id; // ajouter l'id du document
+            newTypeEvent.push(typeEventData);
           });
-          setTypeEvents(typeEvent);
+          setTypeEvents(newTypeEvent);
         }
       });
-  }, [userId, typeEvents]);
+
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, []);
+
+  const logout = () => {
+    auth()
+      .signOut()
+      .then(() => navigation.navigate('LoginScreen' as never));
+  };
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
+      flex: 1, // Prend tout l'espace disponible
+      paddingTop: 20,
     },
-    buttonsContainer: {
-    paddingBottom: 50,
-    paddingTop: 50,
-  },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+      padding: 20,
+    },
+    addEventButtonContainer: {
+      alignItems: 'center',
+      marginVertical: 15,
+    },
+    flatListContainer: {
+      paddingBottom: 20,
+    },
   });
 
   return (
     <SafeAreaView style={[styles.container]}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon1
+            name={'arrow-back-ios'}
+            color={theme.colors.primary}
+            size={30}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={logout}>
+          <Icon name="logout" color={theme.colors.primary} size={30} />
+        </TouchableOpacity>
+      </View>
       <Header>{t('TypeEvents.title')}</Header>
-        
-      <View style={{justifyContent: 'center', alignContent: 'center'}}>
-      <LargeButton
+      <View style={styles.addEventButtonContainer}>
+        <LargeButton
           isPrimary
           title={t('TypeEvents.AddButtonText')}
           action={() => navigation.navigate('AddTypeEvent' as never)}
         />
-        <Header>{t('TypeEvents.List')}</Header>
-        
-        {typeEvents.length === 0 && (
-          <Paragraph>{t('TypeEvents.EmptyList')}</Paragraph>
-        )}
-        <ScrollView scrollEnabled showsVerticalScrollIndicator>
-          {typeEvents.map((item: TypeEvent, index: number) => {
-            return (
-              <TypeEventLists
-                key={index.toString()}
-                typeEvent={item}
-                color={theme.colors.black}
-              />
-            );
-          })}
-        </ScrollView>
-        <View style={styles.buttonsContainer}>
-          <LargeButton
-            title={t('Global.Cancel')}
-            action={() => navigation.goBack()}
-          />
-        </View>
       </View>
+      <Header>{t('TypeEvents.List')}</Header>
+      <FlatList
+        data={typeEvents}
+        renderItem={({item}) => (
+          <TypeEventLists typeEvent={item} color={theme.colors.black} />
+        )}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.flatListContainer}
+      />
+      
     </SafeAreaView>
   );
 };

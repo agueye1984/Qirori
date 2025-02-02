@@ -9,11 +9,9 @@ type Props = {
   color: string;
 };
 
-
 const AdminLists = ({user, color}: Props) => {
   const {t} = useTranslation();
-  const {ColorPallet} = useTheme()
-
+  const {ColorPallet} = useTheme();
 
   const styles = StyleSheet.create({
     contactCon: {
@@ -75,26 +73,32 @@ const AdminLists = ({user, color}: Props) => {
       paddingHorizontal: 34,
       backgroundColor: ColorPallet.primary,
     },
+    orderCard: {
+      backgroundColor: '#f8f9fa',
+      marginVertical: 10,
+      padding: 15,
+      borderRadius: 8,
+    },
+    orderId: {fontWeight: 'bold', fontSize: 16},
+    customer: {marginVertical: 5},
+    address: {color: '#6c757d'},
   });
 
-
   return (
-      <View style={styles.contactCon}>
-        <View style={styles.contactDat}>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('Administrators.Name')} : </Text>
-          <Text style={styles.txt}>{user.displayName} </Text>
-        </View>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('Administrators.Phone')} : </Text>
-          <Text style={styles.txt}>{user.phoneNumber} </Text>
-        </View>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.name}>{t('Administrators.Email')} : </Text>
-          <Text style={styles.txt}>{user.email}</Text>
-        </View>
-        </View>
-      </View>
+    <View style={styles.orderCard}>
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('Administrators.Name')} : </Text>
+        {user.displayName}
+      </Text>
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('Administrators.Phone')} : </Text>
+        {user.phoneNumber}
+      </Text>
+      <Text style={styles.address}>
+        <Text style={styles.orderId}>{t('Administrators.Email')} : </Text>
+        {user.email}
+      </Text>
+    </View>
   );
 };
 

@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {StyleSheet, View} from 'react-native';
-import TextInput from './TextInput';
+import {StyleSheet, Text, View} from 'react-native';
 import {SelectList} from 'react-native-dropdown-select-list';
 import firestore from '@react-native-firebase/firestore';
-import {Event, TypeEvent} from '../contexts/types';
+import {TypeEvent} from '../contexts/types';
 import {useTheme} from '../contexts/theme';
 import {theme} from '../core/theme';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 
 type Props = {
   eventName: string;
@@ -21,6 +22,7 @@ export const NameSection = ({eventName, setEventName, current, error}: Props) =>
   const [selectAutre, setSelectAutre] = useState(false);
   const [event, setEvent] = useState<TypeEvent[]>([]);
   const selectedLanguageCode = i18n.language;
+  const defaultStyles = DefaultComponentsThemes();
 
   useEffect(() => {
     var db = firestore()
@@ -108,10 +110,22 @@ export const NameSection = ({eventName, setEventName, current, error}: Props) =>
       maring: '0',
       borderBottomRightRadius: 4,
     },
+    input: {
+      width: '100%', // Prend toute la largeur du conteneur
+      marginBottom: 15,
+      //height: 50,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 4,
+      paddingHorizontal: 10,
+    },
+    inputError: {
+      borderColor: 'red',
+      borderWidth: 1,
+    },
   });
 
   return (
-    <View>
+    <View style={defaultStyles.sectionStyle}>
       <SelectList
         boxStyles={styles.container}
         setSelected={(val: string) => handleEvent(val)}
@@ -124,16 +138,17 @@ export const NameSection = ({eventName, setEventName, current, error}: Props) =>
         inputStyles={{fontWeight: '600'}}
       />
       {selectAutre && (
-        <TextInput
+        <PaperTextInput
           label={t('AddEvent.Name')}
-          returnKeyType="next"
+          returnKeyType="done"
           value={eventName}
           onChangeText={text => setEventName(text)}
           autoCapitalize="none"
-          error={!!error}
-          errorText={error}
+          style={error ? [styles.input, styles.inputError] : styles.input }
         />
+        
       )}
+      {error && <Text style={defaultStyles.error}>{error}</Text>}
     </View>
   );
 };

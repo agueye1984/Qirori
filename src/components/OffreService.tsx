@@ -1,58 +1,105 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View} from 'react-native';
 import MultiSelect from 'react-native-multiple-select';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../contexts/theme';
-import TextInput from './TextInput';
-import { Button } from 'react-native-paper'; // Assurez-vous d'importer Button depuis react-native-paper
-import { theme } from '../core/theme';
-import { getFilteredRecords, addRecord } from '../services/FirestoreServices'; // Ajoutez addRecord pour ajouter un enregistrement à Firestore
+import {useTranslation} from 'react-i18next';
+import {useTheme} from '../contexts/theme';
+import {Button} from 'react-native-paper'; // Assurez-vous d'importer Button depuis react-native-paper
+import {theme} from '../core/theme';
+import {addRecord, checkIfDocumentExists} from '../services/FirestoreServices'; // Ajoutez addRecord pour ajouter un enregistrement à Firestore
+import firestore from '@react-native-firebase/firestore';
+import {TypeOffre} from '../contexts/types';
+import {v4 as uuidv4} from 'uuid';
+import {TextInput as PaperTextInput} from 'react-native-paper';
 
 type Props = {
-  setOffreService: (value: string[]) => void;
+  setOffre: (value: string[]) => void;
+  category: string;
+  defaultSelectedOffres: string[];
 };
 
-export const OffreService = ({ setOffreService }: Props) => {
-  const { ColorPallet } = useTheme();
-  const { i18n, t } = useTranslation();
-  const [typeOffres, setTypeOffres] = useState<{ id: string; name: string }[]>([]);
+export const OffreService = ({
+  setOffre,
+  category,
+  defaultSelectedOffres,
+}: Props) => {
+  const {ColorPallet} = useTheme();
+  const {i18n, t} = useTranslation();
+  const [typeOffres, setTypeOffres] = useState<{id: string; name: string}[]>(
+    [],
+  );
   const selectedLanguageCode = i18n.language;
-  const [showCustomRegionInput, setShowCustomRegionInput] = useState<boolean>(false);
+  const [showCustomRegionInput, setShowCustomRegionInput] =
+    useState<boolean>(false);
   const [customOffre, setCustomOffre] = useState<string>('');
-  const [selectedOffres, setSelectedOffres] = useState<string[]>([]);
+  const [selectedOffres, setSelectedOffres] = useState<string[]>(
+    defaultSelectedOffres,
+  );
   const [dropdownVisible, setDropdownVisible] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let data = await getFilteredRecords('type_offres', 'nameFr', '');
-        if (selectedLanguageCode === 'en') {
-          data = await getFilteredRecords('type_offres', 'nameEn', '');
+    setSelectedOffres(defaultSelectedOffres);
+  }, [defaultSelectedOffres]);
+
+  useEffect(() => {
+    // Quand la catégorie change, on vide les offres sélectionnées
+    setSelectedOffres([]);
+    setOffre([]); // Réinitialise également l'état dans le composant parent
+  }, [category]); // Exécuter ce useEffect à chaque changement de catégorie
+
+  // console.log(defaultSelectedOffres)
+
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('type_offres')
+      .where('actif', '==', true)
+      .where('category', '==', category)
+      .onSnapshot(querySnapshot => {
+        if (querySnapshot.empty) {
+          setTypeOffres([]);
+        } else {
+          const newOffre: any[] = [];
+          querySnapshot.forEach(documentSnapshot => {
+            const typeOffreData = documentSnapshot.data() as TypeOffre;
+            typeOffreData.id = documentSnapshot.id; // ajouter l'id du document
+
+            if (selectedLanguageCode === 'en') {
+              const offer = {
+                id: typeOffreData.id,
+                name: typeOffreData.nameEn,
+              };
+              newOffre.push(offer);
+              newOffre.sort((a, b) =>
+                a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+              );
+            } else {
+              const offer = {
+                id: typeOffreData.id,
+                name: typeOffreData.nameFr,
+              };
+              //  console.log(offer)
+              newOffre.push(offer);
+              newOffre.sort((a, b) =>
+                a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+              );
+            }
+          });
+          const offre = {
+            id: '-1',
+            name: t('Dropdown.Autre'),
+          };
+          newOffre.push(offre);
+          setTypeOffres(newOffre);
         }
+      });
 
-        const offre = {
-          id: '-1',
-          name: t('Dropdown.Autre'),
-        };
-        const newOffre = data.map((record) => ({
-          id: record.id,
-          name: selectedLanguageCode === 'fr' ? record.data.nameFr : record.data.nameEn,
-        }));
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, [selectedLanguageCode, t, category]);
 
-        newOffre.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-        newOffre.push(offre);
-        setTypeOffres(newOffre);
-        console.log('Fetched typeOffres:', newOffre);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
-  }, [selectedLanguageCode, t]);
+  //console.log(typeOffres)
 
   const handleOffreService = (values: string[]) => {
-    console.log('handleOffreService values:', values);
-
+    // console.log(values)
     if (Array.isArray(values)) {
       if (values.includes('-1')) {
         setShowCustomRegionInput(true);
@@ -61,7 +108,7 @@ export const OffreService = ({ setOffreService }: Props) => {
         setShowCustomRegionInput(false);
         setDropdownVisible(true);
       }
-      setOffreService(values);
+      setOffre(values);
       setSelectedOffres(values);
     } else {
       console.warn('Expected array but got:', values);
@@ -70,18 +117,35 @@ export const OffreService = ({ setOffreService }: Props) => {
 
   const handleAddCustomRegion = async () => {
     try {
+      const offreExists = await checkIfDocumentExists('type_offres', {
+        [`name${selectedLanguageCode.toUpperCase()}`]: customOffre,
+      });
+  
+      if (offreExists) {
+        console.log('Un type d offres avec ce nom existe déjà.');
+        return; // Arrêtez si le type de prix existe déjà
+      }
       // Add the new offer to Firestore
-      const newRegionData = { nameFr: customOffre, nameEn: customOffre };
-      const newRegionRef = await addRecord('type_offres', newRegionData);
-      const newRegionId = newRegionRef.id; // Get the new document ID
+      const uid = uuidv4();
+      const newOffreData = {
+        id: uid,
+        nameFr: selectedLanguageCode === 'fr' ? customOffre : '',
+        nameEn: selectedLanguageCode === 'en' ? customOffre : '',
+        category: category,
+        actif: true,
+      };
+      await addRecord('type_offres', newOffreData, uid);
+      const newOffreId = uid; // Get the new document ID
 
-      const newRegion = { id: newRegionId, name: customOffre };
-      setTypeOffres([...typeOffres, newRegion]);
+      const newOffre = {id: newOffreId, name: customOffre};
+      setTypeOffres([...typeOffres, newOffre]);
 
       // Deselect "Autre" and select the new offer
-      const updatedSelectedOffres = selectedOffres.filter(offre => offre !== '-1').concat(newRegionId);
+      const updatedSelectedOffres = selectedOffres
+        .filter(offre => offre !== '-1')
+        .concat(newOffreId);
       setSelectedOffres(updatedSelectedOffres);
-      setOffreService(updatedSelectedOffres);
+      setOffre(updatedSelectedOffres);
 
       setCustomOffre('');
       setShowCustomRegionInput(false);
@@ -155,10 +219,18 @@ export const OffreService = ({ setOffreService }: Props) => {
     },
     multiSelectInputGroup: {
       justifyContent: 'center',
-      alignItems:'center',
+      alignItems: 'center',
     },
     multiSelectText: {
       textAlign: 'center',
+    },
+    input: {
+      width: '100%', // Prend toute la largeur du conteneur
+      marginBottom: 15,
+      //height: 50,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 4,
+      paddingHorizontal: 10,
     },
   });
 
@@ -172,34 +244,29 @@ export const OffreService = ({ setOffreService }: Props) => {
           selectedItems={selectedOffres}
           selectText={t('Dropdown.Offre')}
           searchInputPlaceholderText={t('Dropdown.Search')}
-       //   tagRemoveIconColor="#CCC"
-        //  tagBorderColor="#CCC"
-        //  tagTextColor="#CCC"
-        //  selectedItemTextColor="#CCC"
-        //  selectedItemIconColor="#CCC"
-       //   itemTextColor="#000"
           displayKey="name"
-     //     searchInputStyle={{ color: '#CCC' }}
-     //     submitButtonColor="#CCC"
-     //     submitButtonText={t('Dropdown.Submit')}
-     hideSubmitButton={true}
-     // styleMainWrapper={styles.multiSelectMainWrapper} // Appliquez des styles personnalisés ici
+          hideSubmitButton={true}
           styleDropdownMenuSubsection={styles.multiSelectContainer} // Appliquez des styles personnalisés ici
           styleInputGroup={styles.multiSelectInputGroup} // Pour centrer le placeholder
+          styleTextDropdown={styles.multiSelectText}
         />
       )}
       {showCustomRegionInput && (
-         <View>
-        <View style={styles.customRegionContainer}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter custom offer"
-            value={customOffre}
-            onChangeText={setCustomOffre}
-          />
-        </View>
-        <Button mode="contained" onPress={handleAddCustomRegion} style={{ marginLeft: 10 }}>
-            Add Offer
+        <View>
+          <View>
+            <PaperTextInput
+              style={styles.input}
+              placeholder={t('Global.Offre')}
+              value={customOffre}
+              onChangeText={setCustomOffre}
+              returnKeyType="done"
+            />
+          </View>
+          <Button
+            mode="contained"
+            onPress={handleAddCustomRegion}
+            style={{marginLeft: 10}}>
+            {t('Global.Add')}
           </Button>
         </View>
       )}

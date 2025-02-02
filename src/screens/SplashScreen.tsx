@@ -2,7 +2,6 @@ import React, {useEffect} from 'react';
 import {Image, SafeAreaView, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useStore} from '../contexts/store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
   const [state] = useStore();

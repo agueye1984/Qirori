@@ -3,12 +3,12 @@ import {
   View,
   TextInput,
   Animated,
-  ActivityIndicator,
   TouchableOpacity,
   TouchableWithoutFeedback,
   Text,
   StyleSheet,
   SafeAreaView,
+  Dimensions,
 } from 'react-native';
 
 type Props = {
@@ -20,6 +20,7 @@ export const SearchBar = ({searchPlaceholder, onChangeText}: Props) => {
   const [hasFocus, setHasFocus] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
   const [contactName, setContactName] = useState('');
+  const {width} = Dimensions.get('window');
 
   const clear = () => {
     setContactName('');
@@ -41,10 +42,8 @@ export const SearchBar = ({searchPlaceholder, onChangeText}: Props) => {
       height: 40,
       borderRadius: 5,
       backgroundColor: '#ddd',
-      marginLeft: 10,
-      marginRight: 10,
-      marginBottom: 5,
-      marginTop: 5,
+      marginHorizontal: width * 0.03, // Dynamique
+      marginVertical: 5,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
@@ -53,9 +52,8 @@ export const SearchBar = ({searchPlaceholder, onChangeText}: Props) => {
       alignSelf: 'center',
       marginLeft: 5,
       height: 40,
-      fontSize: 14,
-      flex: hasFocus ? 1 : 0,
-      width:250,
+      fontSize: width * 0.035, // Dynamique
+      flex: 1,
     },
     leftIconStyle: {
       height: 30,
@@ -94,15 +92,6 @@ export const SearchBar = ({searchPlaceholder, onChangeText}: Props) => {
             onFocus={getHasFocus}
           />
           <View style={styles.rightContainer}>
-            {hasFocus ? (
-              <ActivityIndicator
-                key="loading"
-                style={styles.activityIndicator}
-                color="#515151"
-              />
-            ) : (
-              <View />
-            )}
             {hasFocus && !isEmpty ? (
               <TouchableOpacity onPress={clear}>
                 <View style={styles.rightIconStyle}>

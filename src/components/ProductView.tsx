@@ -1,31 +1,39 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Text, Image, View, StyleSheet, TouchableOpacity} from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign';
-import Icon1 from 'react-native-vector-icons/FontAwesome';
-import {ManageEventsParamList, Panier, Product, User} from '../contexts/types';
-import {v4 as uuidv4} from 'uuid';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {LocalStorageKeys} from '../constants';
-import {useStore} from '../contexts/store';
-import {DispatchAction} from '../contexts/reducers/store';
+import {
+  Category,
+  ManageEventsParamList,
+  Product,
+} from '../contexts/types';
 import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {theme} from '../core/theme';
 import storage from '@react-native-firebase/storage';
-import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import {CategoryList} from './CategoryList';
 import {
   widthPercentageToDP as widthToDp,
   heightPercentageToDP as heightToDp,
 } from 'react-native-responsive-screen';
-import {TextInput} from 'react-native-paper';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {addToCartService} from '../services/CartsServices';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
+import {
+  getNbrProductsByFormule,
+  getRecordById,
+} from '../services/FirestoreServices';
+import Icon2 from 'react-native-vector-icons/Fontisto';
+import {useStore} from '../contexts/store';
+import {useTheme} from '../contexts/theme';
+import defaultComponentsThemes from '../defaultComponentsThemes';
+import Stepper from './Stepper';
+import Button from './Button';
 
 type Props = {
   product: Product;
   onPress: () => void;
-  image: string;
+  image: string[];
+  participantCount: number;
+  selectFormule: string;
 };
 
 type serviceOfferProp = StackNavigationProp<
@@ -33,167 +41,139 @@ type serviceOfferProp = StackNavigationProp<
   'ServicesOffertsList'
 >;
 
-export const ProductView = ({product, image, onPress}: Props) => {
-  const [quantity, setQuantity] = useState('1');
-  const [userId, setUserId] = useState('');
+export const ProductView = ({
+  product,
+  onPress,
+  image,
+  participantCount,
+  selectFormule,
+}: Props) => {
+  const currentUser = auth().currentUser;
+  const [state] = useStore();
   const navigation = useNavigation<serviceOfferProp>();
-  const {t} = useTranslation();
-  const [imageUrl, setImageUrl] = useState('');
-  const [nbrProduct, setNbreProduct] = useState(0);
-  const [isStock, setIsStock] = useState(false);
-  const [stock, setStock] = useState(0);
-  const category = CategoryList(t).find(cat => cat.id === product.category);
-
-  const getNbrProducts = () => {
-    firestore()
-      .collection('carts')
-      .where('product', '==', product.id)
-      .get()
-      .then(querySnapshot => {
-        let nbr = 0;
-        querySnapshot.forEach(documentSnapshot => {
-          const cart = documentSnapshot.data() as Panier;
-          nbr += cart.qty;
-        });
-        const nbRestant = product.quantite - nbrProduct;
-        setIsStock(false);
-        if (nbRestant > 0) {
-          setIsStock(true);
-        }
-
-        setStock(nbRestant);
-        setNbreProduct(nbr);
-      });
-  };
+  const {t, i18n} = useTranslation();
+  const [imagesUrl, setImagesUrl] = useState<string[]>([]);
+  const [category, setCategory] = useState<Category>();
+  const [formuleId, setFormuleId] = useState(selectFormule);
+  const [quantity, setQuantity] = useState(participantCount);
+  const [offreError, setOffreError] = useState('');
+  const {ColorPallet} = useTheme();
+  const defaultStyles = defaultComponentsThemes();
+  const [loadedOffers, setLoadedOffers] = useState<{[key: string]: string}>({});
+  const [stockPerFormule, setStockPerFormule] = useState<{
+    [key: string]: number;
+  }>({});
+  const devise = state.currency.toString();
+  const selectedLanguage = i18n.language;
 
   useEffect(() => {
-    const usersRef = firestore().collection('users');
-    auth().onAuthStateChanged(user => {
-      if (user) {
-        usersRef
-          .doc(user.uid)
-          .get()
-          .then(document => {
-            const userData = document.data() as User;
-            setUserId(userData.id);
-          })
-          .catch(error => {
-            console.log('error1 ' + error);
-          });
+    setQuantity(participantCount);
+  }, [participantCount]);
+
+  useEffect(() => {
+    setFormuleId(selectFormule);
+  }, [selectFormule]);
+
+  useEffect(() => {
+    const getImages = async () => {
+      const tabUrl: string[] = [];
+      for (const imageServ of image) {
+        const url = await storage().ref(imageServ).getDownloadURL();
+        tabUrl.push(url);
       }
-    });
-  }, []);
-
-  useEffect(() => {
-    storage()
-      .ref(image)
-      .getDownloadURL()
-      .then(url => setImageUrl(url));
+      setImagesUrl(tabUrl);
+    };
+    getImages();
   }, [image]);
 
   useEffect(() => {
-    getNbrProducts();
-  }, [nbrProduct]);
+    const fetchData = async () => {
+      try {
+        const cat = (await getRecordById(
+          'categories',
+          product.category,
+        )) as Category;
+        setCategory(cat);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, [product]);
 
-  const addToPanier = () => {
-    firestore()
-      .collection('carts')
-      // Filter results
-      .where('userId', '==', userId)
-      .where('product', '==', product.id)
-      .where('paid', '==', false)
-      .get()
-      .then(querySnapshot => {
-        let idCart = uuidv4();
-        if (querySnapshot.empty) {
-          firestore()
-            .collection('carts')
-            .doc(idCart)
-            .set({
-              id: idCart,
-              product: product.id,
-              qty: parseInt(quantity),
-              totalPrice: parseInt(quantity) * product.prixUnitaire,
-              paid: false,
-              userId: userId,
-              name: product.name,
-              description: product.description,
-              prix: product.prixUnitaire,
-              devise: product.devise,
-              tax: product.prixUnitaire * 0.14975,
-              images: product.images,
-              vendorId: product.userId,
-              dateDelivered: '',
-              statut: '',
-              commandeId: '',
-            })
-            .then(() => {
-              console.log('Cart added!');
-              getNbrProducts();
-            });
-        } else {
-          querySnapshot.forEach(documentSnapshot => {
-            const panier = documentSnapshot.data() as Panier;
-            firestore()
-              .collection('carts')
-              .doc(panier.id)
-              .update({
-                id: panier.id,
-                product: product.id,
-                qty: parseInt(quantity),
-                totalPrice: parseInt(quantity) * product.prixUnitaire,
-                paid: false,
-                userId: userId,
-                name: product.name,
-                description: product.description,
-                prix: product.prixUnitaire,
-                devise: product.devise,
-                tax: product.prixUnitaire * 0.14975,
-                images: product.images,
-                vendorId: product.userId,
-                dateDelivered: '',
-                statut: '',
-              })
-              .then(() => {
-                getNbrProducts();
-                console.log('Cart updated!');
-              });
-          });
+  useEffect(() => {
+    const loadOffers = async () => {
+      const newLoadedOffers = {...loadedOffers};
+      for (const formula of product.formules) {
+        if (!newLoadedOffers[formula.formuleId]) {
+          const formule = await getRecordById('formules', formula.formuleId);
+          newLoadedOffers[formula.formuleId] = formule?.name;
         }
-      });
+      }
+      setLoadedOffers(newLoadedOffers);
+    };
+    const fetchStockForFormules = async () => {
+      const stockData: {[key: string]: number} = {};
+      for (const formula of product.formules) {
+        const stockPanier = await getNbrProductsByFormule(formula.id);
+        stockData[formula.id] = formula.quantity - stockPanier;
+      }
+      setStockPerFormule(stockData);
+    };
 
-      navigation.navigate('ServicesOffertsList', {
-        item: category===undefined ? '':category.id,
-      });
+    loadOffers();
+    fetchStockForFormules();
+  }, [product]);
+
+  const setSelectedOffre = (id: string) => {
+    setOffreError('');
+    setFormuleId(id);
   };
 
-  const increment = (value: string) => {
-    let val = parseInt(value);
-    val += 1;
-    setQuantity(val.toString());
-  };
-  const decrement = (value: string) => {
-    let val = parseInt(value);
-    val -= 1;
-    if (val <= 1) {
-      val = 1;
+  const handleAddToCart = async () => {
+    if (formuleId === 'All' || formuleId === '') {
+      setOffreError(t('Global.OffreErrorEmpty'));
+    } else {
+      setOffreError('');
+      addToCartService(
+        formuleId,
+        product,
+        quantity.toString(),
+        currentUser,
+        navigation,
+        'products',
+      );
+      const newStockForFormule = await getNbrProductsByFormule(formuleId);
+      const formule = product.formules.find((f: any) => f.id === formuleId);
+
+      const totalStock = formule.quantity;
+      setStockPerFormule(prevStock => ({
+        ...prevStock,
+        [formuleId]: totalStock - newStockForFormule, // Mettre à jour le stock pour la formule sélectionnée
+      }));
     }
-    setQuantity(val.toString());
+  };
+
+  const increment = () => setQuantity(quantity + 1);
+  const decrement = () => setQuantity(quantity > 0 ? quantity - 1 : 0); // Évite les nombres négatifs
+  const handleQuantity = (text: string) => {
+    const parsed = parseInt(text, 10);
+    setQuantity(isNaN(parsed) ? 0 : parsed);
   };
 
   const styles = StyleSheet.create({
     card: {
-      backgroundColor: 'white',
+      //backgroundColor: 'white',
       borderRadius: 16,
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      shadowColor: 'black',
+      // shadowOpacity: 0.2,
+      // shadowRadius: 4,
+      //shadowColor: 'black',
       shadowOffset: {
         height: 0,
         width: 0,
       },
       elevation: 1,
-      marginVertical: 5,
+      marginVertical: 20,
     },
     thumb: {
       height: 300,
@@ -203,19 +183,19 @@ export const ProductView = ({product, image, onPress}: Props) => {
     },
     infoContainer: {
       padding: 16,
+      flex: 1,
     },
     name: {
       fontSize: 22,
       fontWeight: 'bold',
     },
     price: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 8,
+      fontSize: widthToDp(4),
+      fontWeight: 'bold',
     },
     itemContainerForm: {
       height: 70,
-      marginHorizontal: 5,
+      marginHorizontal: 15,
       borderWidth: 0.5,
       borderTopLeftRadius: 10,
       borderTopRightRadius: 10,
@@ -239,6 +219,7 @@ export const ProductView = ({product, image, onPress}: Props) => {
     },
     image: {
       height: heightToDp(40),
+      width: '100%', // Assurez-vous que l'image prend toute la largeur
       borderRadius: 7,
       marginBottom: heightToDp(2),
     },
@@ -264,8 +245,6 @@ export const ProductView = ({product, image, onPress}: Props) => {
     },
     itemContainer: {
       marginHorizontal: 15,
-      //borderBottomWidth: 0.2,
-      // borderBottomStyle: 'solid',
       paddingBottom: 10,
     },
     input: {
@@ -274,95 +253,147 @@ export const ProductView = ({product, image, onPress}: Props) => {
     },
     center: {
       flexDirection: 'row',
-      // backgroundColor:'#710096',
       padding: 7,
       paddingHorizontal: 10,
       borderRadius: 20,
     },
     icon: {
-      // color: 'white',
       margin: 2,
-      marginVertical: 15,
+      marginVertical: 20,
+    },
+    error: {
+      ...defaultStyles.text,
+      color: ColorPallet.error,
+      fontWeight: 'bold',
+    },
+    slide: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    paginationContainer: {
+      paddingVertical: 10,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginHorizontal: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.92)',
+    },
+    inactiveDot: {
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    },
+    container2: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+      marginVertical: 8,
+    },
+    labelContainer: {
+      flex: 1,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: 'bold',
     },
   });
+
+  const renderItem = ({item}: {item: string}) => {
+    //console.log('Rendering item:', item);
+    return (
+      <View style={styles.slide}>
+        <Image
+          source={
+            item === ''
+              ? require('../../assets/No_image_available.svg.png')
+              : {uri: item}
+          }
+          style={styles.image}
+        />
+      </View>
+    );
+  };
 
   return (
     <View>
       <View style={styles.container}>
         <TouchableOpacity style={styles.card} onPress={onPress}>
-          <Image
-            style={styles.image}
-            source={
-              imageUrl === ''
-                ? require('../../assets/No_image_available.svg.png')
-                : {uri: imageUrl}
-            }
+          <Carousel
+            data={imagesUrl}
+            renderItem={renderItem}
+            sliderWidth={widthToDp(100)}
+            itemWidth={widthToDp(100)}
+            autoplay={false}
+            loop={false}
+          />
+          <Pagination
+            dotsLength={image.length}
+            activeDotIndex={0}
+            containerStyle={styles.paginationContainer}
+            dotStyle={styles.dot}
+            inactiveDotStyle={styles.inactiveDot}
           />
           <Text style={styles.name}>{product.name}</Text>
           <Text style={styles.title}>
-            {category == undefined ? '' : category.name}
+            {selectedLanguage === 'fr' ? category?.nameFr : category?.nameEn}{' '}
           </Text>
-          <Text style={styles.price}>
-            {product.prixUnitaire.toLocaleString(undefined, {
-              maximumFractionDigits: 2,
-            }) +
-              ' ' +
-              product.devise}
-          </Text>
-          {isStock ? (
-            <Text style={styles.stock}>
-              {stock} {t('BuyProduct.Stock')}
-            </Text>
-          ) : (
-            <Text style={styles.stock}>{t('BuyProduct.NoStock')}</Text>
-          )}
+          <View style={styles.infoContainer}>
+            {product.formules.map((item, index) => {
+              const isSelected = item.id === formuleId;
+              const totalPrice = `${parseInt(item.amount) * quantity} ${
+                state.currency
+              }`;
+              const tabOffer = loadedOffers[item.formuleId] || '';
+              const stockForThisFormule = stockPerFormule[item.id] || 0;
+
+              return (
+                <TouchableOpacity
+                  style={styles.itemContainer}
+                  onPress={() => setSelectedOffre(item.id)}
+                  key={index.toString()}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon2
+                      name={
+                        isSelected ? 'radio-btn-active' : 'radio-btn-passive'
+                      }
+                      size={20}
+                      color={ColorPallet.primary}
+                    />
+                    <Text style={[defaultStyles.text, {paddingLeft: 5}]}>
+                      {tabOffer} | {t('Global.Prix')} : {item.amount} {devise} |{' '}
+                      {t('Global.Stock')} : {stockForThisFormule} |{' '}
+                      {t('Global.Total')} : {totalPrice}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+            {offreError && <Text style={styles.error}>{offreError}</Text>}
+          </View>
         </TouchableOpacity>
       </View>
-      <View style={[styles.itemContainerForm, {flexDirection: 'row'}]}>
-        <View style={{flexDirection: 'row'}}>
-          <View style={{marginHorizontal: 10, marginVertical: 25}}>
-            <Text>{t('BuyProduct.Quantity')}</Text>
-          </View>
-          <View style={styles.center}>
-            <TouchableOpacity onPress={() => decrement(quantity)}>
-              <Icon name="minus" size={18} style={styles.icon} />
-            </TouchableOpacity>
-            <TextInput
-              value={quantity.toString()}
-              onChangeText={text => setQuantity(text)}
-              autoCapitalize="none"
-              keyboardType="number-pad"
-              style={styles.input}
-              selectionColor={theme.colors.primary}
-              underlineColor="transparent"
-              mode="outlined"
-            />
-            <TouchableOpacity onPress={() => increment(quantity)}>
-              <Icon name="plus" size={18} style={styles.icon} />
-            </TouchableOpacity>
-          </View>
+      <View style={styles.container2}>
+        <View style={styles.labelContainer}>
+          <Text style={styles.label}>
+            <Text style={styles.price}>{t('BuyProduct.Quantity')}</Text>
+          </Text>
         </View>
-
-        <View style={{flexDirection: 'row', marginLeft: 100}}>
-          {isStock ? (
-            <TouchableOpacity style={styles.card} onPress={addToPanier}>
-              <Icon
-                name={'shoppingcart'}
-                color={theme.colors.primary}
-                size={30}
-              />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.card} disabled={isStock}>
-              <Icon
-                name={'shoppingcart'}
-                color={theme.colors.primary}
-                size={30}
-              />
-            </TouchableOpacity>
-          )}
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Stepper
+            value={quantity}
+            onIncrement={increment}
+            onDecrement={decrement}
+            onChange={handleQuantity}
+          />
         </View>
       </View>
+      <Button mode="contained" onPress={handleAddToCart}>
+          {t('BuyProduct.AddToCart')}
+        </Button>
     </View>
   );
 };

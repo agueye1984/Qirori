@@ -10,12 +10,10 @@ import {AccueilItem} from '../components/AccueilItem'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import {theme} from '../core/theme'
 import auth from '@react-native-firebase/auth'
-import {LargeButton} from '../components/LargeButton'
 import Icon1 from 'react-native-vector-icons/AntDesign'
 
 const HomeScreen = () => {
   const {t} = useTranslation()
-  const defaultStyles = DefaultComponentsThemes()
   const accueil = AccueilList(t)
   const {navigate} = useNavigation()
 
@@ -30,49 +28,64 @@ const HomeScreen = () => {
   }
 
   const styles = StyleSheet.create({
-    img: {
-      width: '30%',
-      resizeMode: 'contain',
-      paddingRight: 50,
+    safeContainer: {
+      flex: 1,
+      backgroundColor: '#fff',
     },
-    row: {
+    scrollContainer: {
+      padding: 10,
+      flexGrow: 1,
+    },
+    headerRow: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
     },
-    rowCenter: {
-      flex: 1, // Pour que l'icône occupe de l'espace
-      justifyContent: 'center', // Centré verticalement
-      alignItems: 'center', // Centré horizontalement
+    logo: {
+      width: 50,
+      height: 50,
     },
-  })
+    centeredRow: {
+      alignItems: 'center',
+      marginVertical: 20,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: 10,
+    },
+  });
+
   return (
-    <SafeAreaView>
-      <ScrollView style={{padding: 10}}>
-        <View style={styles.row}>
-          <View style={defaultStyles.leftSectRowContainer}>
-            <Image source={require('../assets/logo.png')} style={{width: 80, height: 80}} />
-          </View>
-          <View style={defaultStyles.rightSectRowContainer}>
-            <TouchableOpacity onPress={logout}>
-              <Icon1 name={'logout'} color={theme.colors.primary} size={50} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.rowCenter}>
-          <TouchableOpacity onPress={() => navigate('AddEvent' as never)}>
-            <Icon name={'calendar-plus-o'} color={theme.colors.primary} size={60} />
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        {/* Header Row */}
+        <View style={styles.headerRow}>
+          <Image source={require('../assets/logo.png')} style={styles.logo} />
+          <TouchableOpacity onPress={logout}>
+            <Icon1 name="logout" color={theme.colors.primary} size={50} />
           </TouchableOpacity>
         </View>
+
+        {/* Add Event Button */}
+        <View style={styles.centeredRow}>
+          <TouchableOpacity onPress={() => navigate('AddEvent' as never)}>
+            <Icon name="calendar-plus-o" color={theme.colors.primary} size={60} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Title */}
         <Header>{t('HomeScreen.title')}</Header>
-        <View style={{justifyContent: 'center', alignContent: 'center', flex: 1}}>
-          <View style={{padding: 10}}>
-            {accueil.map((item: Accueil) => {
-              return <AccueilItem key={item.id} item={item} action={() => handleSelection(item)} />
-            })}
-          </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          {accueil.map((item: Accueil) => (
+            <AccueilItem key={item.id} item={item} action={() => handleSelection(item)} />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
+    
   )
 }
 

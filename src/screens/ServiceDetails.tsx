@@ -1,7 +1,10 @@
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {ManageEventsParamList, Offre, Panier, User} from '../contexts/types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {LocalStorageKeys} from '../constants';
+import {
+  Category,
+  ManageEventsParamList,
+  ScheduleState,
+  TypePrix,
+} from '../contexts/types';
 import {
   Image,
   StyleSheet,
@@ -9,153 +12,143 @@ import {
   TouchableOpacity,
   View,
   SafeAreaView,
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
 import {BacktoHome} from '../components/BacktoHome';
-import {t} from 'i18next';
 import {theme} from '../core/theme';
-import Icon1 from 'react-native-vector-icons/FontAwesome';
 import {useEffect, useState} from 'react';
-import {useStore} from '../contexts/store';
-import {v4 as uuidv4} from 'uuid';
-import {DispatchAction} from '../contexts/reducers/store';
-import Button from '../components/Button';
 import storage from '@react-native-firebase/storage';
-import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { CategoryList } from '../components/CategoryList';
-import {
-  widthPercentageToDP as widthToDp,
-  heightPercentageToDP as heightToDp,
-} from 'react-native-responsive-screen';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../contexts/theme';
+import {useTranslation} from 'react-i18next';
+import {useTheme} from '../contexts/theme';
 import defaultComponentsThemes from '../defaultComponentsThemes';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
+import Button from '../components/Button';
 import Icon2 from 'react-native-vector-icons/Fontisto';
-import { StackNavigationProp } from '@react-navigation/stack';
-import {TextInput} from 'react-native-paper';
-import Icon from 'react-native-vector-icons/AntDesign';
-import { offreValidator } from '../core/utils';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {getRecordById} from '../services/FirestoreServices';
+import {useStore} from '../contexts/store';
+import {GetWeekendList} from '../components/WeekendList';
+import {addToCartService} from '../services/CartsServices';
+import Stepper from '../components/Stepper';
+
+interface GroupedSchedule {
+  startTime: string;
+  endTime: string;
+  capacity: string;
+  days: string[];
+}
 
 type serviceOfferProp = StackNavigationProp<
   ManageEventsParamList,
   'ServicesOffertsList'
 >;
 
-export const ServiceDetails = () => {
-  const route = useRoute<RouteProp<ManageEventsParamList, 'ServiceDetails'>>();
-  const {item} = route.params;
-  const navigation = useNavigation<serviceOfferProp>();
-  const [quantity, setQuantity] = useState('1');
-  const [state, dispatch] = useStore();
-  const [userId, setUserId] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [panier, setPanier] = useState<Panier>();
-  const {ColorPallet} = useTheme();
+const groupSchedule = (schedule: ScheduleState): GroupedSchedule[] => {
+  const grouped: {[key: string]: GroupedSchedule} = {};
   const {t} = useTranslation();
+  const daysNames = GetWeekendList(t);
+
+  for (const [day, {startTime, endTime, capacity}] of Object.entries(
+    schedule,
+  )) {
+    const key = `${startTime}-${endTime}-${capacity}`;
+    if (!grouped[key]) {
+      grouped[key] = {startTime, endTime, capacity, days: []};
+    }
+    grouped[key].days.push(daysNames[day]);
+  }
+
+  return Object.values(grouped);
+};
+
+export const ServiceDetails = () => {
+  const currentUser = auth().currentUser;
+  const route = useRoute<RouteProp<ManageEventsParamList, 'ServiceDetails'>>();
+  const item = route.params.item;
+  const navigation = useNavigation<serviceOfferProp>();
+  const [quantity, setQuantity] = useState(1);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const {t, i18n} = useTranslation();
+  const [category, setCategory] = useState<Category>();
   const defaultStyles = defaultComponentsThemes();
-  const [offreId, setOffreId] = useState('');
-  const currencyCode = state.currency.toString();
-  const category = CategoryList(t).find(cat => cat.id === item.category);
+  const {ColorPallet} = useTheme();
+  const [formuleId, setFormuleId] = useState('');
   const [offreError, setOffreError] = useState('');
+  const [activeSlide, setActiveSlide] = useState(0);
+  const selectedLanguage = i18n.language;
+  const [loadedOffers, setLoadedOffers] = useState<{[key: string]: string}>({});
+  const [state] = useStore();
 
   useEffect(() => {
-    const usersRef = firestore().collection('users');
-    auth().onAuthStateChanged(user => {
-      if (user) {
-        usersRef
-          .doc(user.uid)
-          .get()
-          .then(document => {
-            const userData = document.data() as User;
-            setUserId(userData.id);
-          })
-          .catch(error => {
-            console.log('error1 ' + error);
-          });
+    const fetchData = async () => {
+      try {
+        const cat = (await getRecordById(
+          'categories',
+          item.category,
+        )) as Category;
+        setCategory(cat);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
-    });
-  }, []);
+    };
+    fetchData();
+  }, [item.category]);
 
   useEffect(() => {
-    storage()
-      .ref(item.images)
-      .getDownloadURL()
-      .then(url => setImageUrl(url));
+    const getImages = async () => {
+      try {
+        const tabUrl: string[] = [];
+        for (const imageServ of item.images) {
+          const url = await storage().ref(imageServ).getDownloadURL();
+          tabUrl.push(url);
+        }
+        console.log('Fetched URLs:', tabUrl);
+        setImageUrls(tabUrl);
+      } catch (error) {
+        console.error('Error fetching image URLs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getImages();
   }, [item.images]);
 
-  //const price = item.prixUnitaire as number;
-
   const styles = StyleSheet.create({
-    productsList: {
-      backgroundColor: '#eeeeee',
-    },
-    productsListContainer: {
-      backgroundColor: '#eeeeee',
-      paddingVertical: 8,
-      marginHorizontal: 8,
-    },
     container: {
-      backgroundColor: 'white',
-      marginVertical: 25,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      alignItems: 'center',
-      borderBottomWidth: 12,
-      borderBottomColor: '#ddd',
-    },
-    headerText: {
-      color: 'white',
-      fontSize: 25,
-      padding: 20,
-      margin: 20,
-      textAlign: 'center',
-    },
-    TitleText: {
-      fontSize: 25,
-      // padding: 20,
-      marginVertical: 20,
-    },
-    scrollContainer: {
       flex: 1,
-      paddingHorizontal: 20,
     },
-    section: {
-      marginHorizontal: 15,
-      paddingVertical: 5,
+    carouselContainer: {
+      flexGrow: 0, // Fixe la hauteur pour le carousel uniquement
+      marginBottom: 20,
     },
-    thumb: {
-      height: 390,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      width: 390,
+    image: {
+      height: Dimensions.get('window').width - 60,
+      width: Dimensions.get('window').width - 60,
+      borderRadius: 7,
     },
-    name: {
-      fontSize: 22,
-      fontWeight: 'bold',
+    slide: {
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    price: {
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 8,
+    contentContainer: {
+      paddingHorizontal: 16,
+      flexGrow: 1,
+      paddingBottom: 20,
     },
-    title: {
-      fontSize: widthToDp(3.7),
-      fontWeight: 'bold',
-    },
-    category: {
-      fontSize: widthToDp(3.4),
-      color: '#828282',
-      marginTop: 3,
-    },
-    itemContainer: {
-      marginHorizontal: 15,
-      //borderBottomWidth: 0.2,
-      // borderBottomStyle: 'solid',
-      paddingBottom: 10,
+    text: {
+      fontSize: 18,
+      marginBottom: 10,
     },
     infoContainer: {
       padding: 16,
+    },
+    itemContainer: {
+      marginHorizontal: 15,
+      paddingBottom: 10,
     },
     input: {
       width: 70,
@@ -163,14 +156,12 @@ export const ServiceDetails = () => {
     },
     center: {
       flexDirection: 'row',
-      // backgroundColor:'#710096',
       padding: 7,
       paddingHorizontal: 10,
       borderRadius: 20,
       marginLeft: 150,
     },
     icon: {
-      // color: 'white',
       margin: 2,
       marginVertical: 20,
     },
@@ -179,199 +170,225 @@ export const ServiceDetails = () => {
       color: ColorPallet.error,
       fontWeight: 'bold',
     },
-    image: {
-      height: heightToDp(40),
-      borderRadius: 7,
-      marginBottom: heightToDp(2),
+    paginationContainer: {
+      paddingVertical: 10,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      marginHorizontal: 8,
+      backgroundColor: 'rgba(0, 0, 0, 0.92)',
+    },
+    inactiveDot: {
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    },
+    container2: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+      marginVertical: 8,
+    },
+    labelContainer: {
+      flex: 1,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    price: {
+      fontSize: 16,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
+    name: {
+      fontSize: 18,
+      fontWeight: 'bold',
     },
   });
 
-  const addToCart = () => {
-    const offreEmpty = offreValidator(offreId, t);
-    if (offreEmpty != '') {
-      setOffreError(offreEmpty);
+  const renderItem = ({item}: {item: string}) => (
+    <View style={styles.slide}>
+      <Image source={{uri: item}} style={styles.image} />
+    </View>
+  );
+
+  const handleAddToCart = () => {
+    if (formuleId === 'All' || formuleId === '') {
+      setOffreError(t('Global.OffreErrorEmpty'));
     } else {
-    firestore()
-      .collection('carts')
-      // Filter results
-      .where('userId', '==', userId)
-      .where('offre', '==', offreId)
-      .where('paid', '==', false)
-      .get()
-      .then(querySnapshot => {
-        let idCart = uuidv4();
-        const offre = item.offres.find(
-          (offre: Offre) => offre.id == offreId,
-        );
-        const offreMontant = offre === undefined ? 0 : offre.montant;
-        const devise = offre === undefined ? currencyCode : offre.devise;
-        if (querySnapshot.empty) {
-          firestore()
-            .collection('carts')
-            .doc(idCart)
-            .set({
-              id: idCart,
-              offre: offreId,
-              qty: quantity,
-              totalPrice: parseInt(quantity) * offreMontant,
-              paid: false,
-              userId: userId,
-              name: item.name,
-              description: item.description,
-              prix: offreMontant,
-              devise: devise,
-              tax: offreMontant * 0.14975,
-              images: item.images,
-              vendorId: item.userId,
-              dateDelivered: '',
-              statut: '',
-              commandeId: '',
-            })
-            .then(() => {
-              console.log('Cart added!');
-            });
-        } else {
-          querySnapshot.forEach(documentSnapshot => {
-            const panier = documentSnapshot.data() as Panier;
-            firestore()
-              .collection('carts')
-              .doc(panier.id)
-              .update({
-                id: panier.id,
-                offre: offreId,
-                qty: quantity,
-                totalPrice: parseInt(quantity) * offreMontant,
-                paid: false,
-                userId: userId,
-                name: item.name,
-                description: item.description,
-                prix: offreMontant,
-                devise: devise,
-                tax: offreMontant * 0.14975,
-                images: item.images,
-              })
-              .then(() => {
-                console.log('Cart updated!');
-              });
-          });
-        }
-      });
-    navigation.navigate('ServicesOffertsList', {
-      item: item.category,
-    });
-  }
+      addToCartService(
+        formuleId,
+        item,
+        quantity.toString(),
+        currentUser,
+        navigation,
+        'services',
+      );
+    }
   };
 
-  const increment = (value: string) => {
-    let val = parseInt(value);
-    val += 1;
-    setQuantity(val.toString());
-  };
-  const decrement = (value: string) => {
-    let val = parseInt(value);
-    val -= 1;
-    if (val <= 1) {
-      val = 1;
-    }
-    setQuantity(val.toString());
-  };
-  const setSelectedOffre = (id: string) => {
-    setOffreId(id);
+  useEffect(() => {
+    const loadOffers = async () => {
+      const newLoadedOffers = {...loadedOffers};
+      for (const formula of item.formules) {
+        if (!newLoadedOffers[formula.formuleId]) {
+          const formule = await getRecordById('formules', formula.formuleId);
+          const typePrix = (await getRecordById(
+            'type_prix',
+            formula.priceType,
+          )) as TypePrix;
+          const namePrix =
+            selectedLanguage === 'fr' ? typePrix.nameFr : typePrix.nameEn;
+          newLoadedOffers[formula.formuleId] = formule?.name + '#' + namePrix;
+        }
+      }
+      setLoadedOffers(newLoadedOffers);
+    };
+
+    loadOffers();
+  }, [item.formules]);
+
+  const increment = () => setQuantity(quantity + 1);
+  const decrement = () => setQuantity(quantity > 0 ? quantity - 1 : 0); // Évite les nombres négatifs
+  const handleQuantity = (text: string) => {
+    const parsed = parseInt(text, 10);
+    setQuantity(isNaN(parsed) ? 0 : parsed);
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <BacktoHome textRoute={t('BuyProduct.title')} />
-      <View style={styles.section}>
-        <Image
-          style={styles.image}
-          source={
-            imageUrl === ''
-              ? require('../../assets/No_image_available.svg.png')
-              : {uri: imageUrl}
-          }
-        />
-        <Text style={styles.name}>
-          {t('AddProduct.Name')} : {item.name}
-        </Text>
-        <Text style={styles.title}>
-        {t('AddService.Category')} : {category == undefined ? '' : category.name}
-          </Text>
-        <Text style={styles.title}>
-          {t('AddProduct.Description')} : {item.description}
-        </Text>
-        <Text style={styles.category}>
-            {item.conditions == undefined ? '' : item.conditions}
-          </Text>
-          <View style={styles.infoContainer}>
-            {item.offres.map((offer: any, index: number) => {
-              const selectedOffre = offer.id === offreId;
-              return (
-                <TouchableOpacity
-                  style={styles.itemContainer}
-                  onPress={() => setSelectedOffre(offer.id)}
-                  key={index.toString()}>
-                  {selectedOffre ? (
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <Icon2
-                        name={'radio-btn-active'}
-                        size={20}
-                        color={ColorPallet.primary}
-                      />
-                      <Text
-                        style={[
-                          defaultStyles.text,
-                          {paddingLeft: 5, fontWeight: 'bold'},
-                        ]}>
-                        {offer.name} : {offer.montant} {offer.devise}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <Icon2
-                        name={'radio-btn-passive'}
-                        size={20}
-                        color={ColorPallet.primary}
-                      />
-                      <Text style={[defaultStyles.text, {paddingLeft: 5}]}>
-                        {offer.name} : {offer.montant} {offer.devise}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-          {offreError && (
-                <Text style={styles.error}>{t('Global.OfferChoose')}</Text>
-              )}
-        <View style={{flexDirection: 'row'}}>
-          <View style={{marginHorizontal: 5, marginVertical: 25}}>
-            <Text style={styles.price}>{t('BuyProduct.Quantity')}</Text>
-          </View>
-          <View style={styles.center}>
-            <TouchableOpacity onPress={() => decrement(quantity)}>
-              <Icon name="minus" size={18} style={styles.icon} />
-            </TouchableOpacity>
-            <TextInput
-              value={quantity.toString()}
-              onChangeText={text => setQuantity(text)}
-              autoCapitalize="none"
-              keyboardType="number-pad"
-              style={styles.input}
-              selectionColor={theme.colors.primary}
-              underlineColor="transparent"
-              mode="outlined"
+
+      {/* Carousel en haut */}
+      <View style={styles.carouselContainer}>
+        {loading ? (
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        ) : (
+          <View>
+            <Carousel
+              data={imageUrls}
+              renderItem={renderItem}
+              sliderWidth={Dimensions.get('window').width}
+              itemWidth={Dimensions.get('window').width - 60}
+              autoplay={false}
+              loop={false}
+              onSnapToItem={index => setActiveSlide(index)} // Met à jour l'index pour la pagination
             />
-            <TouchableOpacity onPress={() => increment(quantity)}>
-              <Icon name="plus" size={18} style={styles.icon} />
-            </TouchableOpacity>
+            <Pagination
+              dotsLength={imageUrls.length}
+              activeDotIndex={activeSlide} // Met à jour la pagination selon le slide actif
+              containerStyle={styles.paginationContainer}
+              dotStyle={styles.dot}
+              inactiveDotStyle={styles.inactiveDot}
+              inactiveDotOpacity={0.4}
+              inactiveDotScale={0.6}
+            />
+          </View>
+        )}
+      </View>
+
+      {/* Contenu défilable en dessous */}
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <View style={{marginVertical: 10}}>
+          <Text style={styles.text}>
+            <Text style={styles.name}>{t('AddProduct.Name')} :</Text>{' '}
+            {item.name}
+          </Text>
+          <Text style={styles.text}>
+            <Text style={styles.name}>{t('AddService.Category')} :</Text>{' '}
+            {selectedLanguage === 'fr' ? category?.nameFr : category?.nameEn}{' '}
+          </Text>
+          <Text style={styles.text}>
+            <Text style={styles.name}>{t('AddProduct.Description')} :</Text>{' '}
+            {item.description}
+          </Text>
+          {groupSchedule(item.conditions).map((group, idx) => (
+            <Text key={idx}>
+              {group.days.join(', ')}: {group.startTime} - {group.endTime},{' '}
+              {t('WeekSchedule.Capacity')}: {group.capacity}
+            </Text>
+          ))}
+        </View>
+        {/* Formules et autres contenus */}
+        <View style={styles.infoContainer}>
+          {item.formules.map((formule: any, index: number) => {
+            const offer = loadedOffers[formule.formuleId] || '';
+            const tabOffer = offer.split('#');
+            const selectedOffre = formule.id === formuleId;
+            const totalPrice =
+              parseInt(formule.amount) * quantity! +
+              ' ' +
+              state.currency.toString();
+            return (
+              <TouchableOpacity
+                style={styles.itemContainer}
+                onPress={() => setFormuleId(formule.id)}
+                key={index.toString()}>
+                {selectedOffre ? (
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon2
+                      name={'radio-btn-active'}
+                      size={20}
+                      color={ColorPallet.primary}
+                    />
+                    <Text
+                      style={[
+                        defaultStyles.text,
+                        {paddingLeft: 5, fontWeight: 'bold'},
+                      ]}>
+                      {tabOffer[0]} : {formule.amount}{' '}
+                      {state.currency.toString()} {tabOffer[1]}{' '}
+                      {t('Global.Total')} : {totalPrice}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon2
+                      name={'radio-btn-passive'}
+                      size={20}
+                      color={ColorPallet.primary}
+                    />
+                    <Text style={[defaultStyles.text, {paddingLeft: 5}]}>
+                      {tabOffer[0]} : {formule.amount}{' '}
+                      {state.currency.toString()} {tabOffer[1]}{' '}
+                      {t('Global.Total')} : {totalPrice}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        {offreError && (
+          <Text style={styles.error}>{t('Global.OfferChoose')}</Text>
+        )}
+
+        {/* Sélection de la quantité */}
+        <View style={styles.container2}>
+          <View style={styles.labelContainer}>
+            <Text style={styles.label}>
+              <Text style={styles.price}>{t('BuyProduct.Quantity')}</Text>
+            </Text>
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Stepper
+              value={quantity}
+              onIncrement={increment}
+              onDecrement={decrement}
+              onChange={handleQuantity}
+            />
           </View>
         </View>
-        <Button mode="contained" onPress={addToCart}>
+
+        {/* Bouton d'ajout au panier */}
+        <Button mode="contained" onPress={handleAddToCart}>
           {t('BuyProduct.AddToCart')}
         </Button>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

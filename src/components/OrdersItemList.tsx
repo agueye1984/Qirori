@@ -3,54 +3,40 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
-  Pressable,
-  ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import storage from '@react-native-firebase/storage';
 import {
   Commande,
-  Event,
-  Invitation,
   ManageEventsParamList,
-  Offre,
-  Service,
   User,
 } from '../contexts/types';
 import {useTranslation} from 'react-i18next';
-import {Swipeable} from 'react-native-gesture-handler';
 import {useTheme} from '../contexts/theme';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore';
-import {CategoryList} from './CategoryList';
 import {StatusList} from './StatusList';
 import {i18n} from '../localization';
 import {heightPercentageToDP as heightToDp} from 'react-native-responsive-screen';
+import { useStore } from '../contexts/store';
 
 type Props = {
   order: Commande;
-  statut: string;
-  dateDelivered: string;
   color: string;
 };
 
-type ratingProps = StackNavigationProp<
-  ManageEventsParamList,
-  'RatingScreen'
->;
+type ratingProps = StackNavigationProp<ManageEventsParamList, 'RatingScreen'>;
 
-const OrdersItemList = ({order,statut, dateDelivered, color}: Props) => {
+const OrdersItemList = ({order, color}: Props) => {
+
   const {t} = useTranslation();
   const navigation = useNavigation<ratingProps>();
   const {ColorPallet} = useTheme();
-  const [users, setUsers] = useState<User[]>([]);
   const [nbItems, setNbItems] = useState(0);
   const [amount, setAmount] = useState(0);
-  const status = StatusList(t).find(stat => stat.id === statut);
-  const dateDeliver =
-  dateDelivered === undefined ? '' : dateDelivered;
+  const [state] = useStore();
+  const devise = state.currency.toString();
+  const status = StatusList(t).find(stat => stat.id === order.statut);
+  const dateDeliver = order.dateDelivered;
   let dateLivery = dateDeliver;
   if (dateLivery != '') {
     const annee = parseInt(dateDeliver.substring(0, 4));
@@ -72,12 +58,14 @@ const OrdersItemList = ({order,statut, dateDelivered, color}: Props) => {
     let taxAmt = 0;
     order.paniers.map(panier => {
       nb += parseInt(panier.qty.toString());
-      
-      taxAmt +=  parseFloat(panier.qty.toString())*parseFloat(panier.tax.toString());
-      console.log(taxAmt.toFixed(2));
+
+      taxAmt +=
+        parseFloat(panier.qty.toString()) * parseFloat(panier.tax.toString());
       // const taxAmt = Number((panier.tax*panier.qty).toFixed(2));
-      amount += parseFloat(panier.totalPrice.toString())+parseFloat(taxAmt.toFixed(2));
-     // console.log(amount);
+      amount +=
+        parseFloat(panier.totalPrice.toString()) +
+        parseFloat(taxAmt.toFixed(2));
+      // console.log(amount);
     });
     setNbItems(nb);
     setAmount(amount);
@@ -150,59 +138,89 @@ const OrdersItemList = ({order,statut, dateDelivered, color}: Props) => {
         height: 5,
       },
     },
+    imageWrapper: {
+      position: 'relative',
+      marginRight: 10,
+      //marginBottom: 10,
+      width: 100,
+      height: 30,
+      flexDirection: 'row', // Aligner les icônes en ligne
+      alignItems: 'center', // Centrer verticalement les icônes
+    },
+    buttonContainer: {
+      position: 'absolute',
+      top: 5,
+      left: 0,
+      right: 0,
+      flexDirection: 'row', // Aligner les boutons horizontalement
+      justifyContent: 'space-between', // Espacer les boutons uniformément
+    },
+    removeButton: {
+      backgroundColor: 'rgba(255, 0, 0, 0.7)',
+      padding: 5,
+      borderRadius: 15,
+      zIndex: 1,
+    },
+    replaceButton: {
+      backgroundColor: 'rgba(0, 0, 255, 0.7)',
+      padding: 5,
+      borderRadius: 15,
+      zIndex: 1,
+    },
+    copyButton: {
+      backgroundColor: ColorPallet.primary,
+      padding: 5,
+      borderRadius: 15,
+      zIndex: 1,
+    },
+    formulaItem: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 10,
+      borderRadius: 5,
+      marginTop: 10,
+    },
+    orderCard: {
+      backgroundColor: '#f8f9fa',
+      marginVertical: 10,
+      padding: 15,
+      borderRadius: 8,
+    },
+    orderId: { fontWeight: 'bold', fontSize: 16 },
+    customer: { marginVertical: 5 },
+    address: { color: '#6c757d' },
+    total: { fontWeight: 'bold' },
+    statusContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    status: { fontSize: 14, color: '#495057' },
+    changeStatusButton: {
+      backgroundColor: '#007bff',
+      padding: 8,
+      borderRadius: 5,
+    },
+    buttonText: { color: '#fff' },
   });
 
   const handleNotation = () => {
     navigation.navigate('RatingScreen', {item: order});
   };
 
-
-  const RightSwipeActions = (order: Commande) => {
-    const avis = order.avis === undefined ? "" : order.avis
-    console.log(order)
-    if(order.statut==='1' && avis.length===0){
-      return (
-        <Pressable
-        onPress={() => handleNotation()}
-          style={({pressed}) => [
-            styles.editContainer,
-            pressed && {opacity: 0.8},
-          ]}>
-          <Icon name="star" size={30} color={ColorPallet.white} />
-        </Pressable>
-        );
-    }
-  };
-
   return (
-    <Swipeable renderRightActions={()=>RightSwipeActions(order)}>
-        <View style={styles.contactCon}>
-          <View style={styles.contactDat}>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.name}>
-                {t('ProductOrderings.nbItems')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{nbItems} </Text>
-              <Text style={styles.name}>
-                {t('ProductOrderings.TotalAmount')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{amount} </Text>
-            </View>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.name}>
-                {t('ProductOrderings.DateDelivered')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{dateLivery} </Text>
-            </View>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.name}>{t('ProductOrderings.Status')} : </Text>
-              <Text style={styles.txt}>
-                {status === undefined ? '' : status.name}{' '}
-              </Text>
-            </View>
-          </View>
+    <View style={styles.orderCard}>
+     {/*  <Text style={styles.customer}><Text style={styles.orderId}>ID :</Text> CMD {1}</Text> */}
+      <Text style={styles.customer}><Text style={styles.orderId}>{t('ProductOrderings.nbItems')} :</Text> {nbItems}</Text>
+      <Text style={styles.customer}><Text style={styles.total}>{t('ProductOrderings.TotalAmount')} :</Text> {amount} {devise}</Text>
+      <Text style={styles.customer}><Text style={styles.total}>{t('ProductOrderings.DateDelivered')} : </Text>{dateLivery}</Text>
+      <View style={styles.statusContainer}>
+        <Text style={styles.status}><Text style={styles.total}>{t('ProductOrderings.Status')} : </Text>{status.name}</Text>
+        <TouchableOpacity
+          style={styles.changeStatusButton}
+          onPress={() => handleNotation()}
+        >
+          <Text style={styles.buttonText}>{t('Global.Rating')}</Text>
+        </TouchableOpacity>
       </View>
-      </Swipeable>
+    </View>
+     
   );
 };
 

@@ -1,64 +1,91 @@
-import {Image, SafeAreaView, ScrollView, TouchableOpacity, View} from 'react-native'
-import {useTranslation} from 'react-i18next'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
-import Header from '../components/Header'
-import React from 'react'
-import {Accueil} from '../contexts/types'
-import {useNavigation} from '@react-navigation/native'
-import Icon from 'react-native-vector-icons/AntDesign'
-import {theme} from '../core/theme'
-import {DashboardList} from '../components/DashboardList'
-import {DashboardItem} from '../components/DashboardItem'
-import auth from '@react-native-firebase/auth'
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {useTranslation} from 'react-i18next';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+import Header from '../components/Header';
+import React from 'react';
+import {Accueil} from '../contexts/types';
+import {useNavigation} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/AntDesign';
+import {theme} from '../core/theme';
+import {DashboardList} from '../components/DashboardList';
+import {DashboardItem} from '../components/DashboardItem';
+import auth from '@react-native-firebase/auth';
 
 const Dashboard = () => {
-  const {t} = useTranslation()
-  const defaultStyles = DefaultComponentsThemes()
-  const dashboard = DashboardList(t)
-  const {navigate} = useNavigation()
+  const {t} = useTranslation();
+  const dashboard = DashboardList(t);
+  const {navigate} = useNavigation();
 
   function handleSelection(item: Accueil) {
-    navigate(item.route as never)
+    navigate(item.route as never);
   }
 
   const logout = () => {
     auth()
       .signOut()
-      .then(() => navigate('LoginScreen' as never))
-  }
+      .then(() => navigate('LoginScreen' as never));
+  };
 
+  const styles = StyleSheet.create({
+    safeContainer: {
+      flex: 1,
+      backgroundColor: '#fff',
+    },
+    scrollContainer: {
+      padding: 10,
+      flexGrow: 1,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    logo: {
+      width: 50,
+      height: 50,
+    },
+    centeredRow: {
+      alignItems: 'center',
+      marginVertical: 20,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: 10,
+    },
+  });
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View style={defaultStyles.row}>
-        <View style={defaultStyles.leftSectRowContainer}>
-          <Image source={require('../assets/logo.png')} style={{width: 60, height: 60}} />
-        </View>
-        <View style={defaultStyles.rightSectRowContainer}>
-          <View style={{paddingRight: 5, paddingBottom: 7}}>
-            <TouchableOpacity onPress={logout}>
-              <Icon name={'logout'} color={theme.colors.primary} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <Header>{t('HomeScreen.title')}</Header>
+    <SafeAreaView style={styles.safeContainer}>
       <ScrollView
-        scrollEnabled
-        showsVerticalScrollIndicator
-        automaticallyAdjustKeyboardInsets={true}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={defaultStyles.scrollViewContent}>
-        <View style={{justifyContent: 'center', alignContent: 'center', flex: 1}}>
-          <View style={{padding: 10}}>
-            {dashboard.map((item: Accueil) => {
-              return <DashboardItem key={item.id} item={item} action={() => handleSelection(item)} />
-            })}
-          </View>
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled">
+        <View style={styles.headerRow}>
+          <Image source={require('../assets/logo.png')} style={styles.logo} />
+          <TouchableOpacity onPress={logout}>
+            <Icon name="logout" color={theme.colors.primary} size={30} />
+          </TouchableOpacity>
+        </View>
+        <Header>{t('HomeScreen.title')}</Header>
+        <View style={styles.content}>
+          {dashboard.map((item: Accueil) => (
+            <DashboardItem
+              key={item.id}
+              item={item}
+              action={() => handleSelection(item)}
+            />
+          ))}
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

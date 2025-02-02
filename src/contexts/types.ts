@@ -37,7 +37,7 @@ export interface Event {
   id: string
   name: string
   description: string
-  userId: string | null
+  userId: string
   dateDebut: string
   heureDebut: string
   dateFin: string
@@ -52,11 +52,11 @@ export interface Location {
 
 export type ManageEventsParamList = {
   ManageEvents: undefined
-  AddEvent: undefined
-  EventDetails: {
+  AddEvent: {
     item: Event
+    isEditing: boolean
   }
-  EditEvent: {
+  EventDetails: {
     item: Event
   }
   InvitationsContacts: {
@@ -85,12 +85,15 @@ export type ManageEventsParamList = {
   }
   ServiceDetails: {
     item: Service
+    participantCount: number | null
   }
-  EditProduct: {
+  AddProduct: {
     item: Product
+    isEditing: boolean
   }
-  EditService: {
+  AddService: {
     item: Service
+    isEditing: boolean
   }
   CommandesEffectuees: {
     item: Commande
@@ -98,8 +101,9 @@ export type ManageEventsParamList = {
   EditPanier: {
     item: Panier
   }
-  EditTypeEvent: {
+  AddTypeEvent: {
     item: TypeEvent
+    isEditing: boolean
   }
   OTPAuthScreen: {
     code: string
@@ -115,13 +119,33 @@ export type ManageEventsParamList = {
     item: any
     type: string
   }
+  AddCategory: {
+    item: Category
+    isEditing: boolean
+  }
+  AddTypeOffre: {
+    item: TypeOffre
+    isEditing: boolean
+  }
+  AddTypePrix: {
+    item: TypePrix
+    isEditing: boolean
+  }
+  AddProdServEvent:{
+    id: string
+    item?: ProdServEvent
+    isEditing: boolean
+  }
+  ProdServEvents:{
+    id: string
+  }
 }
 
 export interface Invitation {
   id: string
   eventId: string
   reponse: string
-  userId: string | null
+  userId: string
   nbrAdultes: number
   numeroTelephone: string
   nbrEnfants?: number
@@ -137,7 +161,7 @@ export interface Contribution {
   id: string
   eventId: string
   nature?: string
-  userId: string | null
+  userId: string
   contribution: string
   Produits?: Product[]
   montant: number
@@ -149,12 +173,14 @@ export interface Product {
   category: string
   name: string
   description: string
-  userId: string | null
+  userId: string
   devise: string
-  quantite: number
-  prixUnitaire: number
-  images: string
+  formules: any[]
+  images: string[]
   actif: boolean
+  formulesId: string[]
+  conditions: string[]
+  zone: string[]
 }
 
 export interface Service {
@@ -162,40 +188,42 @@ export interface Service {
   category: string
   name: string
   description: string
-  userId: string | null
+  userId: string
   images: string[]
-  formules: Formula[]
+  formules: any[]
   conditions: ScheduleState
   zone: string[]
   province: string
   region: string
+  devise: string
+  formulesId: string[]
 }
 
 export interface Panier {
   id: string
   qty: number
-  product: string
   name: string
   description: string
   prix: number
   devise: string
   tax: number
-  offre: string
+  formule: string
   totalPrice: number
   paid: boolean
-  userId: string | null
+  userId: string
   images: string
   vendorId: string
   dateDelivered: string
   statut: string
   commandeId: string
+  type: string
 }
 
 export interface Mail {
   id: string
   subject: string
   message: string
-  userId: string | null
+  userId: string
 }
 
 export interface Commande {
@@ -206,7 +234,7 @@ export interface Commande {
   orderId: string
   statut: string
   dateDelivered: string
-  userId: string | null
+  userId: string
   rating: number
   avis: string
 }
@@ -219,7 +247,7 @@ export interface Adresse {
   province: string
   postalCode: string
   countryCode: string
-  userId: string | null
+  userId: string
 }
 
 export interface PredictionType {
@@ -242,10 +270,10 @@ export interface Offre {
   images: string
 }
 
-export interface Category {
+/* export interface Category {
   id: string
   name: string
-}
+} */
 
 export interface Select {
   key: string
@@ -263,7 +291,8 @@ export interface TypeOffre {
   id: string
   nameFr: string
   nameEn: string
-  userId: string
+  category: string
+  actif: boolean
 }
 export interface TypeCondition {
   id: string
@@ -283,8 +312,69 @@ export type ScheduleState = {
 };
 
 export type Formula= {
-  id: number;
+  id: string;
   offers: string[];
   priceType: string;
   amount: string;
 }
+
+export interface Category {
+  id: string
+  nameFr: string
+  nameEn: string
+  actif: boolean
+}
+
+export interface TypePrix {
+  id: string
+  nameFr: string
+  nameEn: string
+  type: string
+  actif: boolean
+}
+
+export interface Conditions {
+  id: string
+  nameFr: string
+  nameEn: string
+  category: string
+  actif: boolean
+}
+
+
+export interface Vendeur {
+  id: string
+  name: string
+  category: string
+  adresse: Location
+  province: string
+  region: string
+  zone: string[]
+  idBusinessRegistre: string
+  autreDocs: string
+  confirme: boolean
+  accepte: boolean
+  userId: string
+  actif: boolean
+}
+
+export interface ProdServEvent {
+  id: string
+  category: string
+  formule: string
+  eventId: string
+  custom: string
+  type: string
+}
+
+export interface Formule {
+  id: string
+  offer?: string
+  offers?: string[]
+  priceType: string
+  quantity?: string
+  amount: string
+  category: string
+  type: string
+}
+

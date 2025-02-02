@@ -12,12 +12,13 @@ import Button from '../components/Button'
 import axios from 'axios'
 import firestore from '@react-native-firebase/firestore'
 import Config from 'react-native-config'
+import auth from '@react-native-firebase/auth'
 
 type PaymentScreenProp = StackNavigationProp<ManageEventsParamList, 'PaymentScreen'>
 
 const PaymentScreen = () => {
+  const currentUser = auth().currentUser
   const {confirmPayment} = useStripe()
-  const [clientSecret, setClientSecret] = useState('')
   const {t} = useTranslation()
   const route = useRoute<RouteProp<ManageEventsParamList, 'PaymentScreen'>>()
   const item = route.params.item
@@ -40,13 +41,15 @@ const PaymentScreen = () => {
       const response = await axios.post('https://us-central1-qirori-6a834.cloudfunctions.net/createPaymentIntent', {
         amount: parseInt(amount),
         currency: state.currency.toString(),
-      })
-      return response.data.clientSecret
+      });
+     // console.log(response.data.clientSecret)
+      return response.data.clientSecret;
     } catch (error) {
-      console.error('Error fetching client secret:', error)
-      return null
+      console.error('Error fetching client secret:', error);
+      return null;
     }
   }
+  
 
   const handlePayPress = async () => {
     if (!cardDetails?.complete) {
@@ -58,8 +61,18 @@ const PaymentScreen = () => {
     if (!clientSecret) return
 
     const billingDetails = {
-      name: 'Test Name',
-    } //
+      name: currentUser?.displayName || 'Adama Gueye', // Replace with actual customer name
+      email: currentUser?.email || 'amadagueye@gmail.com', // Replace with actual customer email
+      address: {
+        line1: '1275 rue de la colline', // Street address
+        line2: 'Apt 2', // Additional address details (optional)
+        city: "L'Ancienne-Lorette", // City
+        state: 'Québec', // State or province
+        postalCode: 'G2E3H9', // ZIP or postal code
+        country: 'CA', // Two-letter country code
+      },
+    }
+  
 
     try {
       const {error, paymentIntent} = await confirmPayment(clientSecret, {
@@ -68,8 +81,9 @@ const PaymentScreen = () => {
           billingDetails,
         },
       })
-
+      
       if (error) {
+        console.log('Error object:', error);
         Alert.alert('Error', error.message)
       } else if (paymentIntent) {
         if (type === 'contribution') {

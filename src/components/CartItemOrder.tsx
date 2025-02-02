@@ -1,15 +1,13 @@
-import {View, Text, StyleSheet, Pressable, Image} from 'react-native';
+import {View, Text, StyleSheet, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {Panier, Product} from '../contexts/types';
+import {Panier} from '../contexts/types';
 import {
   widthPercentageToDP as widthToDp,
   heightPercentageToDP as heightToDp,
 } from 'react-native-responsive-screen';
-import {ScrollView, Swipeable} from 'react-native-gesture-handler';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import {useTheme} from '../contexts/theme';
-import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import Carousel from 'react-native-snap-carousel';
 
 type Props = {
   panier: Panier;
@@ -17,14 +15,18 @@ type Props = {
 
 const CartItemOrder = ({panier}: Props) => {
   const {ColorPallet} = useTheme();
-  const [imageUrl, setImageUrl] = useState<string>('');
-
-  
+  const [imagesUrls, setImagesUrls] = useState<string[]>([]);
 
   useEffect(() => {
     const getImages = async () => {
-      const url = await storage().ref(panier.images).getDownloadURL();
-        setImageUrl(url);
+      const tabUrl: string[] = [];
+      for (const imageServ of panier.images) {
+        // console.log(imageServ);
+        const url = await storage().ref(imageServ).getDownloadURL();
+        //console.log(url);
+        tabUrl.push(url);
+      }
+      setImagesUrls(tabUrl);
     };
     getImages();
   }, [panier.images]);
@@ -113,35 +115,54 @@ const CartItemOrder = ({panier}: Props) => {
     name: {
       fontSize: 16,
     },
+    slide: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });
 
+  const renderItem = ({item}: any) => {
+    return (
+      <View style={styles.slide}>
+        <Image
+          source={
+            item === ''
+              ? require('../../assets/No_image_available.svg.png')
+              : {uri: item}
+          }
+          style={styles.image}
+        />
+      </View>
+    );
+  };
+
   return (
-      <View style={styles.contactCon}>
-        <View style={{marginVertical: 25}}>
-          <Image
-            style={styles.thumb}
-            source={
-              imageUrl === ''
-                ? require('../../assets/No_image_available.svg.png')
-                : {uri: imageUrl}
-            }
-          />
+    <View style={styles.contactCon}>
+      <View style={{marginVertical: 25}}>
+        <Carousel
+          data={imagesUrls}
+          renderItem={renderItem}
+          sliderWidth={widthToDp(15)}
+          itemWidth={widthToDp(15)}
+          autoplay={true}
+          loop={true}
+        />
+      </View>
+      <View style={styles.info}>
+        <View>
+          <Text style={styles.title}>{panier.name}</Text>
+          <Text style={styles.description}>
+            {panier.description} • {panier.prix} {panier.devise}
+          </Text>
         </View>
-        <View style={styles.info}>
-          <View>
-            <Text style={styles.title}>{panier.name}</Text>
-            <Text style={styles.description}>
-              {panier.description} • {panier.prix} {panier.devise}
-            </Text>
-          </View>
-          <View style={styles.footer}>
-            <Text style={styles.price}>
-              {panier.totalPrice} {panier.devise}
-            </Text>
-            <Text style={styles.quantity}>x{panier.qty}</Text>
-          </View>
+        <View style={styles.footer}>
+          <Text style={styles.price}>
+            {panier.totalPrice} {panier.devise}
+          </Text>
+          <Text style={styles.quantity}>x{panier.qty}</Text>
         </View>
       </View>
+    </View>
   );
 };
 

@@ -1,152 +1,120 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
-import storage from '@react-native-firebase/storage';
-import {ManageEventsParamList, Panier, Product} from '../contexts/types';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import {
+  Commande,
+  ManageEventsParamList,
+  Panier,
+  User,
+} from '../contexts/types';
 import {useTranslation} from 'react-i18next';
-import {Swipeable} from 'react-native-gesture-handler';
 import {useTheme} from '../contexts/theme';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import firestore from '@react-native-firebase/firestore';
+import {StatusList} from './StatusList';
+import {getRecordById} from '../services/FirestoreServices';
 
 type Props = {
   panier: Panier;
   color: string;
 };
 
-type EditPanierProps = StackNavigationProp<
-  ManageEventsParamList,
-  'EditPanier'
->;
+type EditPanierProps = StackNavigationProp<ManageEventsParamList, 'EditPanier'>;
 
 const OrderDeliveredLists = ({panier, color}: Props) => {
   const {t} = useTranslation();
-  const {ColorPallet} = useTheme();
   const navigation = useNavigation<EditPanierProps>();
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [userName, setUserName] = useState('');
+  const [userAddress, setUserAddress] = useState('');
+  const status = StatusList(t).find(stat => stat.id === panier.statut);
 
-  const getImages = async () => {
-    const url = await storage().ref(panier.images).getDownloadURL();
-    setImageUrl(url);
-  };
+  console.log(panier);
 
   useEffect(() => {
-      getImages();
-  }, [panier.images]); 
+    const fetchUser = async () => {
+      const user = (await getRecordById('users', panier.userId)) as User;
+      setUserName(user.displayName);
+    };
 
-  const styles = StyleSheet.create({
-    contactCon: {
-      flex: 1,
-      flexDirection: 'row',
-      padding: 5,
-      borderBottomWidth: 0.5,
-      borderBottomColor: '#d9d9d9',
-    },
-    imgCon: {},
-    placeholder: {
-      width: 55,
-      height: 55,
-      borderRadius: 30,
-      overflow: 'hidden',
-      backgroundColor: '#d9d9d9',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: color,
-    },
-    contactDat: {
-      flex: 1,
-      justifyContent: 'center',
-      paddingLeft: 5,
-    },
-    txt: {
-      fontSize: 18,
-      color: color,
-    },
-    name: {
-      fontSize: 16,
-      color: color,
-    },
-    phoneNumber: {
-      color: '#888',
-    },
-    thumb: {
-      height: 50,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      borderBottomLeftRadius: 16,
-      borderBottomRightRadius: 16,
-      width: 50,
-    },
-    deleteContainer: {
-      marginVertical: 5,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      paddingHorizontal: 34,
-      backgroundColor: ColorPallet.error,
-    },
-    editContainer: {
-      marginVertical: 5,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      paddingHorizontal: 34,
-      backgroundColor: ColorPallet.primary,
-    },
-  });
+    fetchUser();
+  }, [panier.userId]);
+
+  useEffect(() => {
+    const fetchCommande = async () => {
+      const commande = (await getRecordById(
+        'commandes',
+        panier.commandeId,
+      )) as Commande;
+      setUserAddress(commande?.adresse.address_line_1);
+    };
+
+    fetchCommande();
+  }, [panier.commandeId]);
 
   const handleEdit = () => {
     navigation.navigate('EditPanier', {item: panier});
   };
 
-  const RightSwipeActions = () => {
-    return (
-      <>
-        <Pressable
-          onPress={() => handleEdit()}
-          style={({pressed}) => [
-            styles.editContainer,
-            pressed && {opacity: 0.8},
-          ]}>
-          <Icon name="edit" size={30} color={ColorPallet.white} />
-        </Pressable>
-      </>
-    );
-  };
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 10,
+    },
+    orderCard: {
+      backgroundColor: '#f8f9fa',
+      marginVertical: 10,
+      padding: 15,
+      borderRadius: 8,
+    },
+    orderId: {fontWeight: 'bold', fontSize: 16},
+    customer: {marginVertical: 5},
+    address: {color: '#6c757d'},
+    total: {fontWeight: 'bold'},
+    statusContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    status: {fontSize: 14, color: '#495057'},
+    changeStatusButton: {
+      backgroundColor: '#007bff',
+      padding: 8,
+      borderRadius: 5,
+    },
+    buttonText: {color: '#fff'},
+  });
 
   return (
-    <Swipeable renderRightActions={RightSwipeActions}>
-      <View style={styles.contactCon}>
-        <View style={styles.imgCon}>
-          <Image
-            style={styles.thumb}
-            source={
-              imageUrl === ''
-                ? require('../../assets/No_image_available.svg.png')
-                : {uri: imageUrl}
-            }
-          />
-        </View>
-        <View style={styles.contactDat}>
-        <Text style={styles.name}>
-            {t('AddProduct.Name')} : {panier.commandeId}
-            {panier.qty}{' '}
-          </Text>
-          <Text style={styles.name}>
-            {t('AddProduct.Name')} : {panier.name} {t('AddProduct.Quantite')} :{' '}
-            {panier.qty}{' '}
-          </Text>
-          <Text style={styles.name}>
-            {t('AddProduct.PrixUnitaire')} : {panier.prix}{' '}
-            {t('AddProduct.Devise')} : {panier.devise}{' '}
-          </Text>
-          <Text style={styles.name}>
-            {t('AddProduct.Description')} : {panier.description}
-          </Text>
-        </View>
+    <View style={styles.orderCard}>
+      {/* <Text style={styles.orderId}>ID : CMD {1}</Text> */}
+      <Text style={styles.customer}>
+        <Text style={styles.orderId}>{t('Global.Customer')} : </Text>
+        {userName}
+      </Text>
+      <Text style={styles.address}>
+        <Text style={styles.orderId}>{t('Vendeur.Adresse')} : </Text>
+        {userAddress}
+      </Text>
+      <Text style={styles.customer}>
+        <Text style={styles.total}>{t('ProductOrderings.TotalAmount')} : </Text>
+        {panier.totalPrice} {panier.devise}
+      </Text>
+      <View style={styles.statusContainer}>
+        <Text style={styles.status}>
+          <Text style={styles.total}>{t('ProductOrderings.Status')} : </Text>
+          {status.name}
+        </Text>
+        <TouchableOpacity
+          style={styles.changeStatusButton}
+          onPress={() => handleEdit()}>
+          <Text style={styles.buttonText}>{t('Global.Modify')}</Text>
+        </TouchableOpacity>
       </View>
-    </Swipeable>
+    </View>
   );
 };
 

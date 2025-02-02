@@ -2,7 +2,7 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {StyleSheet, Text, View} from 'react-native';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
-import TextInput from './TextInput';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 import {theme} from '../core/theme';
 
 type Props = {
@@ -35,7 +35,7 @@ export const DescriptionContactUs = ({
   return (
     <View>
       <View>
-        <TextInput
+        <PaperTextInput
           label={t('Global.Message')}
           returnKeyType="next"
           value={contactUsDescription}

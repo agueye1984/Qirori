@@ -30,7 +30,9 @@ import {useTranslation} from 'react-i18next';
 import axios from 'axios';
 import Config from 'react-native-config';
 import firestore from '@react-native-firebase/firestore';
-import { getFilteredRecords, getRecordById } from '../services/FirestoreServices';
+import {getFilteredRecords, getRecordById} from '../services/FirestoreServices';
+import Icon3 from 'react-native-vector-icons/FontAwesome5';
+import {parseDateTime} from '../services/EventsServices';
 
 type invitationsContactsProps = StackNavigationProp<
   ManageEventsParamList,
@@ -45,30 +47,19 @@ export const EventDetails = () => {
   const {ColorPallet} = useTheme();
   const navigation = useNavigation<invitationsContactsProps>();
   const [invitation, setInvitation] = useState<Invitation[]>([]);
-  const [contribution, setContribution] = useState<Contribution[]>([]);
-  const [eventName, setEventName] = useState<string>('')
-  const [nombre, setNombre] = useState(0)
-  const [nbYes, setNbYes] = useState(0)
-  const [nbNo, setNbNo] = useState(0)
-  const [mntContribution, setMntContribution] =useState(0)
-  const [nbClose, setNbClose] = useState(0)
-  const [nbMaybe, setNbMaybe] = useState(0)
+  const [eventName, setEventName] = useState<string>('');
+  const [nombre, setNombre] = useState(0);
+  const [nbYes, setNbYes] = useState(0);
+  const [nbNo, setNbNo] = useState(0);
+  const [mntContribution, setMntContribution] = useState(0);
+  const [nbMaybe, setNbMaybe] = useState(0);
+  const [mntArgent, setMntArgent] = useState(0);
+  const [mntNature, setMntNature] = useState(0);
 
-  const anneeDebut = parseInt(item.dateDebut.substring(0, 4));
-  const moisDebut = parseInt(item.dateDebut.substring(4, 6)) - 1;
-  const jourDebut = parseInt(item.dateDebut.substring(6, 8));
-  const heureDebut = parseInt(item.heureDebut.substring(0, 2));
-  const minutesDebut = parseInt(item.heureDebut.substring(2, 4));
-  const dateDebut = new Date(
-    anneeDebut,
-    moisDebut,
-    jourDebut,
-    heureDebut,
-    minutesDebut,
-    0,
-  );
+  const dateDebut = parseDateTime(item.dateDebut, item.heureDebut);
   const [closeContribution, setCloseContribution] = useState(false);
   const [localisation, setLocalisation] = useState({latitude: 0, longitude: 0});
+  const {width} = Dimensions.get('window');
   const [region, setRegion] = useState({
     latitude: 0,
     longitude: 0,
@@ -94,12 +85,8 @@ export const EventDetails = () => {
       weekday: 'long',
     })
     .split(' ');
-  const anneeFin = parseInt(item.dateFin.substring(0, 4));
-  const moisFin = parseInt(item.dateFin.substring(4, 6)) - 1;
-  const jourFin = parseInt(item.dateFin.substring(6, 8));
-  const heureFin = parseInt(item.heureFin.substring(0, 2));
-  const minutesFin = parseInt(item.heureFin.substring(2, 4));
-  const dateFin = new Date(anneeFin, moisFin, jourFin, heureFin, minutesFin, 0);
+
+  const dateFin = parseDateTime(item.dateFin, item.heureFin);
   const heureFormatFin = dateFin.toLocaleTimeString(languageDate, {
     hour: 'numeric',
     minute: 'numeric',
@@ -110,11 +97,14 @@ export const EventDetails = () => {
     // Exemple d'utilisation de la fonction getFilteredRecords
     const fetchData = async () => {
       try {
-        const data = await getFilteredRecords('invitations', 'eventId', item.id)
-        const newInvitation = data.map((record) => record.data as Invitation)
-        console.log(newInvitation.length)
-        setInvitation(newInvitation)
-        setNombre(newInvitation.length)
+        const data = await getFilteredRecords(
+          'invitations',
+          'eventId',
+          item.id,
+        );
+        const newInvitation = data.map(record => record.data as Invitation);
+        setInvitation(newInvitation);
+        setNombre(newInvitation.length);
         const compteur = newInvitation.reduce(
           (acc, obj) => {
             if (obj.reponse === t('Global.Yes')) {
@@ -128,110 +118,52 @@ export const EventDetails = () => {
             }
             return acc;
           },
-          { oui: 0, non: 0, close:0 }
+          {oui: 0, non: 0, close: 0},
         );
-        setNbClose(compteur.close)
-        setNbNo(compteur.non)
-        setNbYes(compteur.oui)
-        const data1 = await getFilteredRecords('contributions', 'eventId', item.id)
-        let mntDonation = 0
-        data1.map((record) =>{
-            const donation= record.data as Contribution
-            mntDonation += Number(donation.montant)
-        })
-       setMntContribution(mntDonation)
-        const typeEvent = (await getRecordById('type_events', item.name)) as TypeEvent
-        let evenName = typeEvent.nameFr
+        setNbNo(compteur.non);
+        setNbYes(compteur.oui);
+        setCloseContribution(newInvitation.length === compteur.close);
+        setNbMaybe(newInvitation.length - compteur.non - compteur.oui);
+        const data1 = await getFilteredRecords(
+          'contributions',
+          'eventId',
+          item.id,
+        );
+        const newContribution = data1.map(
+          record => record.data as Contribution,
+        );
+        const donation = newContribution.reduce(
+          (acc, obj) => {
+            if (obj.nature === t('Global.Argent')) {
+              acc.argent += Number(obj.montant);
+            }
+            if (obj.nature === t('Global.Nature')) {
+              acc.nature += Number(obj.montant);
+            }
+            return acc;
+          },
+          {argent: 0, nature: 0},
+        );
+        setMntArgent(donation.argent);
+        setMntNature(donation.nature);
+        setMntContribution(donation.argent + donation.nature);
+        const typeEvent = (await getRecordById(
+          'type_events',
+          item.name,
+        )) as TypeEvent;
+        let evenName = typeEvent.nameFr;
         if (selectedLanguageCode === 'en') {
-          evenName = typeEvent.nameEn
+          evenName = typeEvent.nameEn;
         }
-        setEventName(evenName)
+        setEventName(evenName);
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Error fetching data:', error);
       }
-    }
-    fetchData()
-  }, [item])
-
-  /* useEffect(() => {
-    firestore()
-      .collection('invitations')
-      // Filter results
-      .where('eventId', '==', item.id)
-      .get()
-      .then(querySnapshot => {
-        if (querySnapshot.empty) {
-          setInvitation([]);
-        } else {
-          const invitations: Invitation[] = [];
-          querySnapshot.forEach(documentSnapshot => {
-            invitations.push(documentSnapshot.data() as Invitation);
-          });
-          setInvitation(invitations);
-        }
-      });
-  }, []);
+    };
+    fetchData();
+  }, [item]);
 
   useEffect(() => {
-    firestore()
-      .collection('contributions')
-      // Filter results
-      .where('eventId', '==', item.id)
-      .get()
-      .then(querySnapshot => {
-        if (querySnapshot.empty) {
-          setContribution([]);
-        } else {
-          const contributions: Contribution[] = [];
-          querySnapshot.forEach(documentSnapshot => {
-            contributions.push(documentSnapshot.data() as Contribution);
-          });
-          setContribution(contributions);
-        }
-      });
-  }, []);
-  useEffect(() => {
-    firestore()
-    .collection('type_events')
-    .get()
-    .then(querySnapshot => {
-      const events: TypeEvent[] = [];
-      querySnapshot.forEach(documentSnapshot => {
-        events.push(documentSnapshot.data() as TypeEvent);
-      });
-      setTypeEvents(events);
-    });
-  }, []); */
-
-  /* const typeEvent = typeEvents.find(e => e.id === item.name);
-  let nameEvent = typeEvent === undefined ? '' : typeEvent.nameFr;
-  if (selectedLanguageCode === 'en') {
-    nameEvent = typeEvent === undefined ? '' : typeEvent.nameEn;
-  }
- */
- /*  let invitations = invitation;
-  let contributions = contribution; */
-  //let nombre = invitations.length;
-  /* let nbYes = 0;
-  let nbNo = 0;
-  let mntContribution = 0;
-  let nbClose = 0; */
-  /* invitations.map(invitation => {
-    if (invitation.reponse === t('Global.Yes')) {
-      nbYes += 1;
-    }
-    if (invitation.reponse === t('Global.No')) {
-      nbNo += 1;
-    }
-    if (invitation.closeDonation) {
-      nbClose += 1;
-    }
-  });
-  let nbMaybe = nombre - nbNo - nbYes; */
-  useEffect(() => {
-    /* if (nombre > 0) {
-      setCloseContribution(nombre === nbClose);
-    } */
     const apiUrl = `${Config.GOOGLE_PACES_API_BASE_URL}/details/json?key=${Config.GOOGLE_API_KEY}&place_id=${item.localisation.placeId}&components=country:ca`;
     axios
       .request({method: 'post', url: apiUrl})
@@ -259,18 +191,19 @@ export const EventDetails = () => {
         }
       })
       .catch(error => console.log(error));
-  }, [nombre, closeContribution]);
+  }, []);
 
-  /* contributions.map(contribution => {
-    mntContribution += Number(contribution.montant === undefined ? 0 : contribution.montant)
-      ;
-  }); */
-console.log(closeContribution)
-  const addToCalendar = (title: string, startDate: string, endDate: string) => {
+  const addToCalendar = (
+    title: string,
+    startDate: string,
+    endDate: string,
+    location: string,
+  ) => {
     const eventConfig = {
       title,
-      startDate: startDate.replace('Z', 'ZZ'),
-      endDate: endDate.replace('Z', 'ZZ'),
+      startDate: startDate,
+      endDate: endDate,
+      location,
     };
     AddCalendarEvent.presentEventCreatingDialog(eventConfig)
       .then(eventInfo => {
@@ -278,46 +211,39 @@ console.log(closeContribution)
         // These are two different identifiers on iOS.
         // On Android, where they are both equal and represent the event id, also strings.
         // when { action: 'CANCELED' } is returned, the dialog was dismissed
-        console.warn('adama');
-        console.warn(JSON.stringify(eventInfo));
+        // console.warn('adama');
+        // console.warn(JSON.stringify(eventInfo));
       })
       .catch((error: string) => {
         // handle error such as when user rejected permissions
-        console.warn('adama1');
-        console.warn(error);
+        // console.warn(error);
       });
   };
 
-   const closeDonation = () => {
+  const closeDonation = () => {
     invitation.map(invitation => {
-    firestore()
-          .collection('invitations')
-          .doc(invitation.id)
-          .update({
-            closeDonation: true,
-          })
-          .then(() => {
-            console.log('Invitations updated!');
-          });
+      firestore()
+        .collection('invitations')
+        .doc(invitation.id)
+        .update({
+          closeDonation: true,
+        })
+        .then(() => {
+          console.log('Invitations updated!');
         });
-        navigation.navigate('Events' as never);
-    /* invitations.map(invitation => {
-      let invite: Invitation = {
-        ...invitation,
-        closeDonation: true,
-      };
-      dispatch({
-        type: DispatchAction.UPDATE_INVITE,
-        payload: invite,
-      });
-    }); */
-  }; 
+    });
+    navigation.navigate('Events' as never);
+  };
 
   const handleInvitationsContacts = (item: Event) => {
     navigation.navigate('InvitationsContacts', {item: item});
   };
   const handleEditEvent = (item: Event) => {
-    navigation.navigate('EditEvent', {item: item});
+    navigation.navigate('AddEvent', {isEditing: true, item: item});
+  };
+
+  const handleProduitsServices = (item: Event) => {
+    navigation.navigate('ProdServEvents', {id: item.id});
   };
 
   const styles = StyleSheet.create({
@@ -348,6 +274,17 @@ console.log(closeContribution)
       borderBottomLeftRadius: 10,
       backgroundColor: 'white',
     },
+    itemContainerContribution: {
+      height: 120,
+      marginHorizontal: 5,
+      borderWidth: 0.3,
+      flex: 1,
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
+      borderBottomRightRadius: 10,
+      borderBottomLeftRadius: 10,
+      backgroundColor: 'white',
+    },
     mapview: {
       height: 300,
       marginHorizontal: 5,
@@ -356,6 +293,48 @@ console.log(closeContribution)
     row: {
       flexDirection: 'row',
       flexWrap: 'wrap',
+    },
+    container: {
+      flex: 1, // Prend tout l'espace disponible
+      paddingTop: 20,
+    },
+    eventContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dateContainer: {
+      flex: 1,
+    },
+    detailsContainer: {
+      flex: 3,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginLeft: 15,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    eventTitle: {
+      fontSize: width > 400 ? 18 : 16, // Dynamically adjust font size based on screen width
+      fontWeight: 'bold',
+      color: '#333',
+      marginBottom: 5,
+    },
+    eventTime: {
+      fontSize: 14,
+      color: '#666',
+    },
+    eventItemContainer: {
+      marginVertical: 10,
+      padding: 15,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      backgroundColor: '#f9f9f9',
+      // Ajoutez ces styles pour l'espacement
+      marginHorizontal: 10, // Assure un espacement des côtés gauche/droit
     },
   });
 
@@ -441,192 +420,214 @@ console.log(closeContribution)
   ];
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={styles.container}>
       <BacktoHome textRoute={t('Events.title')} />
       <Header>{eventName}</Header>
 
       <ScrollView scrollEnabled>
         <View style={styles.section}>
-          <View style={styles.row}>
-            <View style={{flex: 1, flexDirection: 'row'}}>
-              <DateEvent dateDebut={item.dateDebut} flexSize={0.87} />
-            </View>
-            <View style={{flex: 4, flexDirection: 'row'}}>
-              <View style={[styles.itemContainer]}>
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    flex: 4,
-                    marginHorizontal: 5,
-                    marginVertical: 5,
-                  }}>
-                  <View style={{width: 250}}>
-                    <Text
-                      style={[
-                        defaultStyles.text,
-                        {fontWeight: 'bold', fontSize: 16},
-                      ]}>
-                      {jourFormat['0']} {t('Global.from')} {heureFormatDebut}{' '}
-                      {t('Global.to')} {heureFormatFin}
-                    </Text>
-                  </View>
-                  <View style={{width: 250}}>
-                    <TouchableOpacity
-                      onPress={() =>
-                        addToCalendar(
-                          item.name,
-                          dateDebut.toISOString(),
-                          dateFin.toISOString(),
-                        )
-                      }>
-                      <View style={{flexDirection: 'row', marginTop: 10}}>
-                        <Icon
-                          name={'calendar'}
-                          size={20}
-                          color={theme.colors.primary}
-                        />
-                        <Text style={{color: theme.colors.primary}}>
-                          {' '}
-                          {t('Events.addToCalendar')}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                </View>
+          <View style={styles.eventItemContainer}>
+            <View style={styles.eventContent}>
+              <View style={styles.dateContainer}>
+                <DateEvent dateDebut={item.dateDebut} flexSize={0.23} />
               </View>
-            </View>
-          </View>
-          <View style={[styles.itemContainer, {marginTop: 15}]}>
-            <View style={styles.row}>
-              <View
-                style={{flexDirection: 'column', flex: 4, marginVertical: 5}}>
-                <TouchableOpacity
-                  onPress={() => handleInvitationsContacts(item)}>
-                  <View style={{marginHorizontal: 25}}>
-                    <Icon
-                      name={'user-plus'}
-                      size={25}
-                      color={theme.colors.primary}
-                    />
-                  </View>
-                  <View style={{marginHorizontal: 15}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Events.Invite')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-              <View
-                style={{flexDirection: 'column', flex: 5, marginVertical: 5}}>
-                <TouchableOpacity onPress={() => handleEditEvent(item)}>
-                  <View style={{marginHorizontal: 15, alignItems: 'flex-end'}}>
-                    <Icon
-                      name={'pencil'}
-                      size={25}
-                      color={theme.colors.primary}
-                    />
-                  </View>
-                  <View style={{marginHorizontal: 15, alignItems: 'flex-end'}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Global.Modify')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-          <View style={[styles.itemContainer, {marginTop: 15}]}>
-            <View style={styles.row}>
-              <View
-                style={{flexDirection: 'column', flex: 4, marginVertical: 5}}>
-                <View style={{marginHorizontal: 30}}>
-                  <Text style={{color: theme.colors.primary}}> {nombre}</Text>
-                </View>
-                <View style={{marginHorizontal: 15}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Events.Invited')}
-                    </Text>
-                </View>
-              </View>
-              <View
-                style={{flexDirection: 'column', flex: 4, marginVertical: 5}}>
-                <View style={{marginHorizontal: 25}}>
-                  <Text style={{color: theme.colors.primary}}> {nbYes}</Text>
-                </View>
-                <View style={{marginHorizontal: 15}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Global.Yes')}
-                    </Text>
-             </View>
-              </View>
-              <View
-                style={{flexDirection: 'column', flex: 4, marginVertical: 5}}>
-                <View style={{marginHorizontal: 20}}>
-                  <Text style={{color: theme.colors.primary}}> {nbNo}</Text>
-                </View>
-                <View style={{marginHorizontal: 15}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Global.No')}
-                    </Text>
-                </View>
-              </View>
-              <View
-                style={{flexDirection: 'column', flex: 5, marginVertical: 5}}>
-                <View style={{marginHorizontal: 30}}>
-                  <Text style={{color: theme.colors.primary}}> {nbMaybe}</Text>
-                </View>
-                <View style={{marginHorizontal: 15}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Events.Maybe')}
-                    </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-          <View style={[styles.itemContainer, {marginTop: 15}]}>
-            <View style={styles.row}>
-              <View
-                style={{flexDirection: 'column', flex: 4, marginVertical: 5}}>
-                <View style={{marginHorizontal: 40}}>
-                  <Text style={{color: theme.colors.primary}}>
-                    {' '}
-                    {mntContribution.toLocaleString(undefined, {
-                      maximumFractionDigits: 2,
-                    })}
+              <View style={styles.detailsContainer}>
+                <View style={styles.textContainer}>
+                  <Text style={styles.eventTime}>
+                    {jourFormat['0']} {t('Global.from')} {heureFormatDebut}{' '}
+                    {t('Global.to')} {heureFormatFin}
                   </Text>
-                </View>
-                <View style={{marginHorizontal: 15}}>
-                    <Text style={{color: theme.colors.primary}}>
-                      {' '}
-                      {t('Events.AmountDonation')}
-                    </Text>
-                </View>
-              </View>
-              {!closeContribution && (
-                <View
-                  style={{flexDirection: 'column', flex: 5, marginVertical: 5}}>
-                  <View
-                    style={{
-                      marginHorizontal: 15,
-                      alignItems: 'flex-end',
-                      marginTop: 15,
-                    }}>
-                    <TouchableOpacity onPress={closeDonation}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      addToCalendar(
+                        eventName,
+                        dateDebut.toISOString(),
+                        dateFin.toISOString(),
+                        item.localisation.description,
+                      )
+                    }>
+                    <View style={{flexDirection: 'row', marginTop: 10}}>
+                      <Icon
+                        name={'calendar'}
+                        size={20}
+                        color={theme.colors.primary}
+                      />
                       <Text style={{color: theme.colors.primary}}>
                         {' '}
-                        {t('Events.CloseDonation')}
+                        {t('Events.addToCalendar')}
                       </Text>
-                    </TouchableOpacity>
-                  </View>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-              )}
+              </View>
             </View>
+          </View>
+          <View style={styles.eventItemContainer}>
+            <View style={styles.row}>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <TouchableOpacity
+                  onPress={() => handleInvitationsContacts(item)}>
+                  <Icon
+                    name={'user-plus'}
+                    size={25}
+                    color={theme.colors.primary}
+                    style={{alignSelf: 'center'}}
+                  />
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {t('Events.Invite')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <TouchableOpacity onPress={() => handleProduitsServices(item)}>
+                  <Icon3
+                    name={'gift'}
+                    size={25}
+                    color={theme.colors.primary}
+                    style={{alignSelf: 'center'}}
+                  />
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {t('AddProdServ.title')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <TouchableOpacity onPress={() => handleEditEvent(item)}>
+                  <Icon
+                    name={'pencil'}
+                    size={25}
+                    color={theme.colors.primary}
+                    style={{alignSelf: 'center'}}
+                  />
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {t('Global.Modify')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+          <View style={styles.eventItemContainer}>
+            <View style={styles.row}>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 30}}>
+                  <Text style={{textAlign: 'center'}}>{nombre}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Events.Invited')}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 25}}>
+                  <Text style={{textAlign: 'center'}}>{nbYes}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Global.Yes')}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 20}}>
+                  <Text style={{textAlign: 'center'}}>{nbNo}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Global.No')}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 30}}>
+                  <Text style={{textAlign: 'center'}}>{nbMaybe}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Events.Maybe')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View style={styles.eventItemContainer}>
+            <View style={styles.row}>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 40}}>
+                  <Text style={{textAlign: 'center'}}> {mntNature}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Events.AmountNature')}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 40}}>
+                  <Text style={{textAlign: 'center'}}> {mntArgent}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Events.AmountArgent')}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View style={{marginHorizontal: 40}}>
+                  <Text style={{textAlign: 'center'}}> {mntContribution}</Text>
+                </View>
+                <View style={{marginHorizontal: 15}}>
+                  <Text
+                    style={{color: theme.colors.primary, textAlign: 'center'}}>
+                    {' '}
+                    {t('Events.AmountDonation')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {!closeContribution && (
+              <View
+                style={{flexDirection: 'column', flex: 1, marginVertical: 10}}>
+                <View
+                  style={{
+                    marginHorizontal: 15,
+                    alignItems: 'center',
+                    marginTop: 15,
+                  }}>
+                  <TouchableOpacity onPress={closeDonation}>
+                    <Text style={{color: theme.colors.primary}}>
+                      {' '}
+                      {t('Events.CloseDonation')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </View>
 
           <View style={[styles.mapview, {marginTop: 15}]}>

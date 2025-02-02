@@ -56,21 +56,17 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>This app requires access to the calendar</string>
+	<string>L'application a besoin d'accéder à votre calendrier pour planifier des événements.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Allow Contact Access For Details</string>
-	<key>NSCalendarsFullAccessUsageDescription</key>
-  	<string>This app requires access to the calendar</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Cette application a besoin d'accéder à votre caméra pour vous permettre de prendre des photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is required to show the place of the event</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Your location is required to show the place of the event</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photo Library Access Warning</string>
+	<string>Nous avons besoin d'accéder à votre bibliothèque de photos pour sélectionner des images à télécharger.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Program requires GPS to show the place of the event</string>
+	<string>Votre position est nécessaire pour afficher l'emplacement de l'événement lorsque l'application est en cours d'utilisation.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>

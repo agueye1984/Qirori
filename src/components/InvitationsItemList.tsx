@@ -1,107 +1,90 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Image, Pressable, ScrollView} from 'react-native';
-import storage from '@react-native-firebase/storage';
-import {
-  Event,
-  Invitation,
-  ManageEventsParamList,
-  Offre,
-  Service,
-  TypeEvent,
-  User,
-} from '../contexts/types';
+import {View, Text, StyleSheet, Dimensions} from 'react-native';
+import {Event, TypeEvent, User} from '../contexts/types';
 import {useTranslation} from 'react-i18next';
-import {Swipeable} from 'react-native-gesture-handler';
 import {useTheme} from '../contexts/theme';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {useNavigation} from '@react-navigation/native';
-import firestore from '@react-native-firebase/firestore';
-import {CategoryList} from './CategoryList';
+import {DateEvent} from './DateEvent';
+import {getRecordById} from '../services/FirestoreServices';
+import {parseDateTime} from '../services/EventsServices';
 
 type Props = {
-  event: Event;
-  color: string;
+  item: any;
 };
 
-const InvitationsItemList = ({event, color}: Props) => {
-  const {t,i18n} = useTranslation();
+const InvitationsItemList = ({item}: Props) => {
+  const {t, i18n} = useTranslation();
   const {ColorPallet} = useTheme();
-  const [users, setUsers] = useState<User[]>([]);
-  const [invitations, setInvitations] = useState<any[]>([]);
-  const [typeEvents, setTypeEvents] = useState<TypeEvent[]>([]);
+  const [event, setEvent] = useState<Event>();
+  const [nameEvent, setNameEvent] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+  let presence = item.reponse;
+  const nbEnfants = item.nbrEnfants == undefined ? 0 : item.nbrEnfants;
+  const nbrPerson = item.nbrAdultes + nbEnfants;
+  if (item.reponse == '') {
+    presence = t('Events.Maybe');
+  }
+  const {width} = Dimensions.get('window');
   const selectedLanguageCode = i18n.language;
-  let invitationList = {
-    eventName: '',
-    userName: '',
-    presence: '',
-    nbrPerson: 0,
-  };
+  let languageDate = '';
+  if (selectedLanguageCode === 'fr') {
+    languageDate = 'fr-fr';
+  }
+  if (selectedLanguageCode === 'en') {
+    languageDate = 'en-GB';
+  }
 
   useEffect(() => {
-    firestore()
-      .collection('users')
-      .get()
-      .then(querySnapshot => {
-        const user: User[] = [];
-        querySnapshot.forEach(documentSnapshot => {
-          user.push(documentSnapshot.data() as User);
-        });
-        setUsers(user);
-      });
-  }, []);
+    const fetchEvent = async () => {
+      const evt = (await getRecordById('events', item.eventId)) as Event;
+      setEvent(evt);
+    };
+
+    fetchEvent();
+  }, [item.eventId]);
 
   useEffect(() => {
-    firestore()
-    .collection('type_events')
-    .get()
-    .then(querySnapshot => {
-      const events: TypeEvent[] = [];
-      querySnapshot.forEach(documentSnapshot => {
-        events.push(documentSnapshot.data() as TypeEvent);
-      });
-      setTypeEvents(events);
-    });
-  }, []);
+    const fetchUser = async () => {
+      const user = (await getRecordById('users', item.userId)) as User;
+      setUserName(user.displayName);
+    };
+
+    fetchUser();
+  }, [item.userId]);
 
   useEffect(() => {
-    firestore()
-      .collection('invitations')
-      // Filter results
-      .where('eventId', '==', event.id)
-      .get()
-      .then(querySnapshot => {
-        const invitation: any[] = [];
-        querySnapshot.forEach(documentSnapshot => {
-          const invite = documentSnapshot.data() as Invitation;
-          const user = users.find(e => e.id === invite.userId);
-          const userName = user === undefined ? '' : user.displayName;
-          let presence = invite.reponse;
-          const nbEnfants =
-            invite.nbrEnfants == undefined ? 0 : invite.nbrEnfants;
-          const nbrPerson = invite.nbrAdultes + nbEnfants;
-          if (invite.reponse == '') {
-            presence = t('Events.Maybe');
-          }
-          const typeEvent = typeEvents.find(e => e.id === event.name);
-          console.log(typeEvent)
-          console.log(typeEvents)
-          let nameEvent = typeEvent === undefined ? '' : typeEvent.nameFr;
-          if (selectedLanguageCode === 'en') {
-            nameEvent = typeEvent === undefined ? '' : typeEvent.nameEn;
-          }
-          invitationList = {
-            eventName: nameEvent,
-            userName: userName,
-            presence: presence,
-            nbrPerson: nbrPerson,
-          };
-          invitation.push(invitationList);
-        });
-        setInvitations(invitation);
-        // console.log(donations);
-      });
-  }, [event, users, typeEvents]);
+    const fetchTypeEvent = async () => {
+      const typeEvent = (await getRecordById(
+        'type_events',
+        event?.name,
+      )) as TypeEvent;
+      const name =
+        selectedLanguageCode === 'en' ? typeEvent.nameEn : typeEvent.nameFr;
+      setNameEvent(name);
+    };
+    if (event !== undefined) {
+      fetchTypeEvent();
+    }
+  }, [event?.name, selectedLanguageCode]);
+
+  const dateDebut = parseDateTime(
+    event === undefined ? '' : event.dateDebut,
+    event === undefined ? '' : event.heureDebut,
+  );
+  const heureFormatDebut = dateDebut.toLocaleTimeString(languageDate, {
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h24',
+  });
+
+  const dateFin = parseDateTime(
+    event === undefined ? '' : event.dateFin,
+    event === undefined ? '' : event.heureFin,
+  );
+  const heureFormatFin = dateFin.toLocaleTimeString(languageDate, {
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h24',
+  });
 
   const styles = StyleSheet.create({
     contactCon: {
@@ -120,7 +103,7 @@ const InvitationsItemList = ({event, color}: Props) => {
       backgroundColor: '#d9d9d9',
       alignItems: 'center',
       justifyContent: 'center',
-      color: color,
+      // color: color,
     },
     contactDat: {
       flex: 1,
@@ -129,7 +112,7 @@ const InvitationsItemList = ({event, color}: Props) => {
     },
     txt: {
       fontSize: 16,
-      color: color,
+      //  color: color,
     },
     name: {
       fontSize: 16,
@@ -163,39 +146,89 @@ const InvitationsItemList = ({event, color}: Props) => {
       paddingHorizontal: 34,
       backgroundColor: ColorPallet.primary,
     },
+    eventItemContainer: {
+      marginVertical: 10,
+      padding: 15,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      backgroundColor: '#f9f9f9',
+      // Ajoutez ces styles pour l'espacement
+      marginHorizontal: 10, // Assure un espacement des côtés gauche/droit
+    },
+    eventContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dateContainer: {
+      flex: 1,
+    },
+    detailsContainer: {
+      flex: 3,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginLeft: 15,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    eventTitle: {
+      fontSize: width > 400 ? 18 : 16, // Dynamically adjust font size based on screen width
+      fontWeight: 'bold',
+      color: '#333',
+      marginBottom: 5,
+    },
+    eventTime: {
+      fontSize: 14,
+      color: '#666',
+    },
+    iconContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });
+
   return (
-    <ScrollView style={{padding: 10}} scrollEnabled>
-  {invitations.map((invitation: any, index: number) => {
-      return (
-        <View style={styles.contactCon} key={index.toString()}>
-          <View style={styles.contactDat}>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.name}>
-                {t('InvitationsList.eventTitle')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{invitation.eventName} </Text>
-              <Text style={styles.name}>
-                {t('InvitationsList.userTitle')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{invitation.userName} </Text>
-            </View>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={styles.name}>
-                {t('InvitationsList.presenceTitle')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{invitation.presence} </Text>
-              <Text style={styles.name}>
-                {t('InvitationsList.nbrPersonTitle')} :{' '}
-              </Text>
-              <Text style={styles.txt}>{invitation.nbrPerson} </Text>
-            </View>
+    <View style={styles.eventItemContainer}>
+      <View style={styles.eventContent}>
+        <View style={styles.dateContainer}>
+          <DateEvent
+            dateDebut={event === undefined ? '0' : event.dateDebut}
+            flexSize={0.23}
+          />
+        </View>
+        <View style={styles.detailsContainer}>
+          <View style={styles.textContainer}>
+            <Text style={styles.eventTitle}>{nameEvent}</Text>
+            <Text style={styles.eventTime}>
+              {t('Global.from')} {heureFormatDebut} {t('Global.to')}{' '}
+              {heureFormatFin}
+            </Text>
+            <Text style={styles.eventTitle}>{}</Text>
+            <Text style={styles.txt}>
+              <Text style={[styles.txt, {fontWeight: 'bold'}]}>
+                {t('InvitationsList.userTitle')}:
+              </Text>{' '}
+              {userName}
+            </Text>
+            <Text style={styles.txt}>
+              <Text style={[styles.txt, {fontWeight: 'bold'}]}>
+                {t('InvitationsList.presenceTitle')}:
+              </Text>{' '}
+              {presence}
+            </Text>
+            <Text style={styles.txt}>
+              <Text style={[styles.txt, {fontWeight: 'bold'}]}>
+                {t('InvitationsList.nbrPersonTitle')}:
+              </Text>{' '}
+              {nbrPerson}
+            </Text>
           </View>
         </View>
-      );
-    })
-  }
-  </ScrollView>
+      </View>
+    </View>
   );
 };
 

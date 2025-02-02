@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from 'react'
 import {
   ActivityIndicator,
+  Dimensions,
   PermissionsAndroid,
   Platform,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -42,6 +44,7 @@ export const ContactsList = () => {
   const [recordChecked, setRecordChecked] = useState(recordCheck)
   const navigation = useNavigation<eventDetailsProp>()
   const defaultStyles = DefaultComponentsThemes()
+  const {width, height} = Dimensions.get('window');
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -173,6 +176,8 @@ export const ContactsList = () => {
     setRecordChecked(recordCheck)
   }
 
+  
+
   const inviteContact = async () => {
     recordChecked.map((record) => {
       const contact = contacts.find((cont) => cont.recordID === record)
@@ -210,72 +215,118 @@ export const ContactsList = () => {
     navigation.navigate('EventDetails', {item: item})
   }
 
+  const responsiveStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#f8f8f8', // Couleur de fond générale
+      paddingHorizontal: width * 0.05, // 5% de la largeur de l'écran
+      paddingTop: height * 0.02, // 2% de la hauteur de l'écran
+    },
+    header: {
+      marginBottom: height * 0.02,
+    },
+    searchBar: {
+      marginBottom: height * 0.02,
+    },
+    selectAllContainer: {
+      paddingVertical: height * 0.02,
+    },
+    selectAllText: {
+      fontWeight: 'bold',
+      fontSize: width * 0.04, // Taille de police relative à la largeur
+    },
+    contactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: height * 0.01,
+    },
+    checkBox: {
+      marginRight: width * 0.02,
+    },
+    spinner: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    scrollViewContent: {
+      paddingBottom: height * 0.1, // Espace pour éviter les chevauchements
+    },
+    bottomButtonContainer: {
+      paddingHorizontal: width * 0.05,
+      paddingVertical: height * 0.02,
+      backgroundColor: '#fff',
+      borderTopWidth: 1,
+      borderTopColor: '#ddd',
+    },
+    buttonContainer: {
+      flex: 1,
+    },
+  });
+  
+
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <BacktoHome textRoute={t('InvitationsContacts.title')} />
-      <Header>{t('InvitationsContacts.title')}</Header>
-      <SearchBar searchPlaceholder={searchPlaceholder} onChangeText={(text) => search(text)} />
-      <View style={{paddingVertical: 25}}>
-        <TouchableOpacity onPress={() => checkedAllContacts(contacts, checked)}>
-          <View style={{flexDirection: 'row'}}>
-            {checked ? (
-              <Icon name={'check-box'} size={20} color={theme.colors.primary} />
-            ) : (
-              <Icon name={'check-box-outline-blank'} size={20} color={theme.colors.black} />
-            )}
-            <Text
-              style={{
-                fontWeight: 'bold',
-                color: checked === true ? theme.colors.primary : theme.colors.black,
-              }}>
-              {t('Global.AllSelect')}
-            </Text>
-          </View>
-        </TouchableOpacity>
+    <SafeAreaView style={responsiveStyles.container}>
+  <BacktoHome textRoute={t('InvitationsContacts.title')} />
+  <Header>{t('InvitationsContacts.title')}</Header>
+  <SearchBar
+    searchPlaceholder={searchPlaceholder}
+    onChangeText={(text) => search(text)}
+  />
+  <View style={responsiveStyles.selectAllContainer}>
+    <TouchableOpacity onPress={() => checkedAllContacts(contacts, checked)}>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        {checked ? (
+          <Icon name="check-box" size={20} color={theme.colors.primary} style={responsiveStyles.checkBox} />
+        ) : (
+          <Icon name="check-box-outline-blank" size={20} color={theme.colors.black} style={responsiveStyles.checkBox} />
+        )}
+        <Text
+          style={[
+            responsiveStyles.selectAllText,
+            {color: checked ? theme.colors.primary : theme.colors.black},
+          ]}>
+          {t('Global.AllSelect')}
+        </Text>
       </View>
-      {loading ? (
-        <View style={defaultStyles.spinner}>
-          <ActivityIndicator size="large" color="#0000ff" />
+    </TouchableOpacity>
+  </View>
+  {loading ? (
+    <View style={responsiveStyles.spinner}>
+      <ActivityIndicator size="large" color="#0000ff" />
+    </View>
+  ) : (
+    <ScrollView
+      contentContainerStyle={responsiveStyles.scrollViewContent}
+      keyboardShouldPersistTaps="handled">
+      {contacts.map((contact, index) => (
+        <View key={index} style={responsiveStyles.contactRow}>
+          <TouchableOpacity
+            onPress={() => handleChecked(contact, index, contact.recordID, contact.checked, recordChecked)}
+            style={responsiveStyles.checkBox}>
+            <Icon
+              name={contact.checked ? 'check-box' : 'check-box-outline-blank'}
+              size={20}
+              color={contact.checked ? theme.colors.primary : theme.colors.black}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleChecked(contact, index, contact.recordID, contact.checked, recordChecked)}
+            style={{flex: 1}}>
+            <Contact
+              contact={contact}
+              color={contact.checked ? theme.colors.primary : theme.colors.black}
+            />
+          </TouchableOpacity>
         </View>
-      ) : (
-        <ScrollView
-          scrollEnabled
-          showsVerticalScrollIndicator
-          automaticallyAdjustKeyboardInsets={true}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={defaultStyles.scrollViewContent}>
-          {contacts.map((contact, index) => {
-            return (
-              <View key={index} style={{flexDirection: 'row', flex: 1}}>
-                <TouchableOpacity
-                  onPress={() => handleChecked(contact, index, contact.recordID, contact.checked, recordChecked)}
-                  style={{marginVertical: 20}}>
-                  {contact.checked ? (
-                    <Icon name={'check-box'} size={20} color={theme.colors.primary} />
-                  ) : (
-                    <Icon name={'check-box-outline-blank'} size={20} color={theme.colors.black} />
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleChecked(contact, index, contact.recordID, contact.checked, recordChecked)}
-                  style={{flex: 1}}>
-                  <Contact
-                    contact={contact}
-                    color={contact.checked === true ? theme.colors.primary : theme.colors.black}
-                  />
-                </TouchableOpacity>
-              </View>
-            )
-          })}
-        </ScrollView>
-      )}
-      <View style={defaultStyles.bottomButtonContainer}>
-        <View style={defaultStyles.buttonContainer}>
-          <Button mode="contained" onPress={inviteContact}>
-            {t('InvitationsContacts.Invitee')}
-          </Button>
-        </View>
-      </View>
-    </SafeAreaView>
+      ))}
+    </ScrollView>
+  )}
+  <View style={responsiveStyles.bottomButtonContainer}>
+    <Button mode="contained" onPress={inviteContact}>
+      {t('InvitationsContacts.Invitee')}
+    </Button>
+  </View>
+</SafeAreaView>
+
   )
 }

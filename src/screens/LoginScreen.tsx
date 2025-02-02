@@ -1,27 +1,17 @@
-import React, {useState} from 'react';
-import {
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  BackHandler,
-  ScrollView,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
+import { Button as PaperButton, TextInput as PaperTextInput } from 'react-native-paper';
+import { theme } from '../core/theme';
 import Logo from '../components/Logo';
-import Header from '../components/Header';
-import Button from '../components/Button';
-import TextInput from '../components/TextInput';
-import {theme} from '../core/theme';
-import {emailValidator, passwordValidator} from '../core/utils';
-import {Navigation} from '../types';
-import {useTranslation} from 'react-i18next';
-import Paragraph from '../components/Paragraph';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import { useTranslation } from 'react-i18next';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ManageEventsParamList, User } from '../contexts/types';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { emailValidator, passwordValidator } from '../core/utils';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+
 
 type OTPAuthScreenProp = StackNavigationProp<
   ManageEventsParamList,
@@ -36,6 +26,7 @@ const LoginScreen = () => {
   const [loginError, setLoginError] = useState('');
   const {t} = useTranslation();
   const {navigate} = useNavigation<OTPAuthScreenProp>();
+  const defaultStyles = DefaultComponentsThemes();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -50,16 +41,12 @@ const LoginScreen = () => {
 
   const handleEmail = (text: string) => {
     setEmail(text);
-    if (text === '') {
-      setEmailError('');
-    }
+    setEmailError('');
   };
 
   const handlePassword = (text: string) => {
     setPassword(text);
-    if (text === '') {
-      setPasswordError('');
-    }
+    setPasswordError('');
   };
 
   const _onLoginPressed = async () => {
@@ -119,72 +106,125 @@ const LoginScreen = () => {
         });
     }
   };
-
-  
-
   return (
     <SafeAreaView style={styles.container}>
-      <Logo />
-      <Header>{t('LoginScreen.title')}</Header>
-      <Paragraph>{t('LoginScreen.paragraph')}</Paragraph>
-      <Text style={styles.errorText}>{loginError}</Text>
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
-      <TextInput
-        value={email}
-        label={t('LoginScreen.Email')}
-        returnKeyType="next"
-        onChangeText={text => handleEmail(text)}
-        error={!!emailError}
-        errorText={emailError}
-        autoCapitalize="none"
-        autoComplete="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-        style={styles.input}
-      />
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.logoContainer}>
+          <Logo />
+        </View>
+        <View style={styles.formContainer}>
+          <Text style={styles.header}>{t('LoginScreen.title')}</Text>
+          <Text style={styles.paragraph}>{t('LoginScreen.paragraph')}</Text>
+          <Text style={styles.errorText}>{loginError}</Text>
 
-      <TextInput
-        value={password}
-        label={t('LoginScreen.Password')}
-        returnKeyType="done"
-        onChangeText={text => handlePassword(text)}
-        error={!!passwordError}
-        errorText={passwordError}
-        secureTextEntry
-        style={styles.input}
-      />
- 
-      <View style={styles.forgotPassword}>
-        <TouchableOpacity
-          onPress={() => navigate('ForgotPasswordScreen' as never)}>
-          <Text style={styles.label}>{t('LoginScreen.Forgotpassword')}</Text>
-        </TouchableOpacity>
-      </View>
+          <PaperTextInput
+            label={t('LoginScreen.Email')}
+            value={email}
+            onChangeText={text => handleEmail(text)}
+            keyboardType="email-address"
+            style={emailError ? [styles.input, styles.inputError] : styles.input }
+            autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="done"
+          />
+          {emailError && <Text style={defaultStyles.error}>{emailError}</Text>}
+          <PaperTextInput
+            label={t('LoginScreen.Password')}
+            value={password}
+            onChangeText={text => handlePassword(text)}
+            secureTextEntry
+            style={passwordError ? [styles.input, styles.inputError] : styles.input }
+            returnKeyType="done"
+          />
+          {passwordError && <Text style={defaultStyles.error}>{passwordError}</Text>}
+          <View style={styles.forgotPassword}>
+            <TouchableOpacity onPress={() => navigate('ForgotPasswordScreen' as never)}>
+              <Text style={styles.label}>{t('LoginScreen.Forgotpassword')}</Text>
+            </TouchableOpacity>
+          </View>
 
-      <Button mode="contained" onPress={_onLoginPressed}>
-        {t('LoginScreen.Login')}
-      </Button>
+          <View style={styles.buttonContainer}>
+            <PaperButton mode="contained" onPress={_onLoginPressed} style={styles.button}>
+              {t('LoginScreen.Login')}
+            </PaperButton>
+          </View>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>{t('LoginScreen.DontHaveAccount')} </Text>
-        <TouchableOpacity onPress={() => navigate('RegisterScreen' as never)}>
-          <Text style={styles.link}>{t('LoginScreen.SignUp')}</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>{t('LoginScreen.DontHaveAccount')}</Text>
+            <TouchableOpacity onPress={() => navigate('RegisterScreen' as never)}>
+              <Text style={styles.link}>{t('LoginScreen.SignUp')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  formContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: theme.colors.primary,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  paragraph: {
+    fontSize: 14,
+    color: theme.colors.secondary,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 12,
+    color: 'red',
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%', // Prend toute la largeur du conteneur
+    marginBottom: 15,
+    height: 50,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+  },
   forgotPassword: {
     width: '100%',
     alignItems: 'flex-end',
     marginBottom: 24,
   },
+  buttonContainer: {
+    width: '100%',
+    paddingHorizontal: 20,  // Assurez-vous que le bouton n'est pas collé aux bords
+    marginTop: 20,
+  },
+  button: {
+    width: '100%',
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
   row: {
     flexDirection: 'row',
-    marginTop: 4,
+    justifyContent: 'center',
+    marginTop: 20,
   },
   label: {
     color: theme.colors.secondary,
@@ -193,22 +233,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.primary,
   },
-  errorText: {
-    color: 'red',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    width: '100%',
-    maxWidth: 340,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    width:300
+  inputError: {
+    borderColor: 'red',
+    borderWidth: 1,
   },
 });
 

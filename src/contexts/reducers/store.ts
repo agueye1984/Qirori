@@ -109,7 +109,6 @@ export const reducer = <S extends State>(
         ...state,
         didAgreeTermVendor: true,
       };
-     console.log(newState.didAgreeTermVendor);
       AsyncStorage.setItem(
         LocalStorageKeys.AgreeTermVendor,
         JSON.stringify(newState.didAgreeTermVendor),

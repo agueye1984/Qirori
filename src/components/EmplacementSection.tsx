@@ -2,32 +2,39 @@ import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   FlatList,
-  SafeAreaView,
+  Keyboard,
+  NativeSyntheticEvent,
   StyleSheet,
   Text,
+  TextInputKeyPressEventData,
   TouchableOpacity,
   View,
 } from 'react-native';
-import TextInput from './TextInput';
 import {Location, PredictionType} from '../contexts/types';
 import axios from 'axios';
 import Config from 'react-native-config';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
+import { theme } from '../core/theme';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 
 type Props = {
   eventLocalisation: Location;
   setEventLocalisation: (value: Location) => void;
   error: string;
+  label:string;
 };
 
 export const EmplacementSection = ({
   eventLocalisation,
   setEventLocalisation,
   error,
+  label
 }: Props) => {
   const {t} = useTranslation();
   const [showPredictions, setShowPredictions] = useState(false);
   const [predictions, setPredictions] = useState<PredictionType[]>([]);
   const [placeIds, setPlaceIds] = useState('');
+  const defaultStyles = DefaultComponentsThemes();
 
   const handleChange = async (text: string) => {
     let locations: Location = {placeId: placeIds, description: text};
@@ -45,7 +52,6 @@ export const EmplacementSection = ({
         const {
           data: {predictions},
         } = result;
-        console.log(predictions)
         setPredictions(predictions);
         setShowPredictions(true);
       }
@@ -73,9 +79,6 @@ export const EmplacementSection = ({
           },
         } = result;
        // const codePostal = result.data.formatted_address;
-        //console.log(result);
-        //console.log(result.data);
-        console.log(result.data.result.formatted_address);
         setShowPredictions(false);
         const locations: Location = {
           placeId: placeId,
@@ -91,7 +94,10 @@ export const EmplacementSection = ({
 
   const styles = StyleSheet.create({
     container: {
-      justifyContent: 'center',
+      width: '100%',
+      padding: 10,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
     },
     inputStyle: {
       paddingVertical: 16,
@@ -113,7 +119,25 @@ export const EmplacementSection = ({
       borderBottomColor: 'black',
       borderBottomWidth: 1,
     },
+    input: {
+      width: '100%', // Prend toute la largeur du conteneur
+      marginBottom: 15,
+      //height: 50,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 4,
+      paddingHorizontal: 10,
+    },
+    inputError: {
+      borderColor: 'red',
+      borderWidth: 1,
+    },
   });
+
+  const handleKeyPress = (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+    if (event.nativeEvent.key === 'Enter') {
+      Keyboard.dismiss(); // Masquer le clavier
+    }
+  };
 
   const _renderPredictions = (predictions: PredictionType[]) => {
     const {predictionRow} = styles;
@@ -141,21 +165,23 @@ export const EmplacementSection = ({
   };
 
   return (
-    <SafeAreaView>
-      <View>
-        <TextInput
-          label={t('AddEvent.Emplacement')}
-          returnKeyType="search"
-          value={eventLocalisation.description}
-          onChangeText={text => handleChange(text)}
-          autoCapitalize="none"
-          multiline={true}
-          error={!!error}
-          errorText={error}
-        />
-      </View>
-
-      <View>{showPredictions && _renderPredictions(predictions)}</View>
-    </SafeAreaView>
+    <View>
+      <PaperTextInput
+        label={label}
+        returnKeyType="done"
+        value={eventLocalisation.description}
+        onChangeText={handleChange}
+        multiline
+        style={error ? [styles.input, styles.inputError] : styles.input }
+        onSubmitEditing={Keyboard.dismiss}
+        onKeyPress={handleKeyPress} // Interception de la touche "Entrée"
+      />
+      {error && <Text style={defaultStyles.error}>{error}</Text>}
+      {showPredictions && _renderPredictions(predictions)}
+    </View>
   );
+  
+  
+ 
+  
 };

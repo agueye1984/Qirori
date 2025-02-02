@@ -1,295 +1,303 @@
-import React, {useContext, useEffect, useMemo, useState} from 'react'
-import {View, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity} from 'react-native'
-import {ManageEventsParamList, Offre, Product, Service, User} from '../contexts/types'
-import {StackNavigationProp} from '@react-navigation/stack'
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native'
-import {useStore} from '../contexts/store'
-import Header from '../components/Header'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import {LocalStorageKeys} from '../constants'
-import {useTranslation} from 'react-i18next'
-import {widthPercentageToDP as widthToDp} from 'react-native-responsive-screen'
-import Button from '../components/Button'
-import {ServiceView} from '../components/ServiceView'
-import firestore from '@react-native-firebase/firestore'
-import auth from '@react-native-firebase/auth'
-import Icon from 'react-native-vector-icons/AntDesign'
-import {theme} from '../core/theme'
-import {ProductView} from '../components/ProductView'
-import {Text} from 'react-native-paper'
-import {ProductServiceView} from '../components/ProductServiceView'
-import {conditionValidator} from '../core/utils'
-import {SearchBar} from '../components/SearchBar'
-import {BacktoHome} from '../components/BacktoHome'
-import {SearchAchat} from '../components/SearchAchat'
-import DefaultComponentsThemes from '../defaultComponentsThemes'
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, SafeAreaView, FlatList} from 'react-native';
+import {ManageEventsParamList, Product, Service} from '../contexts/types';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
+import Header from '../components/Header';
+import {Button} from 'react-native-paper';
+import {ProductView} from '../components/ProductView';
+import {ServiceView} from '../components/ServiceView';
+import Filters from '../components/Filters';
+import {getAllRecords, getFilteredRecords} from '../services/FirestoreServices';
+import {fetchGeonameName} from '../services/ZonesServices';
+import SearchBarQuery from '../components/SearchBarQuery';
+import DefaultComponentsThemes from '../defaultComponentsThemes';
 
-type productDetailsProp = StackNavigationProp<ManageEventsParamList, 'ServiceDetails'>
+type productDetailsProp = StackNavigationProp<
+  ManageEventsParamList,
+  'ServiceDetails'
+>;
+
+type CombinedData =
+  | {type: 'header'; title: string}
+  | {type: 'filter'}
+  | {type: 'sectionHeader'; title: string}
+  | {type: 'product'; data: Product}
+  | {type: 'service'; data: Service};
 
 export const ServicesOffertsList = () => {
-  let qty = 0
-  let achatProduit = {
-    id: '',
-    name: '',
-    description: '',
-    images: '',
-    type: '',
-    prix: '',
-    devise: '',
-    offres: [
-      {
-        id: '',
-        name: '',
-        montant: 0,
-        devise: '',
-      },
-    ],
-    conditions: '',
-    category: '',
-    stock: 0,
-  }
-  let prodServ: any[] = []
-  const {t} = useTranslation()
-  const navigation = useNavigation<productDetailsProp>()
-  const [userId, setUserId] = useState('')
-  const [serviceProduct, setServiceProduct] = useState<any[]>([])
-  const [services, setServices] = useState<Service[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const route = useRoute<RouteProp<ManageEventsParamList, 'ServicesOffertsList'>>()
-  const categoryId = route.params.item
-  const [searchPlaceholder, setSearchPlaceholder] = useState(t('Global.Search'))
-  const defaultStyles = DefaultComponentsThemes()
-
-  const getProducts = () => {
-    firestore()
-      .collection('products')
-      .where('category', '==', categoryId)
-      .get()
-      .then((querySnapshot) => {
-        const prod: Product[] = []
-        querySnapshot.forEach((documentSnapshot) => {
-          const product = documentSnapshot.data() as Product
-          achatProduit = {
-            id: product.id,
-            name: product.name,
-            description: product.description,
-            images: product.images,
-            type: 'product',
-            prix: product.prixUnitaire.toString(),
-            devise: product.devise,
-            offres: [
-              {
-                id: '',
-                name: '',
-                montant: 0,
-                devise: '',
-              },
-            ],
-            conditions: '',
-            category: product.category,
-            stock: 0,
-          }
-          prodServ.push(achatProduit)
-          prod.push(product)
-        })
-        setServiceProduct(prodServ)
-        setProducts(prod)
-      })
-  }
-
-  const getServices = () => {
-    firestore()
-      .collection('services')
-      .where('category', '==', categoryId)
-      .get()
-      .then((querySnapshot) => {
-        const serv: Service[] = []
-        querySnapshot.forEach((documentSnapshot) => {
-          const service = documentSnapshot.data() as Service
-          achatProduit = {
-            id: service.id,
-            name: service.name,
-            description: service.description,
-            images: service.images,
-            type: 'service',
-            prix: '',
-            devise: '',
-            offres: service.offres,
-            conditions: service.conditions,
-            category: service.category,
-            stock: 0,
-          }
-          prodServ.push(achatProduit)
-          serv.push(service)
-        })
-        setServiceProduct(prodServ)
-        setServices(serv)
-      })
-  }
-  useEffect(() => {
-    getProducts()
-  }, [categoryId])
+  const route =
+    useRoute<RouteProp<ManageEventsParamList, 'ServicesOffertsList'>>();
+  const categoryId = route.params.item;
+  const [products, setProducts] = useState<Product[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedZone, setSelectedZone] = useState<string>('All');
+  const [selectedFormula, setSelectedFormula] = useState<string>('All');
+  const [participantCount, setParticipantCount] = useState<number>(1);
+  const navigation = useNavigation<productDetailsProp>();
+  const {t, i18n} = useTranslation();
+  const [serviceCategory, setServiceCategory] = useState<string>(categoryId);
+  const [zones, setZones] = useState<{key: string; value: string}[]>([
+    {key: 'All', value: 'All'},
+  ]);
+  const [formulas, setFormulas] = useState<{key: string; value: string}[]>([
+    {key: 'All', value: 'All'},
+  ]);
+  const selectedLanguageCode = i18n.language;
+  const defaultStyles = DefaultComponentsThemes();
 
   useEffect(() => {
-    getServices()
-  }, [categoryId])
+    const loadZonesAndFormulas = async () => {
+      try {
+        const serviceRecords = await getFilteredRecords(
+          'services',
+          'category',
+          serviceCategory,
+        );
+        const zonesSet = new Set<string>();
+        serviceRecords.forEach(record => {
+          const service = record.data as Service;
+          service.zone.forEach(zone => zonesSet.add(zone));
+        });
 
-  console.log(products)
+        const formules = await getAllRecords('formules');
+        const formattedFormulas: any[] = [];
+        for (const record of formules) {
+          const offre = {
+            key: record.id,
+            value: record.data.name,
+          };
+          formattedFormulas.push(offre);
+        }
+
+        const zonesWithNames = await Promise.all(
+          Array.from(zonesSet).map(async geonameId => {
+            const {key, value} = await fetchGeonameName(
+              geonameId,
+              selectedLanguageCode,
+            );
+            return {key, value};
+          }),
+        );
+
+        // Mettre à jour l'état des zones
+        setZones([{key: 'All', value: 'All'}, ...zonesWithNames]);
+        setFormulas([{key: 'All', value: 'All'}, ...formattedFormulas]);
+      } catch (error) {
+        console.error('Error loading zones and formulas:', error);
+      }
+    };
+
+    loadZonesAndFormulas();
+  }, [serviceCategory]);
+
+  const getProducts = async () => {
+    const data = await getFilteredRecords(
+      'products',
+      'category',
+      serviceCategory,
+    );
+    const newProd = data.map(record => record.data as Product);
+    setProducts(newProd);
+  };
+  const getServices = async () => {
+    const data = await getFilteredRecords(
+      'services',
+      'category',
+      serviceCategory,
+    );
+    const newServ = data.map(record => record.data as Service);
+    setServices(newServ);
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, [serviceCategory]);
+
+  useEffect(() => {
+    getServices();
+  }, [serviceCategory]);
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearchQuery = product.name.includes(searchQuery);
+
+    const matchesCategory = product.category.includes(serviceCategory);
+    const matchesZone =
+      selectedZone === 'All' || product.zone.includes(selectedZone);
+    const matchesFormula =
+      selectedFormula === 'All' ||
+      Object.values(product.formules).some(
+        formule => formule.formuleId === selectedFormula.toString(),
+      ); //product.formulesId.includes(selectedFormula.toString());
+    const matchesParticipantCount =
+      participantCount === null ||
+      Object.values(product.formules).some(
+        formule => parseInt(formule.quantity) >= participantCount,
+      );
+
+    return (
+      matchesSearchQuery &&
+      matchesCategory &&
+      matchesZone &&
+      matchesFormula &&
+      matchesParticipantCount
+    );
+  });
+
+  const filteredServices = services.filter(service => {
+    const matchesSearchQuery = service.name.includes(searchQuery);
+    const matchesCategory = service.category.includes(serviceCategory);
+    const matchesZone =
+      selectedZone === 'All' || service.zone.includes(selectedZone);
+    const matchesFormula =
+      selectedFormula === 'All' ||
+      Object.values(service.formules).some(
+        formule => formule.formuleId === selectedFormula.toString(),
+      );
+    const matchesParticipantCount =
+      participantCount === null ||
+      Object.values(service.conditions).some(
+        condition => parseInt(condition.capacity) >= participantCount,
+      );
+
+    return (
+      matchesSearchQuery &&
+      matchesCategory &&
+      matchesZone &&
+      matchesFormula &&
+      matchesParticipantCount
+    );
+  });
+
+  const handleCategoryChange = (value: string) => {
+    setServiceCategory(value);
+  };
+
+  const combinedData: CombinedData[] = [
+    {type: 'header', title: t('BuyProduct.title')},
+    {type: 'filter'},
+    /*  { type: 'sectionHeader', title: t('Products.title') }, */
+    ...filteredProducts.map(
+      product => ({type: 'product', data: product} as CombinedData),
+    ),
+    /* { type: 'sectionHeader', title: t('Services.title') }, */
+    ...filteredServices.map(
+      service => ({type: 'service', data: service} as CombinedData),
+    ),
+  ];
+
+  const renderItem = ({item}: {item: CombinedData}) => {
+    switch (item.type) {
+      case 'header':
+        return <Header>{item.title}</Header>;
+      case 'filter':
+        return (
+          <>
+            <SearchBarQuery setSearchQuery={setSearchQuery} />
+            <Filters
+              setSelectedZone={setSelectedZone}
+              setSelectedFormula={setSelectedFormula}
+              setParticipantCount={setParticipantCount}
+              serviceCategory={serviceCategory}
+              handleCategoryChange={handleCategoryChange}
+              zones={zones}
+              formulas={formulas}
+            />
+          </>
+        );
+      /* case 'sectionHeader':
+        return <Text style={styles.header}>{item.title}</Text>; */
+      case 'product':
+        return (
+          <ProductView
+            product={item.data}
+            image={item.data.images}
+            onPress={() => {
+              navigation.navigate('ProductDetails', {
+                item: item.data,
+              });
+            }}
+            participantCount={participantCount}
+            selectFormule={selectedFormula.toString()}
+          />
+        );
+      case 'service':
+        return (
+          <ServiceView
+            service={item.data}
+            images={item.data.images}
+            participantCount={participantCount}
+            onPress={() => {
+              navigation.navigate('ServiceDetails', {
+                item: item.data,
+                participantCount: participantCount,
+              });
+            }}
+            selectFormule={selectedFormula.toString()}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
+      padding: 10,
     },
-    row: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      width: widthToDp(90),
-      marginTop: 10,
-    },
-    total: {
-      borderTopWidth: 1,
-      paddingTop: 10,
-      borderTopColor: '#E5E5E5',
-      marginBottom: 10,
-    },
-    cartTotalText: {
-      fontSize: widthToDp(4.5),
-      color: '#989899',
-    },
-    addToCart: {
-      position: 'absolute',
-      bottom: 30,
-      right: 10,
-      backgroundColor: '#C37AFF',
-      width: widthToDp(12),
-      height: widthToDp(12),
-      borderRadius: widthToDp(10),
-      alignItems: 'center',
-      padding: widthToDp(2),
-      justifyContent: 'center',
-    },
-    products: {
+    container1: {
       flex: 1,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      width: widthToDp(100),
-      paddingHorizontal: widthToDp(4),
-      justifyContent: 'space-between',
+      backgroundColor: '#fff',
+      marginHorizontal: 15,
+    },
+    header: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginVertical: 10,
+    },
+    button: {
+      flex: 1,
+      marginHorizontal: 10,
     },
     bottomButtonContainer: {
       position: 'absolute',
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: '#fff', // Adjust background color as needed
+      backgroundColor: '#fff',
       padding: 15,
       borderTopWidth: 1,
-      borderColor: '#ccc', // Optional: Add a border color
+      borderColor: '#ccc',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
     },
-    scrollViewContent: {
-      flexGrow: 1,
-      paddingBottom: 80, // Add padding to the bottom to make space for the fixed button
-    },
-    cartCount: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 16,
-    },
-    button: {
-      flex: 1,
-      marginHorizontal: 10,
-    },
-  })
-
-  const search = (text: string) => {
-    console.log(text)
-    if (text === '' || text === null) {
-      getProducts()
-      getServices()
-    } else {
-      const filteredProduct = products.filter((item) => {
-        return Object.values(item.name).join('').includes(text)
-      })
-      if (filteredProduct.length == 0) {
-        const filteredServices = services.filter((item) => {
-          return Object.values(item.name).join('').includes(text)
-        })
-        if (filteredProduct.length == 0) {
-          setProducts(filteredProduct)
-          setServices(filteredServices)
-        } else {
-          setServices(filteredServices)
-        }
-      } else {
-        setProducts(filteredProduct)
-      }
-    }
-  }
+  });
 
   return (
-    <SafeAreaView style={[styles.container]}>
-      <BacktoHome textRoute={t('Achats.title')} />
-      <Header>{t('BuyProduct.title')}</Header>
-      <SearchAchat searchPlaceholder={searchPlaceholder} onChangeText={(text) => search(text)} />
-      {products.length === 0 && services.length === 0 && (
-        <Text
-          style={[
-            defaultStyles.text,
-            {
-              marginVertical: 50,
-              paddingHorizontal: 10,
-              textAlign: 'center',
-            },
-          ]}>
-          {t('Global.EmptyList')}
-        </Text>
-      )}
-      <ScrollView
-        automaticallyAdjustKeyboardInsets={true}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollViewContent}>
-        {products.map((item, index) => (
-          <ProductView
-            key={index}
-            product={item}
-            //image={require('../../assets/No_image_available.svg.png')}
-            image={item.images}
-            onPress={() => {
-              navigation.navigate('ProductDetails', {
-                item: item,
-              })
-            }}
-          />
-        ))}
-        {services.map((item, index) => (
-          <ServiceView
-            key={index}
-            service={item}
-            //image={require('../../assets/No_image_available.svg.png')}
-            image={item.images}
-            onPress={() => {
-              navigation.navigate('ServiceDetails', {
-                item: item,
-              })
-            }}
-          />
-        ))}
-      </ScrollView>
+    <SafeAreaView style={styles.container1}>
+      <FlatList
+        data={combinedData}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={{paddingBottom: 100}} // Adjust padding to ensure visibility of all items
+      />
       <View style={styles.bottomButtonContainer}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-        <Button mode="contained" onPress={() => navigation.navigate('Achats' as never)} style={styles.button}>
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('Achats' as never)}
+          style={defaultStyles.button}>
           {t('Global.Back')}
         </Button>
-        <Button mode="contained" onPress={() => navigation.navigate('Cart' as never)} style={styles.button}>
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('Cart' as never)}
+          style={defaultStyles.button}>
           {t('BuyProduct.Cart')}
         </Button>
-        </View>
       </View>
-      {/* SchrollView is used in order to scroll the content */}
-
-      {/* Creating a seperate view to show the total amount and checkout button */}
     </SafeAreaView>
-  )
-}
+  );
+};

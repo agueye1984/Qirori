@@ -65,6 +65,28 @@ const translation = {
     ProvinceErrorEmpty: 'Province ne peut pas être vide.',
     RegionErrorEmpty: 'Region ne peut pas être vide.',
     TypePrixErrorEmpty: 'Type de Prix ne peut pas être vide.',
+    TypeErrorEmpty: 'Type ne peut pas être vide.',
+    ProductErrorEmpty: 'Produit ne peut pas être vide.',
+    ServiceErrorEmpty: 'Service ne peut pas être vide.',
+    Soit: 'soit ',
+    Total: 'Total',
+    Offre: 'Entrez une offre personnalisée',
+    TypePrix: 'Entrez un type de prix personnalisé',
+    Condition: 'Entrez une condition personnalisée',
+    Prix: 'Prix',
+    Stock: 'Stock',
+    FileErrorEmpty: 'Vous devez sélectionner un fichier',
+    AdresseErrorEmpty: 'Adresse ne peut pas être vide.',
+    ConfirmeErrorEmpty: 'Vous devez cocher la confirmation.',
+    AccepteErrorEmpty: "Vous devez cocher l'acceptation.",
+    ProductService: 'Produits/Services.',
+    Rating: 'Notation',
+    Customer: 'Client',
+    FormulaErrorEmpty: 'Formule ne peut pas être vide.',
+    Participants: 'Nombre de participants',
+    NameFrErrorEmpty: 'Nom en FR ne peut pas être vide.',
+    NameEnErrorEmpty: 'Nom en AN ne peut pas être vide.',
+    Cart: 'Panier',
   },
   LoginScreen: {
     title: 'Connectez-vous',
@@ -118,6 +140,8 @@ const translation = {
     Maybe: 'Peut être',
     AmountDonation: 'Montant total',
     CloseDonation: 'Fermer la contribution',
+    AmountNature: 'Montant donné en nature',
+    AmountArgent: 'Montant donné en argent',
   },
   AddEvent: {
     title: 'Créer un événement',
@@ -129,6 +153,8 @@ const translation = {
     Emplacement: 'Emplacement',
     CharacterCount: 'caractères',
     titleModify: 'Modifier un événement',
+    HeureDebut: 'Heure de début',
+    HeureFin: 'Heure de fin',
   },
   InvitationsContacts: {
     title: 'Invitez vos contacts',
@@ -165,6 +191,7 @@ const translation = {
     Paypal: 'Payer avec PayPal',
     Montant: 'Montant de la contribution',
     AddProduct: 'Ajouter un produit',
+    TypeNature: 'Nature de la contribution',
   },
   Ventes: {
     title: 'Devenir Vendeur',
@@ -183,6 +210,7 @@ const translation = {
     PrixUnitaire: 'Prix Unitaire',
     Devise: 'Devise',
     ProductExistError: 'Le produit est déjà été ajouté',
+    Modify: 'Modifier un produit',
   },
   AddService: {
     title: 'Ajouter un service',
@@ -198,6 +226,9 @@ const translation = {
     FormulasAdded: 'Formules Ajoutées',
     Formula: 'Formule',
     TypePrix: 'Type de prix',
+    EditFormulas: 'Modifier les Formules',
+    EditFormula: 'Modifier la Formule',
+    Modify: 'Modifier un service',
   },
   Achats: {
     title: 'Acheter',
@@ -223,7 +254,7 @@ const translation = {
   Dropdown: {
     Select: 'Sélectionnez une devise',
     Category: 'Sélectionnez une catégorie',
-    Product: ' Sélectionnez un produit',
+    Product: 'Sélectionnez un produit',
     Event: 'Sélectionnez un  événement',
     Autre:'Autres',
     Zone:'Choisir une zone à desservir',
@@ -232,6 +263,12 @@ const translation = {
     Region: 'Sélectionnez une région',
     TypePrix : 'Sélectionnez un type de prix',
     Search: 'Chercher',
+    Formula: 'Sélectionnez une formule',
+    Type: 'Choisir un type',
+    Conditions: 'Sélectionnez une condition',
+    Service: 'Sélectionnez une service',
+    Statut: 'Sélectionnez un statut',
+    New: 'Nouvelle formule',
   },
   Products: {
     title: 'Liste des produits',
@@ -250,6 +287,8 @@ const translation = {
     InvitationsList: 'Liste des invitations',
     ProductOrderings: 'Mes commandes',
     ProductDelivering: 'Commandes à Livrer',
+    EventsList: 'Liste des événements',
+    ValidationVendeur: 'Formulaire de Validation',
   },
   Setting: {
     title: 'Paramètres',
@@ -309,11 +348,13 @@ const translation = {
     TotalAmount: 'Montant total',
     DateDelivered: 'Date prévue de livraison',
     Status: 'Statut',
+    EmptyList: 'Aucune commande pour le moment',
   },
   ProductDelivering: {
     title: 'Commandes à Livrer',
     Statut: 'Statut',
     DateDelivered:  'Date de livraison',
+    EmptyList: 'Aucune commande pour le moment',
   },
   ContributionsList: {
     title: 'Liste des contributions',
@@ -363,6 +404,11 @@ const translation = {
     Administrators: "Gestion des Administateurs",
     Users: "Gestion des Utilisateurs",
     Products: "Gestion des Produits",
+    Categories: "Gestion des Categories",
+    TypeOffres: "Gestion des Types d'offres",
+    TypeEvents: "Gestion des Types d'événements",
+    TypePrix: "Gestion des Types de prix",
+    ValidationVendeur: "Gestion des Vendeurs",
   },
   Administrators:{
     AddButtonText: "Ajouter un administrateur",
@@ -394,10 +440,10 @@ const translation = {
     title: "Restaurer le mot de passe",
     Reset: "Restaurer",
   },
-  TypePrix:{
-    Unit: "Par unité",
-    Person: "Par Personne",
-  },
+   Type:{
+    Product: "Produit",
+    Service: "Service",
+  }, 
   WeekendList:{
     Lundi: "Lundi",
     Mardi: "Mardi",
@@ -411,6 +457,70 @@ const translation = {
     StartTime:"Heure de début",
     EndTime:"Heure de fin",
     Capacity:"Capacité"
+  },
+  Categories: {
+    title: "Categories",
+    EmptyList: 'Categories ajoutées',
+    List: "Liste des Categories",
+    AddButtonText: "Ajouter une categorie",
+  },
+  AddCategory: {
+    title: "Ajouter Categorie",
+    NameFr: "Nom en FR",
+    NameEn: "Nom en AN",
+  },
+  EditCategory: {
+    title: "Modifier Categorie",
+  },
+  TypeOffres: {
+    title: "Types d'offres",
+    EmptyList: "Type d'offre ajouté",
+    List: "Liste des Types d'offres",
+    AddButtonText: "Ajouter un Type d'offre",
+  },
+  AddTypeOffre: {
+    title: "Ajouter Type d'offre",
+    NameFr: "Nom en FR",
+    NameEn: "Nom en AN",
+  },
+  EditTypeOffre: {
+    title: "Modifier Type d'offre",
+  },
+  TypePrix: {
+    title: "Type de prix",
+    EmptyList: 'Type de prix Ajouteé',
+    List: "Liste des Types de prix",
+    AddButtonText: "Ajouter un type de prix",
+    Unit: "Ajouter un type de prix",
+    Person: "Ajouter un type de prix",
+  },
+  AddTypePrix: {
+    title: "Ajouter Type de prix",
+    NameFr: "Name of FR",
+    NameEn: "Name of EN",
+  },
+  EditTypePrix: {
+    title: "Modifier Type de prix",
+  },
+  Vendeur: {
+    title: "Formulaire de validation",
+    Adresse: "Adresse",
+    SelectFile: "Sélectionnez un fichier",
+    IdRegistration: "Carte d'identité ou enregistrement d'entreprise",
+    OtherDocs: 'Autres Docs',
+    Confirme: 'Je confirmes que les infos sont exactes.',
+    Accepte: "J'acceptes les termes et conditions."
+  },
+  AddProdServ: {
+    title: "Boutique de cadeaux",
+    Add: "Ajouter produit ou service",
+    List: "Liste des produits ou services",
+    Custom: 'Personaliser',
+    AddFormProdServ: 'Ajouter Produit/Service',
+    EditFormProdServ: 'Modifier Produit/Service',
+    FormProdServAdded: ' Produits/Services ajoutés',
+    EmptyList: 'Aucun Produit/Service ajouté',
+    type: 'Type',
   },
 };
 

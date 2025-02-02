@@ -5,9 +5,6 @@ import {useTranslation} from 'react-i18next';
 import Header from '../components/Header';
 import {User} from '../contexts/types';
 import {useNavigation} from '@react-navigation/native';
-import {useStore} from '../contexts/store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {LocalStorageKeys} from '../constants';
 import {BacktoHome} from '../components/BacktoHome';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {theme} from '../core/theme';
@@ -19,12 +16,9 @@ export const Setting = () => {
   const defaultStyles = DefaultComponentsThemes();
   const {t} = useTranslation();
   const navigation = useNavigation();
-  const [state] = useStore();
-  const [userId, setUserId] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-
 
   useEffect(() => {
     const usersRef = firestore().collection('users');
@@ -35,7 +29,6 @@ export const Setting = () => {
           .get()
           .then(document => {
             const userData = document.data() as User;
-            setUserId(userData.id);
             setName(userData.displayName);
             setEmail(userData.email);
             setPhone(userData.phoneNumber);
@@ -132,17 +125,6 @@ export const Setting = () => {
             <View style={{flexDirection: 'row', marginTop: 10}}>
               <Text style={{color: theme.colors.primary, marginHorizontal: 15}}>
                 {t('Setting.CountrySetting')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <View style={[styles.itemSeparator, {marginTop: 10}]} />
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('TypeEvents' as never);
-            }}>
-            <View style={{flexDirection: 'row', marginTop: 10}}>
-              <Text style={{color: theme.colors.primary, marginHorizontal: 15}}>
-                {t('Setting.TypeEvents')}
               </Text>
             </View>
           </TouchableOpacity>

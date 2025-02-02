@@ -7,7 +7,6 @@ import {
   View,
 } from 'react-native';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
-import {useNavigation} from '@react-navigation/native';
 import {theme} from '../core/theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -17,7 +16,6 @@ type Props = {
 };
 
 export const BacktoShop = ({textRoute, goBack}: Props) => {
-  const navigation = useNavigation();
   const defaultStyles = DefaultComponentsThemes();
 
   const styles = StyleSheet.create({

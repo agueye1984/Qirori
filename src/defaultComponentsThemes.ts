@@ -94,8 +94,10 @@ const DefaultComponentsThemes = () => {
       marginTop: 4,
     },
     error: {
-      color: 'red',
-      marginTop: 5,
+      fontSize: 12,
+      color: theme.colors.error,
+      paddingHorizontal: 4,
+      paddingTop: 4,
     },
     phoneInputContainer: {
       width: '100%',
@@ -131,6 +133,15 @@ const DefaultComponentsThemes = () => {
       borderBottomRightRadius: 10,
       borderBottomLeftRadius: 10,
     },
+    itemContainerForm2: {
+      height: 100,
+      marginHorizontal: 5,
+      borderWidth: 0.3,
+      borderTopLeftRadius: 10,
+      borderTopRightRadius: 10,
+      borderBottomRightRadius: 10,
+      borderBottomLeftRadius: 10,
+    },
     buttonContainer: {
       flexDirection: 'row', 
       justifyContent: 'space-between', 
@@ -158,6 +169,7 @@ const DefaultComponentsThemes = () => {
     },
     address: {
       marginHorizontal: widthToDp(5),
+      marginVertical: widthToDp(15),
     },
     payment: {
       marginHorizontal: widthToDp(5),
@@ -174,7 +186,7 @@ const DefaultComponentsThemes = () => {
       marginTop: heightToDp(2),
     },
     itemContainerFormCheckout: {
-      height: 100,
+     // height: 100,
       marginHorizontal: 5,
       borderWidth: 0.4,
       borderTopLeftRadius: 10,
@@ -313,6 +325,19 @@ const DefaultComponentsThemes = () => {
       borderTopRightRadius: 10,
       borderBottomRightRadius: 10,
       borderBottomLeftRadius: 10,
+    },
+    buttonText: {
+      color: 'blue',          // Couleur du texte
+      fontSize: 16,              // Taille de la police
+      textAlign: 'center',       // Centrer le texte
+      fontWeight: 'bold',        // Mettre en gras (facultatif)
+      paddingVertical: 10,       // Espacement vertical pour le confort
+    },
+    sectionStyle: {
+      flex: 1,
+      marginVertical: 10,
+      padding: 10,
+      width: '100%', // Les sections occupent toute la largeur du parent
     },
   })
 }

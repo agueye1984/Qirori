@@ -1,19 +1,18 @@
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native'
 import React, {useEffect, useState} from 'react'
-import {SafeAreaView, ScrollView, Text, View} from 'react-native'
+import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native'
 import Header from '../components/Header'
 import {ManageEventsParamList, User} from '../contexts/types'
 import {useTranslation} from 'react-i18next'
-import {heightPercentageToDP as heightToDp} from 'react-native-responsive-screen'
 import auth from '@react-native-firebase/auth'
 import firestore from '@react-native-firebase/firestore'
 import CartItemOrder from '../components/CartItemOrder'
 import {Paragraph} from 'react-native-paper'
 import {BacktoShop} from '../components/BacktoShop'
 import DefaultComponentsThemes from '../defaultComponentsThemes'
+import { theme } from '../core/theme'
 
 export const CommandesEffectuees = () => {
-  const currentUser = auth().currentUser
   const route = useRoute<RouteProp<ManageEventsParamList, 'CommandesEffectuees'>>()
   const item = route.params.item
   const [name, setName] = useState('')
@@ -60,62 +59,198 @@ export const CommandesEffectuees = () => {
     })
   }, [])
 
-  return (
-    <SafeAreaView>
-      <BacktoShop textRoute={t('Achats.title')} goBack={() => navigation.navigate('Achats' as never)} />
-      <Header>{t('Order.title')}</Header>
-      <View style={defaultStyles.address}>
-        <View style={{marginTop: heightToDp(1), marginBottom: heightToDp(1)}}>
-          <Paragraph>
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#f5f5f5',
+    },
+    button: {
+      width: '90%',
+      paddingVertical: 15,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.primary,
+      alignSelf: 'center',
+    },
+    buttonText: {
+      fontSize: 16,
+      color: '#fff',
+      textAlign: 'center',
+    },
+    bottomButtonContainer: {
+      padding: 10,
+      borderTopWidth: 1,
+      borderColor: '#ccc',
+      backgroundColor: '#fff',
+    },
+    eventItemContainer: {
+      marginVertical: 10,
+      padding: 15,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      backgroundColor: '#f9f9f9',
+      // Ajoutez ces styles pour l'espacement
+      marginHorizontal: 10, // Assure un espacement des côtés gauche/droit
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    label1: {
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    labelContainer: {
+      flex: 1,
+    },
+    container1: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 5,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+      marginVertical: 5,
+      marginHorizontal: 10,
+    },
+  });
+
+  const data = [
+    {key: 'header', component: <Header>{t('Order.title')}</Header>},
+    {key: 'dateDelivered', component: (
+      <View style={defaultStyles.section}>
+        <View style={styles.container1}>
+        <Paragraph>
             {t('Order.paragraph')} : {dateLivery}
           </Paragraph>
-        </View>
+          </View>
       </View>
-      <View style={defaultStyles.address}>
-        <Text style={defaultStyles.title}>{t('Checkout.InfoPersonal')}</Text>
-        <View style={{marginTop: heightToDp(1), marginBottom: heightToDp(1)}}>
-          <View style={[defaultStyles.itemContainerForm]}>
-            <Text style={{marginVertical: 15, marginLeft: 5}}>
-              {t('Checkout.Name')} : {name} {t('Checkout.Email')} : {email}
-            </Text>
-            <Text style={{marginVertical: 15, marginLeft: 5}}>
-              {t('Checkout.Phone')} : {phone}
-            </Text>
+    )
+    
+    },
+    {
+      key: 'info',
+      component: (
+        <View style={defaultStyles.section}>
+          <View style={styles.container1}>
+            <Text style={styles.label1}>{t('Checkout.InfoPersonal')}</Text>
+          </View>
+          <View style={defaultStyles.itemContainerFormInvite}>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>{t('Checkout.Name')} : </Text>
+                  {name}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>{t('Checkout.Email')} : </Text>
+                  {email}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>{t('Checkout.Phone')} : </Text>
+                  {phone}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
-      </View>
-      <View style={defaultStyles.address}>
-        <Text style={defaultStyles.title}>{t('Checkout.ShippingAddress')}</Text>
-        <View style={{marginTop: heightToDp(1), marginBottom: heightToDp(1)}}>
-          <View style={[defaultStyles.itemContainerForm1]}>
-            <Text style={{marginVertical: 15, marginLeft: 5}}>
-              {t('Checkout.AdresseLine1')} : {shippingAddress.address_line_1}
-            </Text>
-            <Text style={{marginVertical: 15, marginLeft: 5}}>
-              {t('Checkout.AdresseLine2')} : {shippingAddress.address_line_2}
-            </Text>
-            <Text style={{marginVertical: 15, marginLeft: 5}}>
-              {t('Checkout.City')} : {shippingAddress.city} {t('Checkout.Province')} : {shippingAddress.province}
-            </Text>
-            <Text style={{marginVertical: 15, marginLeft: 5}}>
-              {t('Checkout.PostalCode')} : {shippingAddress.postalCode}
-            </Text>
+      ),
+    },
+    {
+      key: 'shipping',
+      component: (
+        <View style={defaultStyles.section}>
+          <View style={styles.container1}>
+            <Text style={styles.label1}>{t('Checkout.ShippingAddress')}</Text>
+          </View>
+          <View style={defaultStyles.itemContainerFormInvite}>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>
+                    {t('Checkout.AdresseLine1')} :{' '}
+                  </Text>
+                  {shippingAddress.address_line_1}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>
+                    {t('Checkout.AdresseLine2')} :{' '}
+                  </Text>
+                  {shippingAddress.address_line_2}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>{t('Checkout.City')} : </Text>
+                  {shippingAddress.city}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>{t('Checkout.Province')} : </Text>
+                  {shippingAddress.province}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container1}>
+              <View style={styles.labelContainer}>
+                <Text>
+                  <Text style={styles.label}>
+                    {t('Checkout.PostalCode')} :{' '}
+                  </Text>
+                  {shippingAddress.postalCode}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
-      </View>
-      <View style={defaultStyles.address}>
-        <Text style={defaultStyles.title}>{t('Cart.items')}</Text>
-        <ScrollView
-          scrollEnabled
-          showsVerticalScrollIndicator
-          automaticallyAdjustKeyboardInsets={true}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={defaultStyles.scrollViewContent}>
+      ),
+    },
+    {
+      key: 'paniers',
+      component:  (
+        <View style={defaultStyles.section}>
+          <View style={styles.container1}>
+            <Text style={styles.label1}>{t('Cart.items')}</Text>
+          </View>
           {carts.map((panier, index) => (
             <CartItemOrder key={index} panier={panier} />
           ))}
-        </ScrollView>
-      </View>
+        </View>
+        ),
+    },
+  ];
+
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <BacktoShop textRoute={t('Achats.title')} goBack={() => navigation.navigate('Achats' as never)} />
+      <FlatList
+        data={data}
+        renderItem={({item}) => <View>{item.component}</View>}
+        keyExtractor={item => item.key}
+        contentContainerStyle={[
+          defaultStyles.scrollViewContent,
+          {paddingBottom: 100},
+        ]}
+      />
     </SafeAreaView>
   )
 }

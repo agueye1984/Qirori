@@ -38,3 +38,15 @@ export const WeekendList = (t: any): any[] => {
       }
   ]
 }
+
+export const GetWeekendList = (t: any): { [key: string]: string } => {
+  return {
+    '1': t('WeekendList.Lundi'),
+    '2': t('WeekendList.Mardi'),
+    '3': t('WeekendList.Mercredi'),
+    '4': t('WeekendList.Jeudi'),
+    '5': t('WeekendList.Vendredi'),
+    '6': t('WeekendList.Samedi'),
+    '7': t('WeekendList.Dimanche')
+  };
+};
