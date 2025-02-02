@@ -59,7 +59,7 @@ jobs:
       - name: Configure ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7.4
+          ruby-version: 3.2.0
 
       # Watch for changes to the HEAD ref, use
       # git for cache keys.
