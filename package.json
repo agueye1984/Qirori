@@ -102,6 +102,7 @@
     "cross-spawn": "^7.0.3",
     "execa": "^5.1.1",
     "undici": "^5.28.4",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "yargs-parser": "^21.1.1"
   }
 }
