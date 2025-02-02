@@ -29,12 +29,9 @@ const MultiImagePicker = ({ servicesImages, setServiceImages }: Props) => {
       } else if (response.errorCode) {
         console.log("Erreur: ", response.errorMessage);
       } else if (response.assets && response.assets.length > 0) {
-       // const selectedImageUris = response.assets.map(asset => asset.uri).filter(Boolean) as string[];
        const selectedImageUris = response.assets
        .map(asset => asset.uri)
        .filter(uri => uri !== undefined) as string[]; 
-        //const selectedImageUri = response.assets[0].uri;
-        //console.log(selectedImageUri)
         
         if (selectedImageUris) {
           if (replaceIndex !== undefined) {
