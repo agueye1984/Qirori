@@ -71,7 +71,7 @@ export const Contributions = () => {
           invitations.push(inviteData);
           eventIds.add(inviteData.eventId); // Collecter les eventIds
         });
-
+        console.log(invitations)
         const eventPromises = Array.from(eventIds).map(eventId =>
           firestore().collection('events').doc(eventId).get(),
         );
@@ -99,6 +99,8 @@ export const Contributions = () => {
 
     fetchInvitations();
   }, [telephone]);
+
+  console.log(invitations)
 
   const styles = StyleSheet.create({
     container: {

@@ -11,7 +11,7 @@ import {useTranslation} from 'react-i18next';
 import Header from '../components/Header';
 import {BacktoHome} from '../components/BacktoHome';
 import {useNavigation} from '@react-navigation/native';
-import {Location} from '../contexts/types';
+import {Category, Location, Vendeur} from '../contexts/types';
 import {useStore} from '../contexts/store';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -35,6 +35,7 @@ import storage from '@react-native-firebase/storage';
 import {
   accepteValidator,
   adresseValidator,
+  categoriesValidator,
   categoryValidator,
   confirmeValidator,
   fileValidator,
@@ -43,6 +44,7 @@ import {
   regionValidator,
   zoneValidator,
 } from '../core/utils';
+import { CategorySection } from '../components/CategorySection';
 
 export const ValidationVendeur = () => {
   const currentUser = auth().currentUser;
@@ -55,7 +57,7 @@ export const ValidationVendeur = () => {
   const [businessName, setBusinessName] = useState<string>('');
   const [nameError, setNameError] = useState('');
   const [businessError, setBusinessError] = useState('');
-  const [businessCategory, setBusinessCategory] = useState<string>('');
+  const [businessCategory, setBusinessCategory] = useState<string[]>([]);
   const [categoryError, setCategoryError] = useState('');
   const [businessAdresse, setBusinessAdresse] = useState<Location>({
     placeId: '',
@@ -85,6 +87,7 @@ export const ValidationVendeur = () => {
   const [confirmeError, setConfirmeError] = useState<string>('');
   const [accepteError, setAccepteError] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
+  const [categorieVendeur, setCategorieVendeur] = useState<string[]>([]);
 
   const handleFileSelectionRegistration = async () => {
     try {
@@ -179,6 +182,26 @@ export const ValidationVendeur = () => {
   });
 
   useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('vendeurs')
+      .where('actif', '==', true)
+      .where('userId', '==', currentUser?.uid)
+      .onSnapshot(querySnapshot => {
+        const cat: string[] = [];
+        if (querySnapshot.empty) {
+          setCategorieVendeur(cat);
+        } else {
+          querySnapshot.forEach(documentSnapshot => {
+            const vendeur = documentSnapshot.data() as Vendeur;
+            cat.push(...vendeur.category);
+          });
+          setCategorieVendeur(cat);
+        }
+      });
+    return () => unsubscribe();
+  }, [currentUser?.uid]);
+
+  useEffect(() => {
     const fetchData = async () => {
       const geonameId = (countryGeonameIds as Record<string, number>)[
         countryCode
@@ -238,28 +261,42 @@ export const ValidationVendeur = () => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('categories')
+      .where('actif', '==', true)
       .onSnapshot(querySnapshot => {
         if (querySnapshot.empty) {
           setCategories([]);
         } else {
-          const newCat: string[] = [];
+          const newCat: any[] = [];
           querySnapshot.forEach(documentSnapshot => {
-            newCat.push(documentSnapshot.id);
+            const data = documentSnapshot.data() as Category;
+            if (!categorieVendeur.includes(documentSnapshot.id)) { // Filtrer côté client
+              const newCateg = {
+                key: documentSnapshot.id,
+                value:
+              selectedLanguageCode === 'fr'
+                ? data.nameFr
+                : data.nameEn,
+              }
+              newCat.push(newCateg);
+            }
           });
+          newCat.sort((a, b) =>
+            a.value.toLowerCase().localeCompare(b.value.toLowerCase()),
+          );
           setCategories(newCat);
         }
       });
-
-    // Nettoyage de l'écouteur lors du démontage du composant
+  
     return () => unsubscribe();
-  }, []);
+  }, [categorieVendeur]); // Ajout de la dépendance pour recharger si categorieVendeur change
+  
 
   const handleNameChange = (value: string) => {
     setBusinessError('');
     setBusinessName(value);
   };
 
-  const handleCategoryChange = (value: string) => {
+  const handleCategoryChange = (value: string[]) => {
     setCategoryError('');
     setBusinessCategory(value);
   };
@@ -298,7 +335,7 @@ export const ValidationVendeur = () => {
     try {
       const nameEmpty = nameSectionValidator(businessName, t);
       const zoneEmpty = zoneValidator(zoneService, t);
-      const categoryEmpty = categoryValidator(businessCategory, t);
+      const categoryEmpty = categoriesValidator(businessCategory, t);
       const provinceEmpty = provinceValidator(province, t);
       const regionEmpty = regionValidator(region, t);
       const idRegistrationEmpty = fileValidator(idRegistration, t);
@@ -306,7 +343,7 @@ export const ValidationVendeur = () => {
       const adressEmpty = adresseValidator(businessAdresse, t);
       const confirmeEmpty = confirmeValidator(confirme, t);
       const accepteEmpty = accepteValidator(accepte, t);
-
+    
       if (
         nameEmpty ||
         categoryEmpty ||
@@ -329,6 +366,8 @@ export const ValidationVendeur = () => {
         setAccepte(false);
         setConfirme(false);
       } else {
+
+        
         const uid = uuidv4();
         let idRegistrationDoc: string | null = '';
         if (idRegistration !== null) {
@@ -410,11 +449,11 @@ export const ValidationVendeur = () => {
       component: (
         <View style={defaultStyle.section}>
           <View style={defaultStyle.sectionStyle}>
-            <CategoryService
+            <CategorySection
               categoryService={businessCategory}
               setCategoryService={handleCategoryChange}
               error={categoryError}
-              categoryVendeur={categories}
+              categories={categories}
             />
 
             {categoryError ? (

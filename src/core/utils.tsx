@@ -207,6 +207,17 @@ export const categoryValidator = (
   return '';
 };
 
+export const categoriesValidator = (
+  categories: string[],
+  t: TFunction<'translation', undefined>,
+) => {
+  if (!categories || categories.length <= 0) {
+    return t('Global.CategoryErrorEmpty');
+  }
+
+  return '';
+};
+
 export const offreValidator = (
   offre: string[],
   t: TFunction<'translation', undefined>,

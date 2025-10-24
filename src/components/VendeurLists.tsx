@@ -25,11 +25,19 @@ const VendeurLists = ({vendeur, color}: Props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const tabCat: string[] = []
+        for (const categ of vendeur.category) {
+
+         
         const cat = (await getRecordById(
           'categories',
-          vendeur.category,
+          categ,
         )) as Category;
-        setCategoryName(selectedLanguage ==='fr' ? cat.nameFr: cat.nameEn);
+        //console.log(cat)
+        tabCat.push(selectedLanguage ==='fr' ? cat.nameFr: cat.nameEn)
+        
+      }
+      setCategoryName(tabCat.join(','));
       } catch (error) {
         console.error('Error fetching data:', error);
       }

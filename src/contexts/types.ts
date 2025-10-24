@@ -345,7 +345,7 @@ export interface Conditions {
 export interface Vendeur {
   id: string
   name: string
-  category: string
+  category: string[]
   adresse: Location
   province: string
   region: string

@@ -30,7 +30,7 @@ export const Products = () => {
         } else {
           querySnapshot.forEach(documentSnapshot => {
             const vendeur = documentSnapshot.data() as Vendeur;
-            cat.push(vendeur.category);
+            cat.push(...vendeur.category);
           });
           setCategorieVendeur(cat);
         }

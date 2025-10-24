@@ -13,7 +13,7 @@ import Header from '../components/Header';
 import {BacktoHome} from '../components/BacktoHome';
 import {VentesList} from '../components/VentesList';
 import {useNavigation} from '@react-navigation/native';
-import {Accueil, Location, User, Vendeur} from '../contexts/types';
+import {Accueil, Category, Location, User, Vendeur} from '../contexts/types';
 import {VentesItem} from '../components/VentesItem';
 import {useStore} from '../contexts/store';
 import auth from '@react-native-firebase/auth';
@@ -38,6 +38,7 @@ import storage from '@react-native-firebase/storage';
 import {
   accepteValidator,
   adresseValidator,
+  categoriesValidator,
   categoryValidator,
   confirmeValidator,
   fileValidator,
@@ -47,6 +48,7 @@ import {
   zoneValidator,
 } from '../core/utils';
 import Paragraph from '../components/Paragraph';
+import { CategorySection } from '../components/CategorySection';
 
 export const Ventes = () => {
   const currentUser = auth().currentUser;
@@ -60,7 +62,7 @@ export const Ventes = () => {
   const [businessName, setBusinessName] = useState<string>('');
   const [nameError, setNameError] = useState('');
   const [businessError, setBusinessError] = useState('');
-  const [businessCategory, setBusinessCategory] = useState<string>('');
+  const [businessCategory, setBusinessCategory] = useState<string[]>([]);
   const [categoryError, setCategoryError] = useState('');
   const [businessAdresse, setBusinessAdresse] = useState<Location>({
     placeId: '',
@@ -273,13 +275,22 @@ export const Ventes = () => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('categories')
+      .where('actif', '==', true)
       .onSnapshot(querySnapshot => {
         if (querySnapshot.empty) {
           setCategories([]);
         } else {
-          const newCat: string[] = [];
+          const newCat: any[] = [];
           querySnapshot.forEach(documentSnapshot => {
-            newCat.push(documentSnapshot.id);
+            const data = documentSnapshot.data() as Category;
+            const newCateg = {
+              key: documentSnapshot.id,
+              value:
+            selectedLanguageCode === 'fr'
+              ? data.nameFr
+              : data.nameEn,
+            }
+            newCat.push(newCateg);
           });
           setCategories(newCat);
         }
@@ -294,7 +305,7 @@ export const Ventes = () => {
     setBusinessName(value);
   };
 
-  const handleCategoryChange = (value: string) => {
+  const handleCategoryChange = (value: string[]) => {
     setCategoryError('');
     setBusinessCategory(value);
   };
@@ -333,7 +344,7 @@ export const Ventes = () => {
     try {
       const nameEmpty = nameSectionValidator(businessName, t);
       const zoneEmpty = zoneValidator(zoneService, t);
-      const categoryEmpty = categoryValidator(businessCategory, t);
+      const categoryEmpty = categoriesValidator(businessCategory, t);
       const provinceEmpty = provinceValidator(province, t);
       const regionEmpty = regionValidator(region, t);
       const idRegistrationEmpty = fileValidator(idRegistration, t);
@@ -443,13 +454,18 @@ export const Ventes = () => {
       component: (
         <View style={defaultStyle.section}>
           <View style={defaultStyle.sectionStyle}>
-            <CategoryService
+            {/* <CategorySection
               categoryService={businessCategory}
               setCategoryService={handleCategoryChange}
               error={categoryError}
               categoryVendeur={categories}
+            /> */}
+            <CategorySection
+              categoryService={businessCategory}
+              setCategoryService={handleCategoryChange}
+              error={categoryError}
+              categories={categories}
             />
-
             {categoryError ? (
               <Text style={defaultStyle.error}>{categoryError}</Text>
             ) : null}

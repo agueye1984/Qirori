@@ -2,7 +2,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Text, View} from 'react-native';
+import {Image, Text, View} from 'react-native';
 import {useTheme} from '../contexts/theme';
 import DefaultComponentsThemes from '../defaultComponentsThemes';
 import {Events} from '../screens/Events';
@@ -17,6 +17,7 @@ import {EventDetails} from '../screens/EventDetails';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon1 from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon3 from 'react-native-vector-icons/AntDesign';
 import {InvitationsContacts} from '../screens/InvitationsContacts';
 import {ContactsList} from '../screens/ContactsList';
 import {InvitationDetails} from '../screens/InvitationDetails';
@@ -649,14 +650,17 @@ const BottomNav = () => {
       .where('paid', '==', false) // Seuls les produits non payés
       .onSnapshot(snapshot => {
         const count = snapshot.docs.reduce(
-          (sum, doc) => sum + doc.data().qty,
+          (sum, doc) => sum + Number(doc.data().qty),
           0,
         );
+       // console.log(count)
         setCartCount(count); // Mettre à jour le nombre total de produits
       });
 
     return () => unsubscribe(); // Nettoyer l'écouteur
   }, [currentUser?.uid]);
+
+ // console.log(cartCount)
 
   return (
     <Tab.Navigator
@@ -682,7 +686,7 @@ const BottomNav = () => {
                 style={styles.tabBarIcone}
                 name={'home'}
                 color={focused ? theme.colors.primary : ColorPallet.lightGray}
-                size={20}
+                size={25}
               />
             </View>
           ),
@@ -700,7 +704,7 @@ const BottomNav = () => {
                 style={styles.tabBarIcone}
                 name={'event'}
                 color={focused ? theme.colors.primary : ColorPallet.lightGray}
-                size={20}
+                size={25}
               />
             </View>
           ),
@@ -712,42 +716,51 @@ const BottomNav = () => {
         options={{
           title: t('Global.Cart') || '',
           tabBarIcon: ({focused}) => (
-            <View style={{width: '100%', height: '100%'}}>
-              {focused && <View style={styles.tabBarActive} />}
-              <Icon
-                style={styles.tabBarIcone}
-                name={'shopping-cart'}
-                color={focused ? theme.colors.primary : ColorPallet.lightGray}
-                size={20}
+            <View
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              {/*  <Icon3
+          name={'shoppingcart'}
+          color={focused ? theme.colors.primary : ColorPallet.lightGray}
+          size={25}
+        /> */}
+              <Image
+                source={require('../assets/shopping-cart-3.png')}
+                style={{
+                  width: 25,
+                  height: 25,
+                  tintColor: focused
+                    ? theme.colors.primary
+                    : ColorPallet.lightGray,
+                }}
               />
+
+
               {cartCount > 0 && (
-                <View
+                <Text
                   style={{
                     position: 'absolute',
-                    top: 5, // Ajustez pour positionner verticalement
-                    right: 5, // Position horizontale au-dessus de l'icône
-                    //left: -15,
-                    backgroundColor: 'red',
-                    borderRadius: 12, // Crée un badge circulaire
-                    height: 15, // Taille fixe pour le badge
-                    width: 15, // Taille fixe pour le badge
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    top: '50%', // Centre verticalement
+                    left: '50%', // Centre horizontalement
+                    transform: [{translateX: cartCount > 9 ? -5 : -2}, {translateY: -12}], // Ajustement fin
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    color: 'black', // Même couleur que l'icône
+                    textAlign: 'center',
                   }}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: 12,
-                      fontWeight: 'bold',
-                    }}>
-                    {cartCount}
-                  </Text>
-                </View>
+                  {cartCount > 99 ? '99+' : cartCount}
+                </Text>
               )}
             </View>
           ),
         }}
       />
+
       <Tab.Screen
         name={'Achats'}
         component={Achats}
@@ -760,7 +773,7 @@ const BottomNav = () => {
                 style={styles.tabBarIcone}
                 name={'shopping-outline'}
                 color={focused ? theme.colors.primary : ColorPallet.lightGray}
-                size={20}
+                size={25}
               />
             </View>
           ),
@@ -779,7 +792,7 @@ const BottomNav = () => {
                 style={styles.tabBarIcone}
                 name={'ellipsis-h'}
                 color={focused ? theme.colors.primary : ColorPallet.lightGray}
-                size={20}
+                size={25}
               />
             </View>
           ),
