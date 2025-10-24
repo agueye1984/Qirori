@@ -30,6 +30,8 @@ export const DatePanier = ({dateDelivered, setDateDelivered}: Props) => {
     timeZone: 'UTC',
   });
 
+  console.log(dateFormatDebut)
+
   const handleOpenDateDebutChange = () => {
     setOpenDateDebut(true);
   };
